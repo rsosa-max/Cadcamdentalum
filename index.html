@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mallas y Topología en CAD/CAM Dental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0E14;
+    --panel:#10161D;
+    --panel2:#161E27;
+    --line:#22303C;
+    --cyan:#5EEAD4;
+    --cyan-dim:#2DD4BF;
+    --amber:#F5A25A;
+    --red:#F2545B;
+    --text:#E7EEF3;
+    --text-dim:#8CA0AD;
+    --text-faint:#5A6B78;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;}
+  body{padding:0; min-height:100vh;}
+  .app{max-width:1100px; margin:0 auto; padding:28px 20px 80px;}
+
+  /* HEADER */
+  header.top{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan-dim); display:flex; align-items:center; gap:8px;}
+  .eyebrow::before{content:''; width:7px; height:7px; background:var(--cyan); border-radius:50%; box-shadow:0 0 8px var(--cyan);}
+  h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(26px,4vw,40px); letter-spacing:-.01em; margin-top:10px; line-height:1.08;}
+  h1 span{color:var(--cyan);}
+  .sub{color:var(--text-dim); font-size:15px; margin-top:10px; max-width:640px; line-height:1.5;}
+
+  /* NAV TABS */
+  nav.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:26px; scrollbar-width:thin;}
+  nav.tabs button{
+    flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.02em;
+    background:transparent; border:1px solid var(--line); color:var(--text-dim);
+    padding:9px 14px; border-radius:7px; cursor:pointer; white-space:nowrap; transition:all .15s ease;
+  }
+  nav.tabs button .n{color:var(--text-faint); margin-right:7px;}
+  nav.tabs button:hover{border-color:var(--cyan-dim); color:var(--text);}
+  nav.tabs button.active{background:var(--cyan); border-color:var(--cyan); color:#04201C; font-weight:700;}
+  nav.tabs button.active .n{color:#04201C;}
+
+  /* SECTIONS */
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:'Space Grotesk',sans-serif; font-size:clamp(20px,3vw,28px); font-weight:600; margin-bottom:14px; letter-spacing:-.01em;}
+  h3{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; margin-bottom:8px; color:var(--text);}
+  p{color:var(--text-dim); line-height:1.65; font-size:14.5px; margin-bottom:12px;}
+  p strong{color:var(--text); font-weight:600;}
+  .lead{color:var(--text); font-size:16px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;}}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px;}
+  .viewport{background:linear-gradient(160deg,#0D1319,#0A0E14); border:1px solid var(--line); border-radius:12px; padding:16px; position:relative;}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); letter-spacing:.08em; text-transform:uppercase;}
+
+  .stat-row{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:90px; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:10px 12px;}
+  .stat .num{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:19px; color:var(--cyan);}
+  .stat .lab{font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+  .ctrl-row{display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap;}
+  .ctrl-row label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:8px;}
+  input[type=range]{accent-color:var(--cyan); width:150px;}
+  input[type=checkbox]{accent-color:var(--cyan); width:15px; height:15px;}
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:'JetBrains Mono',monospace; font-size:11.5px; border:1px solid var(--line); background:var(--panel2); color:var(--text-dim); padding:7px 12px; border-radius:20px; cursor:pointer; transition:all .15s;}
+  .chip:hover{color:var(--text); border-color:var(--cyan-dim);}
+  .chip.active{background:var(--cyan); color:#04201C; border-color:var(--cyan); font-weight:700;}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:18px; color:var(--text-dim); font-size:14px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'▸'; position:absolute; left:0; color:var(--cyan-dim);}
+
+  .legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:10px;}
+  .legend .item{display:flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim);}
+  .legend .dot{width:10px; height:10px; border-radius:3px;}
+
+  .divider{height:1px; background:var(--line); margin:34px 0;}
+
+  /* topology compare */
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:600px){.compare{grid-template-columns:1fr;}}
+  .compare .card h3{display:flex; align-items:center; gap:8px;}
+  .badge{font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 8px; border-radius:20px; letter-spacing:.05em;}
+  .badge.ok{background:rgba(94,234,212,.12); color:var(--cyan);}
+  .badge.bad{background:rgba(242,84,91,.14); color:var(--red);}
+
+  /* errors gallery */
+  .err-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;}
+  .err-card .viewport{padding:10px; margin-bottom:10px;}
+  .err-card h3{font-size:14.5px;}
+  .err-card p{font-size:13px; margin-bottom:0;}
+
+  /* flow */
+  .flow{display:flex; gap:0; overflow-x:auto; padding:6px 0 14px;}
+  .flow-step{flex:none; width:168px; position:relative; padding-right:26px;}
+  .flow-step .idx{font-family:'JetBrains Mono',monospace; color:var(--cyan); font-size:12px; font-weight:700;}
+  .flow-step h3{font-size:13.5px; margin:8px 0 6px;}
+  .flow-step p{font-size:12.5px;}
+  .flow-step:not(:last-child)::after{content:'→'; position:absolute; right:2px; top:2px; color:var(--text-faint); font-size:16px;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+  table.formats th{font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); text-align:left; padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.formats td{padding:9px 10px; border-bottom:1px solid var(--line); color:var(--text-dim);}
+  table.formats td:first-child{color:var(--cyan); font-family:'JetBrains Mono',monospace; font-weight:700;}
+
+  /* quiz */
+  .q-block{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:14px;}
+  .q-block h3{font-size:14.5px; margin-bottom:12px; color:var(--text);}
+  .opt{display:block; width:100%; text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--text-dim); padding:11px 14px; border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:13.5px; transition:all .15s;}
+  .opt:hover{border-color:var(--cyan-dim);}
+  .opt.correct{border-color:var(--cyan); background:rgba(94,234,212,.1); color:var(--cyan);}
+  .opt.wrong{border-color:var(--red); background:rgba(242,84,91,.1); color:var(--red);}
+  .opt[disabled]{cursor:default;}
+  .explain{font-size:12.5px; color:var(--text-faint); margin-top:8px; display:none; line-height:1.5; padding-top:8px; border-top:1px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:24px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; font-family:'JetBrains Mono',monospace;}
+  .score-box .big{font-size:34px; font-weight:700; color:var(--cyan);}
+  .reset-btn{font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--cyan); color:#04201C; border:none; padding:9px 18px; border-radius:8px; cursor:pointer; font-weight:700; margin-top:12px;}
+
+  footer{margin-top:50px; padding-top:18px; border-top:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">CAD / CAM · Odontología digital</div>
+    <h1>Mallas y <span>topología de mallas</span></h1>
+    <p class="sub">De la nube de puntos del escáner intraoral al diseño protésico: cómo se construye, se mide y se corrige una malla 3D antes de fresarla o imprimirla.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. INTRO -->
+    <section class="panel" data-name="Intro" id="sec-intro">
+      <div class="grid2">
+        <div>
+          <div class="kicker">01 · Punto de partida</div>
+          <h2>¿Qué es una malla en CAD/CAM dental?</h2>
+          <p class="lead">Cuando un escáner intraoral o de laboratorio captura un diente, no obtiene una superficie continua: obtiene <strong>miles de puntos</strong>. Una malla es la estructura que conecta esos puntos en triángulos para reconstruir una superficie digital que el software puede diseñar, editar y enviar a fresar o imprimir.</p>
+          <p>Toda la cadena CAD/CAM —desde la corona hasta la guía quirúrgica— depende de que esa malla esté bien construida. Una malla con errores de topología produce ajustes marginales deficientes, oclusiones mal calculadas o piezas que simplemente no se pueden fabricar.</p>
+          <ul class="clean">
+            <li>El escáner produce una <strong>nube de puntos</strong> (point cloud).</li>
+            <li>El software la <strong>triangula</strong>: conecta puntos vecinos en caras triangulares.</li>
+            <li>El resultado es una <strong>malla poligonal</strong>, normalmente exportada como STL.</li>
+            <li>La topología de esa malla determina si es editable, imprimible y clínicamente precisa.</li>
+          </ul>
+        </div>
+        <div class="viewport">
+          <span class="tag">Vista isométrica · superficie oclusal</span>
+          <svg id="hero-svg" viewBox="0 0 400 320"></svg>
+          <div class="legend">
+            <div class="item"><span class="dot" style="background:var(--cyan)"></span> Malla triangulada</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ANATOMIA -->
+    <section class="panel" data-name="Anatomía" id="sec-anatomia">
+      <div class="kicker">02 · Componentes</div>
+      <h2>La anatomía de una malla: vértices, aristas y caras</h2>
+      <p class="lead">Toda malla poligonal —sin importar si representa una corona, una guía o un modelo completo— se construye con tres elementos. Selecciona cada uno para verlo resaltado sobre la misma malla.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag" id="anat-tag">Vértices</span>
+          <svg id="anat-svg" viewBox="0 0 400 320"></svg>
+        </div>
+        <div>
+          <div class="btn-row" id="anat-buttons"></div>
+          <div class="card" style="margin-top:14px;" id="anat-desc"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. TOPOLOGIA -->
+    <section class="panel" data-name="Topología" id="sec-topologia">
+      <div class="kicker">03 · Reglas de construcción</div>
+      <h2>Topología: manifold, watertight y normales</h2>
+      <p class="lead">Que una malla "se vea bien" no significa que esté bien construida. La topología describe cómo se conectan las caras entre sí, y de eso depende si el archivo es fabricable.</p>
+
+      <div class="compare">
+        <div class="card">
+          <h3>Malla manifold <span class="badge ok">correcta</span></h3>
+          <div class="viewport" style="margin:10px 0;"><svg viewBox="0 0 260 200" id="manifold-svg"></svg></div>
+          <p>Cada arista es compartida por <strong>exactamente dos</strong> caras. Es la condición mínima para que un sólido tenga un "adentro" y un "afuera" bien definidos, y para que una fresadora o impresora interprete la geometría sin ambigüedad.</p>
+        </div>
+        <div class="card">
+          <h3>Malla non-manifold <span class="badge bad">error</span></h3>
+          <div class="viewport" style="margin:10px 0;"><svg viewBox="0 0 260 200" id="nonmanifold-svg"></svg></div>
+          <p>Una arista compartida por <strong>tres o más</strong> caras (o caras "flotantes" sin volumen cerrado). El software de diseño no puede resolver el interior del sólido y el CAM suele rechazar el archivo.</p>
+        </div>
+        <div class="card">
+          <h3>Malla watertight <span class="badge ok">cerrada</span></h3>
+          <div class="viewport" style="margin:10px 0;"><svg viewBox="0 0 260 200" id="watertight-svg"></svg></div>
+          <p>No tiene huecos: cada arista de borde forma parte de un lazo cerrado. Requisito obligatorio para impresión 3D (slicers) y para calcular volumen o espesor mínimo de pared.</p>
+        </div>
+        <div class="card">
+          <h3>Normales invertidas <span class="badge bad">error</span></h3>
+          <div class="viewport" style="margin:10px 0;"><svg viewBox="0 0 260 200" id="normals-svg"></svg></div>
+          <p>Cada cara tiene un vector "normal" que indica su lado exterior. Si algunas caras apuntan hacia adentro, el render se ve con parches oscuros o invertidos y el motor de fresado puede calcular la trayectoria de la fresa del lado equivocado.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DENSIDAD -->
+    <section class="panel" data-name="Densidad" id="sec-densidad">
+      <div class="kicker">04 · Laboratorio interactivo</div>
+      <h2>Densidad de malla: precisión contra peso de archivo</h2>
+      <p class="lead">Mueve el control de resolución y observa el mismo diente reconstruido con más o menos triángulos. Más densidad captura mejor los detalles (surcos, puntos de contacto), pero aumenta el tamaño del archivo y el tiempo de cómputo.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Superficie oclusal · malla en vivo</span>
+          <svg id="lod-svg" viewBox="0 0 400 320"></svg>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ctrl-row">
+              <label>Resolución
+                <input type="range" id="lod-slider" min="3" max="22" value="5" step="1">
+              </label>
+              <label><input type="checkbox" id="lod-wire" checked> Ver wireframe</label>
+            </div>
+            <div class="stat-row">
+              <div class="stat"><div class="num" id="stat-verts">0</div><div class="lab">Vértices</div></div>
+              <div class="stat"><div class="num" id="stat-faces">0</div><div class="lab">Caras</div></div>
+              <div class="stat"><div class="num" id="stat-size">0 KB</div><div class="lab">Peso aprox. STL</div></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px;">
+            <h3>Cuándo usar cada nivel</h3>
+            <ul class="clean">
+              <li><strong>Baja densidad:</strong> modelos de estudio, previsualización rápida, guías quirúrgicas simples.</li>
+              <li><strong>Densidad media:</strong> coronas y carillas — el estándar en la mayoría de flujos de laboratorio.</li>
+              <li><strong>Alta densidad:</strong> zonas críticas como márgenes de preparación, puntos de contacto oclusal o áreas de ajuste subgingival.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ERRORES -->
+    <section class="panel" data-name="Errores" id="sec-errores">
+      <div class="kicker">05 · Control de calidad</div>
+      <h2>Errores comunes en mallas dentales</h2>
+      <p class="lead">Antes de diseñar sobre una malla escaneada, se revisa por estos defectos. La mayoría de software CAD dental (exocad, 3Shape, DentalCAD) tiene herramientas específicas para detectarlos y repararlos.</p>
+
+      <div class="grid3">
+        <div class="err-card">
+          <div class="viewport"><svg viewBox="0 0 200 160" id="err-hole-svg"></svg></div>
+          <h3>Huecos (holes)</h3>
+          <p>Zonas sin captura —por saliva, sangrado o sombra del escáner— que dejan la malla abierta. Impiden calcular volumen y deben rellenarse antes de exportar.</p>
+        </div>
+        <div class="err-card">
+          <div class="viewport"><svg viewBox="0 0 200 160" id="err-spike-svg"></svg></div>
+          <h3>Picos / ruido (spikes)</h3>
+          <p>Vértices desplazados por vibración, reflejos o polvo de contraste, que generan picos irreales sobre la superficie oclusal o el margen.</p>
+        </div>
+        <div class="err-card">
+          <div class="viewport"><svg viewBox="0 0 200 160" id="err-overlap-svg"></svg></div>
+          <h3>Auto-intersección</h3>
+          <p>Dos regiones de la malla se cruzan entre sí —común al fusionar varias tomas de escaneo mal alineadas. Genera geometría imposible de fresar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FLUJO -->
+    <section class="panel" data-name="Flujo CAD/CAM" id="sec-flujo">
+      <div class="kicker">06 · De la boca al archivo fabricable</div>
+      <h2>Dónde vive la malla en el flujo CAD/CAM</h2>
+      <p class="lead">La malla no es un paso aislado: es el formato que atraviesa todo el flujo digital, desde la captura hasta la fabricación.</p>
+
+      <div class="flow">
+        <div class="flow-step"><div class="idx">01</div><h3>Escaneo intraoral / de yeso</h3><p>Captura de nube de puntos por triangulación óptica o luz estructurada.</p></div>
+        <div class="flow-step"><div class="idx">02</div><h3>Triangulación</h3><p>El software conecta los puntos y genera la malla poligonal inicial.</p></div>
+        <div class="flow-step"><div class="idx">03</div><h3>Limpieza y reparación</h3><p>Se cierran huecos, se eliminan picos y se corrige la orientación de normales.</p></div>
+        <div class="flow-step"><div class="idx">04</div><h3>Diseño CAD</h3><p>Sobre la malla limpia se diseña la restauración, guía o modelo.</p></div>
+        <div class="flow-step"><div class="idx">05</div><h3>Exportación</h3><p>Se genera el archivo final, típicamente en STL, listo para CAM.</p></div>
+        <div class="flow-step"><div class="idx">06</div><h3>Fresado / impresión</h3><p>El CAM traduce la malla en trayectorias de fresa o capas de impresión.</p></div>
+      </div>
+
+      <div class="card" style="margin-top:8px;">
+        <h3>Formatos de malla más usados en odontología digital</h3>
+        <table class="formats">
+          <tr><th>Formato</th><th>Contiene</th><th>Uso típico</th></tr>
+          <tr><td>STL</td><td>Solo geometría (vértices y caras), sin color</td><td>Estándar universal para diseño y fabricación</td></tr>
+          <tr><td>PLY</td><td>Geometría + color por vértice</td><td>Escaneos con textura, documentación de tejidos</td></tr>
+          <tr><td>OBJ</td><td>Geometría + mapa de textura UV</td><td>Casos estéticos, comunicación con laboratorio</td></tr>
+          <tr><td>3MF</td><td>Geometría + color + metadatos de impresión</td><td>Flujos modernos de impresión 3D dental</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 7. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">07 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Mallas y topología de mallas · CAD/CAM dental</span>
+    <span id="clock"></span>
+  </footer>
+
+</div>
+
+<script>
+/* ============ TABS ============ */
+const sections = [...document.querySelectorAll('section.panel')];
+const tabsNav = document.getElementById('tabs');
+sections.forEach((s,i)=>{
+  const b = document.createElement('button');
+  b.innerHTML = `<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click', ()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active');
+tabsNav.children[0].classList.add('active');
+
+/* ============ MESH ENGINE (isometric heightmap) ============ */
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+function heightAt(x,y){
+  // x,y in [0,1] — molar-like occlusal surface with 4 cusps + central fossa
+  const cusps = [
+    [0.26,0.28,1.0],[0.74,0.28,0.95],[0.26,0.74,0.9],[0.74,0.74,1.0]
+  ];
+  let h = 0.18; // base convexity
+  for(const [cx,cy,amp] of cusps){
+    const d2 = (x-cx)**2 + (y-cy)**2;
+    h += amp*0.9*Math.exp(-d2/(2*0.10*0.10));
+  }
+  // central fossa depression
+  const df = (x-0.5)**2 + (y-0.5)**2;
+  h -= 0.55*Math.exp(-df/(2*0.14*0.14));
+  return h;
+}
+
+function buildMesh(N, opts={}){
+  opts = Object.assign({corrupt:null, w:400, h:320, seed:0}, opts);
+  const pts = []; // [i][j] -> {x,y,z}
+  for(let i=0;i<N;i++){
+    pts.push([]);
+    for(let j=0;j<N;j++){
+      const x = i/(N-1), y = j/(N-1);
+      let z = heightAt(x,y);
+      pts[i].push({x,y,z});
+    }
+  }
+  // corruption for error gallery
+  if(opts.corrupt==='spike'){
+    const ci = Math.floor(N*0.5), cj = Math.floor(N*0.45);
+    if(pts[ci] && pts[ci][cj]) pts[ci][cj].z += 1.6;
+  }
+
+  const K = Math.min(opts.w, opts.h*1.15) * 0.30;
+  const offX = opts.w/2, offY = opts.h*0.62;
+  const HZ = K*0.85;
+  function project(p){
+    const sx = (p.x - p.y) * Math.cos(Math.PI/6) * K*2.05;
+    const sy = (p.x + p.y) * Math.sin(Math.PI/6) * K*1.05 - p.z*HZ;
+    return [sx+offX, sy+offY*0.62 + 18];
+  }
+
+  const faces = []; // {pts:[[sx,sy],..], depth, shade, edges:[[..]]}
+  const light = normalize([0.35,-0.5,0.79]);
+
+  function normalize(v){const l=Math.hypot(...v); return v.map(c=>c/l);}
+  function cross(a,b){return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];}
+  function sub3(a,b){return [a.x-b.x,a.y-b.y,a.z-b.z];}
+
+  for(let i=0;i<N-1;i++){
+    for(let j=0;j<N-1;j++){
+      if(opts.corrupt==='hole'){
+        const hi = N*0.45, hj=N*0.4;
+        if(Math.abs(i-hi)<N*0.14 && Math.abs(j-hj)<N*0.14) continue;
+      }
+      const p00=pts[i][j], p10=pts[i+1][j], p01=pts[i][j+1], p11=pts[i+1][j+1];
+      const tris = [[p00,p10,p01],[p10,p11,p01]];
+      tris.forEach((tri,ti)=>{
+        let n = normalize(cross(sub3(tri[1],tri[0]), sub3(tri[2],tri[0])));
+        let flip = false;
+        if(opts.corrupt==='flip' && i===Math.floor((N-1)*0.5) && j===Math.floor((N-1)*0.45) && ti===0){
+          n = n.map(c=>-c); flip = true;
+        }
+        const dot = n[0]*light[0]+n[1]*light[1]+n[2]*light[2];
+        const lum = Math.max(0.12, Math.min(1, 0.45 + dot*0.65));
+        faces.push({
+          poly: tri.map(project),
+          depth: i+j,
+          lum, flip
+        });
+      });
+    }
+  }
+  faces.sort((a,b)=>a.depth-b.depth);
+  return {pts, faces, N};
+}
+
+function shadeColor(lum, flip){
+  if(flip){
+    const r = Math.round(140+lum*90);
+    return `rgb(${r},${Math.round(50+lum*20)},${Math.round(55+lum*25)})`;
+  }
+  // cyan-teal ramp
+  const r = Math.round(10+lum*40);
+  const g = Math.round(40+lum*190);
+  const b = Math.round(45+lum*175);
+  return `rgb(${r},${g},${b})`;
+}
+
+function renderMesh(svgEl, mesh, opts={}){
+  opts = Object.assign({wire:true, w:400, h:320}, opts);
+  svgEl.setAttribute('viewBox', `0 0 ${opts.w} ${opts.h}`);
+  while(svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+  const g = document.createElementNS(SVGNS,'g');
+  mesh.faces.forEach(f=>{
+    const poly = document.createElementNS(SVGNS,'polygon');
+    poly.setAttribute('points', f.poly.map(p=>p.join(',')).join(' '));
+    poly.setAttribute('fill', shadeColor(f.lum, f.flip));
+    if(opts.wire){
+      poly.setAttribute('stroke', 'rgba(94,234,212,0.28)');
+      poly.setAttribute('stroke-width','0.6');
+    } else {
+      poly.setAttribute('stroke','none');
+    }
+    g.appendChild(poly);
+  });
+  svgEl.appendChild(g);
+}
+
+/* HERO */
+renderMesh(document.getElementById('hero-svg'), buildMesh(11,{w:400,h:320}), {wire:true,w:400,h:320});
+
+/* ============ ANATOMIA (vertices/edges/faces highlight) ============ */
+(function(){
+  const svg = document.getElementById('anat-svg');
+  const N = 5, w=400,h=320;
+  const mesh = buildMesh(N,{w,h});
+  const tag = document.getElementById('anat-tag');
+  const desc = document.getElementById('anat-desc');
+  const modes = {
+    'Caras': {
+      label:'Caras (faces)',
+      text:'Cada triángulo es una <strong>cara</strong>: la unidad mínima de superficie de la malla. El conjunto de caras es lo que el motor 3D renderiza y lo que la fresadora interpreta como material sólido a cortar.'
+    },
+    'Aristas': {
+      label:'Aristas (edges)',
+      text:'Una <strong>arista</strong> es el segmento que conecta dos vértices y que comparten dos caras adyacentes. Contar cuántas caras comparten una misma arista es justamente el criterio para saber si una malla es manifold.'
+    },
+    'Vértices': {
+      label:'Vértices',
+      text:'Los <strong>vértices</strong> son los puntos en el espacio 3D —el resultado directo de la nube de puntos del escáner. Su posición (X, Y, Z) es el dato más básico que existe en un archivo de malla.'
+    }
+  };
+  function draw(mode){
+    svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    const g = document.createElementNS(SVGNS,'g');
+    mesh.faces.forEach(f=>{
+      const poly = document.createElementNS(SVGNS,'polygon');
+      poly.setAttribute('points', f.poly.map(p=>p.join(',')).join(' '));
+      poly.setAttribute('fill', mode==='Caras' ? shadeColor(f.lum,false) : 'rgba(94,234,212,0.05)');
+      poly.setAttribute('stroke', mode==='Aristas' ? 'var(--cyan)' : 'rgba(94,234,212,0.22)');
+      poly.setAttribute('stroke-width', mode==='Aristas' ? '1.6' : '0.6');
+      g.appendChild(poly);
+    });
+    svg.appendChild(g);
+    if(mode==='Vértices'){
+      for(let i=0;i<N;i++)for(let j=0;j<N;j++){
+        const K = Math.min(w,h*1.15)*0.30, offX=w/2, offY=h*0.62, HZ=K*0.85;
+        const p = mesh.pts[i][j];
+        const sx=(p.x-p.y)*Math.cos(Math.PI/6)*K*2.05+offX;
+        const sy=(p.x+p.y)*Math.sin(Math.PI/6)*K*1.05 - p.z*HZ + offY*0.62+18;
+        const c = document.createElementNS(SVGNS,'circle');
+        c.setAttribute('cx',sx); c.setAttribute('cy',sy); c.setAttribute('r',3.4);
+        c.setAttribute('fill','var(--cyan)');
+        c.setAttribute('stroke','#04201C'); c.setAttribute('stroke-width','0.8');
+        svg.appendChild(c);
+      }
+    }
+    tag.textContent = modes[mode].label;
+    desc.innerHTML = `<h3>${modes[mode].label}</h3><p style="margin-bottom:0">${modes[mode].text}</p>`;
+  }
+  const btnRow = document.getElementById('anat-buttons');
+  Object.keys(modes).forEach((m,idx)=>{
+    const b = document.createElement('button');
+    b.className='chip'+(idx===0?' active':'');
+    b.textContent = m;
+    b.addEventListener('click',()=>{
+      [...btnRow.children].forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      draw(m);
+    });
+    btnRow.appendChild(b);
+  });
+  draw('Caras');
+})();
+
+/* ============ TOPOLOGIA static diagrams ============ */
+function simpleTriSet(svgId, kind){
+  const svg = document.getElementById(svgId);
+  const w=260,h=200;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  const g = (tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e;};
+  const addPoly = (pts,fill,stroke)=>{
+    const p = g('polygon',{points:pts.map(pt=>pt.join(',')).join(' '), fill, stroke:stroke||'rgba(94,234,212,.5)', 'stroke-width':'1.4'});
+    svg.appendChild(p);
+  };
+  const addDot = (x,y,color)=>svg.appendChild(g('circle',{cx:x,cy:y,r:4,fill:color||'var(--cyan)'}));
+  const addLine=(x1,y1,x2,y2,color,w2)=>svg.appendChild(g('line',{x1,y1,x2,y2,stroke:color,'stroke-width':w2||2}));
+
+  if(kind==='manifold'){
+    addPoly([[60,150],[130,60],[130,150]], 'rgba(94,234,212,.16)');
+    addPoly([[130,60],[200,150],[130,150]], 'rgba(94,234,212,.28)');
+    addLine(130,60,130,150,'var(--cyan)',2.4);
+    addDot(60,150); addDot(130,60); addDot(130,150); addDot(200,150);
+  }
+  if(kind==='nonmanifold'){
+    addPoly([[60,150],[130,60],[130,150]], 'rgba(94,234,212,.16)');
+    addPoly([[130,60],[200,150],[130,150]], 'rgba(94,234,212,.28)');
+    addPoly([[100,40],[160,20],[130,60]], 'rgba(242,84,91,.28)');
+    addLine(130,60,130,150,'var(--red)',3);
+    addLine(130,60,100,40,'var(--red)',1.6);
+    addLine(130,60,160,20,'var(--red)',1.6);
+    addDot(60,150); addDot(130,60,'var(--red)'); addDot(130,150); addDot(200,150); addDot(100,40); addDot(160,20);
+  }
+  if(kind==='watertight'){
+    const cx=130,cy=105,r=55;
+    const pts=[]; for(let a=0;a<8;a++){pts.push([cx+r*Math.cos(a*Math.PI/4), cy+r*Math.sin(a*Math.PI/4)]);}
+    pts.forEach((p,i)=>{ addPoly([[cx,cy],p,pts[(i+1)%pts.length]], i%2? 'rgba(94,234,212,.14)':'rgba(94,234,212,.26)'); });
+    addDot(cx,cy);
+    pts.forEach(p=>addDot(p[0],p[1]));
+  }
+  if(kind==='watertight-open'){/* unused */}
+  if(kind==='normals'){
+    addPoly([[60,150],[130,60],[130,150]], 'rgba(94,234,212,.24)');
+    addPoly([[130,60],[200,150],[130,150]], 'rgba(242,84,91,.3)');
+    // normal arrows
+    addLine(95,120,95,80,'var(--cyan)',2); svg.appendChild(g('polygon',{points:'90,86 100,86 95,76', fill:'var(--cyan)'}));
+    addLine(165,120,165,160,'var(--red)',2); svg.appendChild(g('polygon',{points:'160,155 170,155 165,166', fill:'var(--red)'}));
+    addDot(60,150); addDot(130,60); addDot(130,150); addDot(200,150);
+  }
+}
+simpleTriSet('manifold-svg','manifold');
+simpleTriSet('nonmanifold-svg','nonmanifold');
+simpleTriSet('watertight-svg','watertight');
+simpleTriSet('normals-svg','normals');
+
+/* watertight with a hole for contrast — reuse errors gallery */
+
+/* ============ DENSIDAD (LOD slider) ============ */
+(function(){
+  const svg = document.getElementById('lod-svg');
+  const slider = document.getElementById('lod-slider');
+  const wireChk = document.getElementById('lod-wire');
+  const statV = document.getElementById('stat-verts');
+  const statF = document.getElementById('stat-faces');
+  const statS = document.getElementById('stat-size');
+  function update(){
+    const N = parseInt(slider.value,10);
+    const mesh = buildMesh(N,{w:400,h:320});
+    renderMesh(svg, mesh, {wire:wireChk.checked, w:400,h:320});
+    const verts = N*N, faces = (N-1)*(N-1)*2;
+    statV.textContent = verts.toLocaleString('es-MX');
+    statF.textContent = faces.toLocaleString('es-MX');
+    const kb = Math.max(1, Math.round(faces*50/1024));
+    statS.textContent = kb + ' KB';
+  }
+  slider.addEventListener('input', update);
+  wireChk.addEventListener('change', update);
+  update();
+})();
+
+/* ============ ERRORES gallery ============ */
+renderMesh(document.getElementById('err-hole-svg'), buildMesh(9,{w:200,h:160,corrupt:'hole'}), {wire:true,w:200,h:160});
+renderMesh(document.getElementById('err-spike-svg'), buildMesh(9,{w:200,h:160,corrupt:'spike'}), {wire:true,w:200,h:160});
+(function(){
+  // self-intersection: two overlapping simple triangles
+  const svg = document.getElementById('err-overlap-svg');
+  const w=200,h=160;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+  svg.appendChild(g('polygon',{points:'30,120 100,30 130,120', fill:'rgba(94,234,212,.22)', stroke:'var(--cyan)','stroke-width':1.4}));
+  svg.appendChild(g('polygon',{points:'70,130 150,50 170,130', fill:'rgba(242,84,91,.28)', stroke:'var(--red)','stroke-width':1.4}));
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ = [
+  {
+    q:'¿Qué son exactamente los "vértices" de una malla?',
+    opts:['Los triángulos que forman la superficie','Puntos con coordenadas X, Y, Z en el espacio','Los archivos STL generados por el escáner','Las herramientas de corte del CAM'],
+    correct:1,
+    exp:'Los vértices son los puntos individuales en el espacio 3D — el dato más elemental capturado por el escáner, antes de conectarse en triángulos.'
+  },
+  {
+    q:'Una malla es "manifold" cuando…',
+    opts:['Tiene más de 100,000 triángulos','Fue exportada en formato OBJ','Cada arista es compartida por exactamente dos caras','No tiene color asignado'],
+    correct:2,
+    exp:'La condición manifold exige que cada arista pertenezca a exactamente dos caras, garantizando un interior y exterior bien definidos.'
+  },
+  {
+    q:'¿Por qué una malla debe ser "watertight" (cerrada) antes de imprimirla en 3D?',
+    opts:['Porque así pesa menos el archivo','Porque el slicer necesita calcular un volumen cerrado, sin huecos','Porque mejora el color del render','Porque lo exige el formato STL únicamente en dientes anteriores'],
+    correct:1,
+    exp:'Sin una envolvente completamente cerrada, el software de impresión no puede determinar qué región es sólido y cuál es vacío.'
+  },
+  {
+    q:'Si aumentas la densidad (resolución) de una malla, ¿qué ocurre?',
+    opts:['Se reduce el tamaño del archivo','Se pierden detalles de la superficie','Aumenta la precisión de detalle pero también el peso del archivo','La malla deja de ser manifold automáticamente'],
+    correct:2,
+    exp:'Más vértices y caras capturan mejor los detalles finos (surcos, márgenes), a costa de un archivo más pesado y mayor tiempo de cómputo.'
+  },
+  {
+    q:'Un "hueco" (hole) en una malla escaneada generalmente se debe a…',
+    opts:['Que el paciente tiene una caries','Zonas no capturadas por el escáner, por saliva, sombra o sangrado','Un exceso de triángulos en esa zona','Haber usado el formato OBJ en vez de STL'],
+    correct:1,
+    exp:'Los huecos aparecen donde el escáner no pudo capturar información —típicamente por humedad, sombra o obstrucción— y deben repararse antes del diseño.'
+  }
+];
+
+(function(){
+  const container = document.getElementById('quiz-container');
+  const scoreBox = document.getElementById('quiz-score');
+  let score = 0, answered = 0;
+
+  QUIZ.forEach((item, qi)=>{
+    const block = document.createElement('div');
+    block.className='q-block';
+    const h3 = document.createElement('h3');
+    h3.textContent = `${qi+1}. ${item.q}`;
+    block.appendChild(h3);
+    const explain = document.createElement('div');
+    explain.className='explain';
+    explain.innerHTML = item.exp;
+
+    item.opts.forEach((optText, oi)=>{
+      const btn = document.createElement('button');
+      btn.className='opt';
+      btn.textContent = optText;
+      btn.addEventListener('click', ()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){
+          btn.classList.add('correct');
+          score++;
+        } else {
+          btn.classList.add('wrong');
+          block.querySelectorAll('.opt')[item.correct].classList.add('correct');
+        }
+        explain.classList.add('show');
+        answered++;
+        if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain);
+    container.appendChild(block);
+  });
+
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML = `
+      <div class="score-box">
+        <div class="big">${score} / ${QUIZ.length}</div>
+        <div style="color:var(--text-dim); margin-top:6px;">respuestas correctas</div>
+        <button class="reset-btn" id="quiz-reset">Reintentar</button>
+      </div>`;
+    document.getElementById('quiz-reset').addEventListener('click', ()=>location.reload());
+  }
+})();
+
+/* footer clock-ish label */
+document.getElementById('clock').textContent = 'Malla activa · render en tiempo real';
+</script>
+</body>
+</html>
