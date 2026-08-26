@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voxeles y Formatos Volumétricos en Odontología</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0B0C;
+    --panel:#131315;
+    --panel2:#1A1A1D;
+    --line:#2A2A2E;
+    --amber:#E8A659;
+    --amber-dim:#C98A3E;
+    --red:#F2545B;
+    --text:#EDEDEE;
+    --text-dim:#9A9A9E;
+    --text-faint:#5C5C61;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh;}
+  .app{max-width:1100px; margin:0 auto; padding:28px 20px 80px;}
+
+  header.top{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber-dim); display:flex; align-items:center; gap:8px;}
+  .eyebrow::before{content:''; width:7px; height:7px; background:var(--amber); border-radius:2px; box-shadow:0 0 8px var(--amber);}
+  h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(26px,4vw,40px); letter-spacing:-.01em; margin-top:10px; line-height:1.08;}
+  h1 span{color:var(--amber);}
+  .sub{color:var(--text-dim); font-size:15px; margin-top:10px; max-width:660px; line-height:1.5;}
+
+  nav.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:26px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; background:transparent; border:1px solid var(--line); color:var(--text-dim); padding:9px 14px; border-radius:7px; cursor:pointer; white-space:nowrap; transition:all .15s ease;}
+  nav.tabs button .n{color:var(--text-faint); margin-right:7px;}
+  nav.tabs button:hover{border-color:var(--amber-dim); color:var(--text);}
+  nav.tabs button.active{background:var(--amber); border-color:var(--amber); color:#241403; font-weight:700;}
+  nav.tabs button.active .n{color:#241403;}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:'Space Grotesk',sans-serif; font-size:clamp(20px,3vw,28px); font-weight:600; margin-bottom:14px; letter-spacing:-.01em;}
+  h3{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; margin-bottom:8px; color:var(--text);}
+  p{color:var(--text-dim); line-height:1.65; font-size:14.5px; margin-bottom:12px;}
+  p strong{color:var(--text); font-weight:600;}
+  .lead{color:var(--text); font-size:16px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid5{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid5{grid-template-columns:1fr 1fr;}}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px;}
+  .viewport{background:radial-gradient(ellipse at 50% 20%,#161514,#0B0B0C); border:1px solid var(--line); border-radius:12px; padding:16px; position:relative;}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:90px; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:10px 12px;}
+  .stat .num{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:18px; color:var(--amber);}
+  .stat .lab{font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+  .ctrl-row{display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap;}
+  .ctrl-row label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:8px;}
+  input[type=range]{accent-color:var(--amber); width:150px;}
+  input[type=checkbox]{accent-color:var(--amber); width:15px; height:15px;}
+  select{background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:6px 8px;}
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:'JetBrains Mono',monospace; font-size:11.5px; border:1px solid var(--line); background:var(--panel2); color:var(--text-dim); padding:7px 12px; border-radius:20px; cursor:pointer; transition:all .15s;}
+  .chip:hover{color:var(--text); border-color:var(--amber-dim);}
+  .chip.active{background:var(--amber); color:#241403; border-color:var(--amber); font-weight:700;}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:18px; color:var(--text-dim); font-size:14px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'▸'; position:absolute; left:0; color:var(--amber-dim);}
+
+  .divider{height:1px; background:var(--line); margin:34px 0;}
+
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:600px){.compare{grid-template-columns:1fr;}}
+  .badge{font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 8px; border-radius:20px; letter-spacing:.05em;}
+  .badge.a{background:rgba(232,166,89,.14); color:var(--amber);}
+  .badge.b{background:rgba(94,180,234,.14); color:#5EB4EA;}
+
+  .callout{border:1px dashed var(--amber-dim); border-radius:10px; padding:14px 16px; background:rgba(232,166,89,.06); margin-top:16px;}
+  .callout p{color:var(--text); font-size:13.5px; margin:0;}
+  .callout .lab{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--amber); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+  table.formats th{font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); text-align:left; padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.formats td{padding:9px 10px; border-bottom:1px solid var(--line); color:var(--text-dim); vertical-align:top;}
+  table.formats td:first-child{color:var(--amber); font-family:'JetBrains Mono',monospace; font-weight:700; white-space:nowrap;}
+
+  .app-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;}
+  .app-card .idx{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); margin-bottom:6px;}
+  .app-card h3{font-size:14.5px;}
+  .app-card p{font-size:13px; margin-bottom:8px;}
+  .app-card .fov{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-faint); border-top:1px dashed var(--line); padding-top:8px;}
+  .app-card .fov b{color:var(--amber-dim);}
+
+  canvas#slice-canvas{width:100%; height:auto; image-rendering:pixelated; border-radius:8px; display:block;}
+
+  .q-block{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:14px;}
+  .q-block h3{font-size:14.5px; margin-bottom:12px; color:var(--text);}
+  .opt{display:block; width:100%; text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--text-dim); padding:11px 14px; border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:13.5px; transition:all .15s;}
+  .opt:hover{border-color:var(--amber-dim);}
+  .opt.correct{border-color:var(--amber); background:rgba(232,166,89,.1); color:var(--amber);}
+  .opt.wrong{border-color:var(--red); background:rgba(242,84,91,.1); color:var(--red);}
+  .opt[disabled]{cursor:default;}
+  .explain{font-size:12.5px; color:var(--text-faint); margin-top:8px; display:none; line-height:1.5; padding-top:8px; border-top:1px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:24px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; font-family:'JetBrains Mono',monospace;}
+  .score-box .big{font-size:34px; font-weight:700; color:var(--amber);}
+  .reset-btn{font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--amber); color:#241403; border:none; padding:9px 18px; border-radius:8px; cursor:pointer; font-weight:700; margin-top:12px;}
+
+  footer{margin-top:50px; padding-top:18px; border-top:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">CAD / CAM · Imagenología volumétrica</div>
+    <h1>Voxeles y <span>formatos volumétricos</span></h1>
+    <p class="sub">Si la clase anterior fue sobre superficies (mallas), esta es sobre interiores: cómo el CBCT reconstruye un volumen 3D en cubos de densidad, qué formatos lo transportan y cómo se usa clínicamente.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. INTRO -->
+    <section class="panel" data-name="Intro" id="sec-intro">
+      <div class="grid2">
+        <div>
+          <div class="kicker">01 · Punto de partida</div>
+          <h2>¿Qué es un voxel?</h2>
+          <p class="lead">Un <strong>voxel</strong> ("volumetric pixel") es la unidad mínima de un volumen 3D: un cubo con una posición fija en el espacio (X, Y, Z) y un valor de <strong>densidad o intensidad</strong> asociado. Donde un pixel describe un punto de una imagen plana, un voxel describe un punto dentro de un cuerpo sólido.</p>
+          <p>El CBCT (Cone Beam CT) no fotografía una superficie: mide cuánta radiación atraviesa cada punto del volumen craneofacial y construye una rejilla tridimensional de voxeles con esa información. De ahí se puede reconstruir hueso, dientes, conductos, vía aérea o tejido blando —todo lo que la clase anterior de mallas <strong>no puede</strong> capturar, porque un escáner óptico intraoral solo ve la superficie visible.</p>
+          <ul class="clean">
+            <li>Un volumen CBCT es una <strong>rejilla 3D</strong> de voxeles (no una superficie).</li>
+            <li>Cada voxel guarda un valor de <strong>densidad</strong> (escala de grises / Unidades Hounsfield aproximadas).</li>
+            <li>El tamaño físico del voxel —en micras o milímetros— define la resolución real del estudio.</li>
+            <li>El formato estándar para transportar estos datos es <strong>DICOM</strong>.</li>
+          </ul>
+        </div>
+        <div class="viewport">
+          <span class="tag">Modelo volumétrico · vista isométrica</span>
+          <svg id="hero-svg" viewBox="0 0 400 320"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ANATOMIA DEL VOXEL -->
+    <section class="panel" data-name="Anatomía" id="sec-anatomia">
+      <div class="kicker">02 · Componentes</div>
+      <h2>Tamaño de voxel, isotropía y FOV</h2>
+      <p class="lead">Tres parámetros del voxel determinan qué tan útil es un estudio CBCT para una pregunta clínica específica.</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Tamaño de voxel</h3>
+          <p>Es la longitud de la arista del cubo, típicamente entre <strong>0.075 y 0.4 mm</strong> en equipos dentales. Un voxel más pequeño resuelve más detalle (trabéculas óseas, límites de una fractura radicular) pero implica más dosis de radiación y archivos más pesados.</p>
+        </div>
+        <div class="card">
+          <h3>Isotropía</h3>
+          <p>Un voxel <strong>isotrópico</strong> mide lo mismo en X, Y y Z —el estándar deseable en CBCT dental, porque permite medir con la misma precisión en cualquier plano. Un voxel <strong>anisotrópico</strong> (más alto que ancho, como en algunos cortes de TC médica) distorsiona las mediciones si se reconstruye en un plano distinto al original.</p>
+        </div>
+      </div>
+
+      <div class="compare" style="margin-top:16px;">
+        <div class="viewport">
+          <span class="tag">Isotrópico <span class="badge a">1:1:1</span></span>
+          <svg id="cube-iso-svg" viewBox="0 0 260 220"></svg>
+        </div>
+        <div class="viewport">
+          <span class="tag">Anisotrópico <span class="badge b">1:1:2.4</span></span>
+          <svg id="cube-aniso-svg" viewBox="0 0 260 220"></svg>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Campo de visión (FOV)</div>
+        <p>El FOV es la porción de la cabeza que el equipo captura. Es un compromiso clínico directo: un <strong>FOV pequeño</strong> (ej. una sola pieza) permite voxeles diminutos y alta resolución con baja dosis; un <strong>FOV grande</strong> (arcada completa o cráneo) sacrifica resolución o eleva la dosis para cubrir todo el volumen. Se elige el FOV más pequeño que responda la pregunta clínica —principio ALARA.</p>
+      </div>
+    </section>
+
+    <!-- 3. VOXEL VS MALLA -->
+    <section class="panel" data-name="Voxel vs Malla" id="sec-comparacion">
+      <div class="kicker">03 · Dos formas de representar un diente</div>
+      <h2>Voxel vs. malla: ¿cuándo se usa cada una?</h2>
+      <p class="lead">No compiten entre sí: resuelven preguntas distintas y con frecuencia se combinan en el mismo caso clínico.</p>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>Origen</h3>
+          <p><strong>Voxel:</strong> tomografía (CBCT), mide densidad a través del volumen.<br><br><strong>Malla:</strong> escaneo óptico (intraoral o de laboratorio), mide solo la superficie visible.</p>
+        </div>
+        <div class="card">
+          <h3>Qué representa</h3>
+          <p><strong>Voxel:</strong> el interior completo —hueso, conductos, tejido blando, dientes no erupcionados.<br><br><strong>Malla:</strong> únicamente la superficie externa visible desde fuera.</p>
+        </div>
+        <div class="card">
+          <h3>Formato típico</h3>
+          <p><strong>Voxel:</strong> DICOM (serie de cortes 2D + metadatos).<br><br><strong>Malla:</strong> STL, PLY, OBJ (triángulos de superficie).</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Dónde se conectan ambos mundos</div>
+        <p>Para obtener un STL del hueso o de un diente desde un CBCT, el software <strong>segmenta</strong> el volumen —selecciona los voxeles por encima de un umbral de densidad— y luego <strong>triangula</strong> esa frontera para generar una malla de superficie. Es exactamente el mismo proceso de triangulación que vimos en la clase de mallas, solo que aquí el punto de partida es un volumen y no una nube de puntos óptica.</p>
+      </div>
+    </section>
+
+    <!-- 4. RESOLUCION INTERACTIVA -->
+    <section class="panel" data-name="Resolución" id="sec-resolucion">
+      <div class="kicker">04 · Laboratorio interactivo</div>
+      <h2>Resolución de voxel: el mismo diente, distinta rejilla</h2>
+      <p class="lead">Mueve el control de resolución y observa cómo cambia tanto el modelo volumétrico como el corte 2D del mismo diente —así se ve un conducto en distintas resoluciones de adquisición.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Volumen · vista isométrica</span>
+          <svg id="vox-svg" viewBox="0 0 400 320"></svg>
+        </div>
+        <div class="viewport">
+          <span class="tag" id="slice-tag">Corte axial</span>
+          <canvas id="slice-canvas" width="120" height="120"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="ctrl-row">
+          <label>Resolución
+            <input type="range" id="vox-slider" min="4" max="14" value="7" step="1">
+          </label>
+          <label>Plano
+            <select id="slice-orientation">
+              <option value="axial">Axial</option>
+              <option value="sagittal">Sagital</option>
+              <option value="coronal">Coronal</option>
+            </select>
+          </label>
+          <label>Posición del corte
+            <input type="range" id="slice-slider" min="0" max="100" value="45" step="1">
+          </label>
+          <label><input type="checkbox" id="lesion-toggle"> Simular lesión periapical</label>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><div class="num" id="stat-voxsize">0 mm</div><div class="lab">Tamaño de voxel</div></div>
+          <div class="stat"><div class="num" id="stat-voxcount">0</div><div class="lab">Voxeles totales</div></div>
+          <div class="stat"><div class="num" id="stat-voxweight">0 MB</div><div class="lab">Peso aprox. del volumen</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. FORMATOS -->
+    <section class="panel" data-name="Formatos" id="sec-formatos">
+      <div class="kicker">05 · Transportando el volumen</div>
+      <h2>Formatos volumétricos usados en odontología</h2>
+      <p class="lead">A diferencia del mundo de las mallas —dominado por STL— los datos volumétricos viven principalmente en un estándar médico interoperable.</p>
+
+      <div class="card">
+        <table class="formats">
+          <tr><th>Formato</th><th>Contiene</th><th>Uso típico</th></tr>
+          <tr><td>DICOM</td><td>Serie de cortes 2D + metadatos del paciente, equipo y protocolo</td><td>Estándar universal de CBCT; se abre en Romexis, InVivo, Blue Sky Bio, exocad, 3D Slicer, etc.</td></tr>
+          <tr><td>Propietario (raw/.vol)</td><td>Datos crudos del fabricante antes de exportar</td><td>Formato interno del equipo; casi siempre se convierte a DICOM para compartirse</td></tr>
+          <tr><td>NRRD / NIfTI</td><td>Volumen + metadatos, sin capa clínica de DICOM</td><td>Investigación y análisis en software como 3D Slicer</td></tr>
+          <tr><td>STL (segmentado)</td><td>Solo la superficie extraída de un umbral de densidad del volumen</td><td>Puente hacia el mundo de mallas: guías quirúrgicas, modelos impresos de hueso</td></tr>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Por qué importa DICOM</div>
+        <p>DICOM no es solo el archivo de imagen: incluye metadatos de calibración (tamaño real de voxel, orientación del paciente, kV/mA usados) sin los cuales las medidas en el software de planeación dejarían de ser confiables. Perder esos metadatos —por ejemplo al convertir mal a otro formato— invalida las mediciones clínicas.</p>
+      </div>
+    </section>
+
+    <!-- 6. APLICACIONES CLINICAS -->
+    <section class="panel" data-name="Aplicaciones clínicas" id="sec-aplicaciones">
+      <div class="kicker">06 · De la rejilla de voxeles al diagnóstico</div>
+      <h2>Aplicaciones clínicas del CBCT</h2>
+      <p class="lead">La elección de FOV y tamaño de voxel cambia según la pregunta clínica que se quiera responder.</p>
+
+      <div class="grid3" id="apps-grid"></div>
+    </section>
+
+    <!-- 7. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">07 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Voxeles y formatos volumétricos · CAD/CAM dental</span>
+    <span>Volumen simplificado con fines didácticos</span>
+  </footer>
+
+</div>
+
+<script>
+/* ============ TABS ============ */
+const sections = [...document.querySelectorAll('section.panel')];
+const tabsNav = document.getElementById('tabs');
+sections.forEach((s,i)=>{
+  const b = document.createElement('button');
+  b.innerHTML = `<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click', ()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active');
+tabsNav.children[0].classList.add('active');
+
+const SVGNS='http://www.w3.org/2000/svg';
+
+/* ============ DENSITY MODEL (shared by 3D voxel render + 2D slices) ============ */
+function sampleDensity(x,y,z){
+  // x,y in [-1,1] mesiodistal/buccolingual, z in [-1,1] apex(-1) -> crown(1)
+  const r = Math.sqrt(x*x+y*y);
+  const t = (z+1)/2;
+  let taper = 0.16 + 0.30*Math.pow(t,1.3);
+  if(t>0.62){ taper += 0.14*Math.sin(Math.min(1,(t-0.62)/0.38)*Math.PI); }
+  const outerR = taper;
+  const canalR = t<0.88 ? (0.045+0.02*t) : 0.09;
+  if(r>outerR) return 0;
+  if(r<=canalR) return 0.22; // canal / pulpa
+  return 1; // dentina
+}
+
+/* ============ 3D VOXEL ISOMETRIC RENDER ============ */
+function buildVolume(N){
+  const density=[];
+  for(let i=0;i<N;i++){
+    density.push([]);
+    for(let j=0;j<N;j++){
+      density[i].push([]);
+      for(let k=0;k<N;k++){
+        const x=(i/(N-1))*2-1, y=(k/(N-1))*2-1, z=(j/(N-1))*2-1;
+        density[i][j].push(sampleDensity(x,y,z));
+      }
+    }
+  }
+  return density;
+}
+function surfaceVoxels(density,N){
+  const list=[];
+  const occ=(i,j,k)=>(i>=0&&i<N&&j>=0&&j<N&&k>=0&&k<N)?density[i][j][k]>0.05:false;
+  for(let i=0;i<N;i++)for(let j=0;j<N;j++)for(let k=0;k<N;k++){
+    const d=density[i][j][k];
+    if(d<=0.05) continue;
+    if(!occ(i+1,j,k)||!occ(i-1,j,k)||!occ(i,j+1,k)||!occ(i,j-1,k)||!occ(i,j,k+1)||!occ(i,j,k-1)){
+      list.push({i,j,k,d});
+    }
+  }
+  return list;
+}
+function voxColor(shade,canal){
+  if(canal){
+    return `rgb(${Math.round(196*shade)},${Math.round(88*shade)},${Math.round(58*shade)})`;
+  }
+  return `rgb(${Math.round(214*shade)},${Math.round(178*shade)},${Math.round(132*shade)})`;
+}
+function renderVoxelModel(svg,N,w,h){
+  const voxels = surfaceVoxels(buildVolume(N),N);
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const tileW = Math.min(w,h)/(N*0.95);
+  const tileH = tileW*0.55;
+  const voxH = tileW*0.62;
+  const originX = w/2;
+  const originY = h*0.14 + (N*voxH)/2.1;
+  function anchor(i,j,k){
+    const x=(i-k)*(tileW/2);
+    const y=(i+k)*(tileH/2) - j*voxH;
+    return {x:x+originX, y:y+originY};
+  }
+  const faces=[];
+  voxels.forEach(v=>{
+    const a = anchor(v.i,v.j,v.k);
+    const Nn={x:a.x,y:a.y-tileH/2}, E={x:a.x+tileW/2,y:a.y}, S={x:a.x,y:a.y+tileH/2}, W={x:a.x-tileW/2,y:a.y};
+    const top=[Nn,E,S,W];
+    const left=[W,S,{x:S.x,y:S.y+voxH},{x:W.x,y:W.y+voxH}];
+    const right=[S,E,{x:E.x,y:E.y+voxH},{x:S.x,y:S.y+voxH}];
+    const depth = v.i + v.k - v.j;
+    const isCanal = v.d < 0.5;
+    faces.push({poly:top,shade:1.0,depth:depth-0.3,canal:isCanal});
+    faces.push({poly:left,shade:0.72,depth:depth-0.1,canal:isCanal});
+    faces.push({poly:right,shade:0.52,depth:depth,canal:isCanal});
+  });
+  faces.sort((a,b)=>a.depth-b.depth);
+  const g=document.createElementNS(SVGNS,'g');
+  faces.forEach(f=>{
+    const poly=document.createElementNS(SVGNS,'polygon');
+    poly.setAttribute('points', f.poly.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '));
+    poly.setAttribute('fill', voxColor(f.shade,f.canal));
+    poly.setAttribute('stroke','rgba(0,0,0,0.3)');
+    poly.setAttribute('stroke-width','0.5');
+    g.appendChild(poly);
+  });
+  svg.appendChild(g);
+  return voxels.length;
+}
+renderVoxelModel(document.getElementById('hero-svg'),9,400,320);
+
+/* ============ SINGLE CUBE (anatomy section) ============ */
+function drawSingleCube(svg, zRatio, label){
+  const w=260,h=220;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const tileW=110, tileH=60, voxH=90*zRatio;
+  const a={x:w/2,y:h*0.28};
+  const Nn={x:a.x,y:a.y-tileH/2}, E={x:a.x+tileW/2,y:a.y}, S={x:a.x,y:a.y+tileH/2}, W={x:a.x-tileW/2,y:a.y};
+  const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+  const top=[Nn,E,S,W];
+  const left=[W,S,{x:S.x,y:S.y+voxH},{x:W.x,y:W.y+voxH}];
+  const right=[S,E,{x:E.x,y:E.y+voxH},{x:S.x,y:S.y+voxH}];
+  svg.appendChild(g('polygon',{points:top.map(p=>`${p.x},${p.y}`).join(' '), fill:'rgb(226,192,148)'}));
+  svg.appendChild(g('polygon',{points:left.map(p=>`${p.x},${p.y}`).join(' '), fill:'rgb(176,140,100)'}));
+  svg.appendChild(g('polygon',{points:right.map(p=>`${p.x},${p.y}`).join(' '), fill:'rgb(140,108,76)'}));
+  [top,left,right].forEach(poly=>{
+    const outline=g('polygon',{points:poly.map(p=>`${p.x},${p.y}`).join(' '), fill:'none', stroke:'rgba(0,0,0,.35)','stroke-width':'1'});
+    svg.appendChild(outline);
+  });
+  const txt = g('text',{x:w/2,y:h-14,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#9A9A9E'});
+  txt.textContent = label;
+  svg.appendChild(txt);
+}
+drawSingleCube(document.getElementById('cube-iso-svg'), 0.62, 'dx = dy = dz');
+drawSingleCube(document.getElementById('cube-aniso-svg'), 1.5, 'dz > dx = dy');
+
+/* ============ RESOLUTION LAB (voxel model + slice viewer) ============ */
+(function(){
+  const svg = document.getElementById('vox-svg');
+  const slider = document.getElementById('vox-slider');
+  const orientSel = document.getElementById('slice-orientation');
+  const sliceSlider = document.getElementById('slice-slider');
+  const lesionToggle = document.getElementById('lesion-toggle');
+  const sliceTag = document.getElementById('slice-tag');
+  const canvas = document.getElementById('slice-canvas');
+  const statSize = document.getElementById('stat-voxsize');
+  const statCount = document.getElementById('stat-voxcount');
+  const statWeight = document.getElementById('stat-voxweight');
+  const ctx = canvas.getContext('2d');
+
+  const orientLabels = {axial:'Corte axial', sagittal:'Corte sagital', coronal:'Corte coronal'};
+
+  function drawSlice(N){
+    const S = Math.max(24, N*8);
+    canvas.width = S; canvas.height = S;
+    const orientation = orientSel.value;
+    const fixedT = (sliceSlider.value/100)*2-1;
+    const showLesion = lesionToggle.checked;
+    const img = ctx.createImageData(S,S);
+    for(let row=0; row<S; row++){
+      for(let col=0; col<S; col++){
+        const u = (col/(S-1))*2-1;
+        let x,y,z;
+        if(orientation==='axial'){ x=u; y=(row/(S-1))*2-1; z=fixedT; }
+        else if(orientation==='sagittal'){ x=fixedT; y=u; z=1-(row/(S-1))*2; }
+        else { x=u; y=fixedT; z=1-(row/(S-1))*2; }
+        let d = sampleDensity(x,y,z);
+        if(showLesion){
+          const distApex = Math.sqrt(x*x + y*y + (z+1.05)*(z+1.05));
+          if(distApex < 0.3 && d>0){ d = Math.max(0, d-0.7); }
+        }
+        const gray = Math.round(14 + d*212);
+        const idx=(row*S+col)*4;
+        img.data[idx]=gray; img.data[idx+1]=Math.round(gray*0.97); img.data[idx+2]=Math.round(gray*0.90); img.data[idx+3]=255;
+      }
+    }
+    ctx.putImageData(img,0,0);
+    sliceTag.textContent = orientLabels[orientation];
+  }
+
+  function update(){
+    const N = parseInt(slider.value,10);
+    const count = renderVoxelModel(svg, N, 400, 320);
+    drawSlice(N);
+    const mmSize = (14 / N).toFixed(2); // simplified: 14mm volume height mapped over N voxels
+    statSize.textContent = mmSize + ' mm';
+    statCount.textContent = (N*N*N).toLocaleString('es-MX');
+    const mb = Math.max(0.1, (N*N*N*2/1024/1024*40)).toFixed(1);
+    statWeight.textContent = mb + ' MB';
+  }
+  slider.addEventListener('input', update);
+  orientSel.addEventListener('change', update);
+  sliceSlider.addEventListener('input', update);
+  lesionToggle.addEventListener('change', update);
+  update();
+})();
+
+/* ============ APLICACIONES CLINICAS ============ */
+const APPS = [
+  {t:'Implantología', d:'Medición de altura y espesor óseo disponible, densidad ósea, localización de estructuras vecinas (nervio dentario inferior, seno maxilar) y diseño de guías quirúrgicas.', fov:'FOV mediano · voxel 0.2–0.3 mm'},
+  {t:'Endodoncia', d:'Localización de conductos accesorios o curvos, diagnóstico de fracturas radiculares y lesiones periapicales que no se ven en una radiografía 2D.', fov:'FOV pequeño · voxel 0.075–0.15 mm'},
+  {t:'Ortodoncia', d:'Análisis de vía aérea, impactación de caninos, reabsorciones radiculares y cefalometría 3D para planeación integral.', fov:'FOV grande · voxel 0.3–0.4 mm'},
+  {t:'Cirugía maxilofacial', d:'Planeación de terceros molares, relación con estructuras anatómicas críticas y valoración prequirúrgica de patología ósea.', fov:'FOV grande · voxel 0.25–0.4 mm'},
+  {t:'ATM', d:'Evaluación de superficies articulares, espacio articular y cambios degenerativos del cóndilo mandibular.', fov:'FOV mediano-grande · voxel 0.2–0.3 mm'}
+];
+(function(){
+  const grid = document.getElementById('apps-grid');
+  APPS.forEach((a,i)=>{
+    const el = document.createElement('div');
+    el.className='app-card';
+    el.innerHTML = `<div class="idx">0${i+1}</div><h3>${a.t}</h3><p>${a.d}</p><div class="fov"><b>Configuración típica →</b> ${a.fov}</div>`;
+    grid.appendChild(el);
+  });
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ = [
+  {q:'¿Qué distingue a un voxel de un pixel?', opts:['El voxel es más pequeño','El voxel tiene una posición 3D y un valor de densidad de volumen, no solo de superficie','El voxel solo existe en formato STL','No hay diferencia real'], correct:1, exp:'El pixel describe un punto de una imagen plana; el voxel describe un punto dentro de un volumen 3D, con un valor de densidad asociado.'},
+  {q:'Un voxel "isotrópico" significa que…', opts:['Tiene la misma dimensión en X, Y y Z','Solo aparece en equipos médicos, nunca dentales','No tiene valor de densidad','Se usa exclusivamente para mallas'], correct:0, exp:'La isotropía garantiza que la resolución sea igual de precisa en cualquier plano de reconstrucción (axial, sagital, coronal).'},
+  {q:'¿Cuál es el formato estándar universal para transportar datos de un CBCT?', opts:['STL','DICOM','OBJ','PLY'], correct:1, exp:'DICOM incluye no solo la imagen, sino los metadatos de calibración (tamaño real de voxel, orientación) necesarios para que las mediciones sean confiables.'},
+  {q:'Según el principio ALARA aplicado al FOV, ¿qué se recomienda?', opts:['Usar siempre el FOV más grande disponible','Elegir el FOV más pequeño que responda la pregunta clínica','El FOV no afecta la dosis de radiación','Usar solo equipos de FOV fijo'], correct:1, exp:'Un FOV más pequeño reduce el volumen irradiado; se elige el mínimo necesario para responder la pregunta clínica específica.'},
+  {q:'¿Cómo se obtiene un STL de hueso a partir de un CBCT?', opts:['El equipo lo exporta directamente sin procesar','Segmentando el volumen por umbral de densidad y triangulando esa frontera','Convirtiendo el DICOM a PLY automáticamente','No es posible obtener una malla desde un volumen'], correct:1, exp:'La segmentación selecciona los voxeles por encima de un umbral de densidad; luego se triangula esa frontera para generar la malla de superficie, igual que en el flujo de mallas.'}
+];
+(function(){
+  const container = document.getElementById('quiz-container');
+  const scoreBox = document.getElementById('quiz-score');
+  let score=0, answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div');
+    block.className='q-block';
+    const h3=document.createElement('h3');
+    h3.textContent=`${qi+1}. ${item.q}`;
+    block.appendChild(h3);
+    const explain=document.createElement('div');
+    explain.className='explain';
+    explain.innerHTML=item.exp;
+    item.opts.forEach((optText,oi)=>{
+      const btn=document.createElement('button');
+      btn.className='opt';
+      btn.textContent=optText;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){ btn.classList.add('correct'); score++; }
+        else { btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct'); }
+        explain.classList.add('show');
+        answered++;
+        if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain);
+    container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML = `<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--text-dim); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    document.getElementById('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
