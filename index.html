@@ -16,13 +16,14 @@
     --text-faint:#54626B;
     --cyan:#5EEAD4;
     --amber:#E8A659;
+    --blue:#6EA8FE;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; min-height:100vh;}
   .wrap{max-width:920px; margin:0 auto; padding:56px 22px 90px;}
 
   .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); display:flex; align-items:center; gap:8px;}
-  .eyebrow::before{content:''; width:7px; height:7px; background:linear-gradient(135deg,var(--cyan),var(--amber)); border-radius:2px;}
+  .eyebrow::before{content:''; width:7px; height:7px; background:linear-gradient(135deg,var(--cyan),var(--blue),var(--amber)); border-radius:2px;}
   h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(30px,5vw,46px); letter-spacing:-.01em; margin-top:12px; line-height:1.06;}
   .sub{color:var(--text-dim); font-size:15.5px; margin-top:14px; max-width:600px; line-height:1.6;}
 
@@ -43,6 +44,7 @@
 
   .card.mallas{--accent:var(--cyan);}
   .card.voxeles{--accent:var(--amber);}
+  .card.escaneo{--accent:var(--blue);}
 
   .empty{margin-top:14px; border:1px dashed var(--line); border-radius:14px; padding:20px 22px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:12.5px; text-align:center;}
 
@@ -72,6 +74,16 @@
         <h2>Voxeles y formatos volumétricos</h2>
         <p>Tamaño de voxel, isotropía, FOV, formatos DICOM y aplicaciones clínicas del CBCT.</p>
         <span class="tag">Volumen · CBCT</span>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="card escaneo" href="escaneo-cadcam.html">
+      <div class="idx">03</div>
+      <div class="info">
+        <h2>De análogo a digital: métodos de escaneo</h2>
+        <p>Bases físicas de la triangulación óptica, trasfondo histórico y aplicaciones clínicas de la digitalización dental.</p>
+        <span class="tag">Captura · fundamentos</span>
       </div>
       <div class="arrow">→</div>
     </a>
