@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>De Análogo a Digital: Métodos de Escaneo en Odontología</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12;
+    --panel:#111620;
+    --panel2:#161D29;
+    --line:#232C3A;
+    --blue:#6EA8FE;
+    --blue-dim:#4B82D9;
+    --red:#F2545B;
+    --text:#E8EDF3;
+    --text-dim:#8C9AAB;
+    --text-faint:#576273;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh;}
+  .app{max-width:1100px; margin:0 auto; padding:28px 20px 80px;}
+
+  header.top{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--blue-dim); display:flex; align-items:center; gap:8px;}
+  .eyebrow::before{content:''; width:7px; height:7px; background:var(--blue); border-radius:50%; box-shadow:0 0 8px var(--blue);}
+  h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(26px,4vw,40px); letter-spacing:-.01em; margin-top:10px; line-height:1.08;}
+  h1 span{color:var(--blue);}
+  .sub{color:var(--text-dim); font-size:15px; margin-top:10px; max-width:660px; line-height:1.5;}
+
+  nav.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:26px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; background:transparent; border:1px solid var(--line); color:var(--text-dim); padding:9px 14px; border-radius:7px; cursor:pointer; white-space:nowrap; transition:all .15s ease;}
+  nav.tabs button .n{color:var(--text-faint); margin-right:7px;}
+  nav.tabs button:hover{border-color:var(--blue-dim); color:var(--text);}
+  nav.tabs button.active{background:var(--blue); border-color:var(--blue); color:#061229; font-weight:700;}
+  nav.tabs button.active .n{color:#061229;}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:'Space Grotesk',sans-serif; font-size:clamp(20px,3vw,28px); font-weight:600; margin-bottom:14px; letter-spacing:-.01em;}
+  h3{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; margin-bottom:8px; color:var(--text);}
+  p{color:var(--text-dim); line-height:1.65; font-size:14.5px; margin-bottom:12px;}
+  p strong{color:var(--text); font-weight:600;}
+  .lead{color:var(--text); font-size:16px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid4{grid-template-columns:1fr 1fr;}}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px;}
+  .viewport{background:radial-gradient(ellipse at 50% 15%,#131a26,#0A0D12); border:1px solid var(--line); border-radius:12px; padding:16px; position:relative;}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:100px; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:10px 12px;}
+  .stat .num{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:17px; color:var(--blue);}
+  .stat .lab{font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+  .stat.warn .num{color:var(--red);}
+
+  .ctrl-row{display:flex; align-items:center; gap:16px; margin-top:14px; flex-wrap:wrap;}
+  .ctrl-row label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:8px;}
+  input[type=range]{accent-color:var(--blue); width:150px;}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:18px; color:var(--text-dim); font-size:14px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'▸'; position:absolute; left:0; color:var(--blue-dim);}
+
+  .callout{border:1px dashed var(--blue-dim); border-radius:10px; padding:14px 16px; background:rgba(110,168,254,.06); margin-top:16px;}
+  .callout p{color:var(--text); font-size:13.5px; margin:0;}
+  .callout .lab{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--blue); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  /* timeline */
+  .timeline-track{display:flex; gap:4px; overflow-x:auto; padding:10px 0 18px; margin-bottom:6px;}
+  .tl-dot{flex:none; width:120px; text-align:center; cursor:pointer; padding:10px 6px; border-radius:10px; border:1px solid transparent; transition:all .15s;}
+  .tl-dot .yr{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--blue-dim); font-weight:700;}
+  .tl-dot .ttl{font-size:11.5px; color:var(--text-faint); margin-top:5px; line-height:1.3;}
+  .tl-dot::before{content:''; display:block; width:9px; height:9px; border-radius:50%; background:var(--line); margin:0 auto 8px; transition:all .15s;}
+  .tl-dot:hover{background:var(--panel);}
+  .tl-dot.active{background:var(--panel2); border-color:var(--blue-dim);}
+  .tl-dot.active::before{background:var(--blue); box-shadow:0 0 8px var(--blue);}
+  .tl-dot.active .ttl{color:var(--text);}
+  .tl-detail{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px;}
+  .tl-detail .yr-big{font-family:'JetBrains Mono',monospace; color:var(--blue); font-size:13px; margin-bottom:6px;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+  table.formats th{font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); text-align:left; padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.formats td{padding:9px 10px; border-bottom:1px solid var(--line); color:var(--text-dim); vertical-align:top;}
+  table.formats td:first-child{color:var(--blue); font-family:'JetBrains Mono',monospace; font-weight:700; white-space:nowrap;}
+
+  .app-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;}
+  .app-card .idx{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--blue); margin-bottom:6px;}
+  .app-card h3{font-size:14.5px;}
+  .app-card p{font-size:13px; margin-bottom:0;}
+
+  .limit-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;}
+  .limit-card h3{font-size:14px; display:flex; align-items:center; gap:8px;}
+  .limit-card h3::before{content:'⚠'; color:var(--red); font-size:13px;}
+  .limit-card p{font-size:13px; margin-bottom:0;}
+
+  .q-block{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:14px;}
+  .q-block h3{font-size:14.5px; margin-bottom:12px; color:var(--text);}
+  .opt{display:block; width:100%; text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--text-dim); padding:11px 14px; border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:13.5px; transition:all .15s;}
+  .opt:hover{border-color:var(--blue-dim);}
+  .opt.correct{border-color:var(--blue); background:rgba(110,168,254,.1); color:var(--blue);}
+  .opt.wrong{border-color:var(--red); background:rgba(242,84,91,.1); color:var(--red);}
+  .opt[disabled]{cursor:default;}
+  .explain{font-size:12.5px; color:var(--text-faint); margin-top:8px; display:none; line-height:1.5; padding-top:8px; border-top:1px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:24px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; font-family:'JetBrains Mono',monospace;}
+  .score-box .big{font-size:34px; font-weight:700; color:var(--blue);}
+  .reset-btn{font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--blue); color:#061229; border:none; padding:9px 18px; border-radius:8px; cursor:pointer; font-weight:700; margin-top:12px;}
+
+  footer{margin-top:50px; padding-top:18px; border-top:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">CAD / CAM · Captura digital</div>
+    <h1>De análogo a <span>digital</span></h1>
+    <p class="sub">Antes de que exista una malla o un volumen de voxeles, alguien tuvo que resolver un problema físico: convertir una boca real en coordenadas. Esta clase revisa cómo funciona ese salto y cómo llegamos hasta aquí.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. INTRO -->
+    <section class="panel" data-name="Intro" id="sec-intro">
+      <div class="grid2">
+        <div>
+          <div class="kicker">01 · Punto de partida</div>
+          <h2>¿Qué significa "digitalizar" una boca?</h2>
+          <p class="lead">Durante casi todo el siglo XX, el único registro de una boca era físico: una impresión de alginato o silicona, vaciada en yeso. Digitalizar significa capturar esa misma geometría —o directamente la boca del paciente— como <strong>coordenadas numéricas</strong> que una computadora puede almacenar, medir y enviar a fabricar.</p>
+          <p>Las dos clases anteriores partieron de un archivo ya digital: una malla o un volumen de voxeles. Esta clase responde la pregunta que queda pendiente: <strong>¿de dónde salen esos números?</strong> La respuesta cambia según la tecnología, pero el objetivo siempre es el mismo: convertir luz reflejada (o radiación atravesada) en posiciones X, Y, Z.</p>
+          <ul class="clean">
+            <li>Todo escáner resuelve el mismo problema: <strong>medir distancia sin tocar</strong> (o, en el escaneo de contacto histórico, tocando físicamente).</li>
+            <li>La física detrás puede ser óptica (triangulación, confocal, fotogrametría) o radiográfica (CBCT).</li>
+            <li>El método usado determina la precisión, la velocidad y las limitaciones clínicas del escáner.</li>
+          </ul>
+        </div>
+        <div class="viewport">
+          <span class="tag">Del molde físico al archivo</span>
+          <svg id="intro-svg" viewBox="0 0 400 320"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. HISTORIA -->
+    <section class="panel" data-name="Trasfondo histórico" id="sec-historia">
+      <div class="kicker">02 · Línea de tiempo</div>
+      <h2>De la impresión de yeso al escaneo intraoral</h2>
+      <p class="lead">Selecciona un hito para ver el detalle. La digitalización dental no fue un solo invento: fue una acumulación de soluciones a lo largo de cinco décadas.</p>
+
+      <div class="timeline-track" id="timeline-track"></div>
+      <div class="tl-detail" id="timeline-detail"></div>
+    </section>
+
+    <!-- 3. PRINCIPIOS FISICOS -->
+    <section class="panel" data-name="Bases físicas" id="sec-fisica">
+      <div class="kicker">03 · Laboratorio interactivo</div>
+      <h2>Triangulación óptica: cómo se calcula un punto en 3D</h2>
+      <p class="lead">La mayoría de escáneres intraorales miden profundidad por <strong>triangulación</strong>: un emisor proyecta luz sobre la superficie, una cámara la observa desde un ángulo distinto, y el sistema calcula la posición del punto resolviendo el triángulo que forman emisor, punto y cámara. Mueve los controles y observa cómo cambia la medición.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Simulador de triangulación</span>
+          <svg id="tri-svg" viewBox="0 0 460 300"></svg>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ctrl-row">
+              <label>Distancia base (emisor–cámara)
+                <input type="range" id="tri-baseline" min="60" max="260" value="140" step="2">
+              </label>
+              <label>Posición del punto medido
+                <input type="range" id="tri-point" min="0" max="100" value="50" step="1">
+              </label>
+            </div>
+            <div class="stat-row">
+              <div class="stat"><div class="num" id="tri-angle">0°</div><div class="lab">Ángulo de triangulación</div></div>
+              <div class="stat" id="tri-status-stat"><div class="num" id="tri-status">Visible</div><div class="lab">Estado del punto</div></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px;">
+            <h3 id="tri-read-title">Lectura</h3>
+            <p id="tri-read-text" style="margin-bottom:0;">Un ángulo de triangulación mayor da más sensibilidad para detectar cambios de profundidad. Pero si el punto queda detrás de una cúspide respecto a la cámara, el rayo se bloquea y esa zona queda sin capturar —el origen de los huecos que vimos en la clase de mallas.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider" style="height:1px;background:var(--line);margin:30px 0;"></div>
+
+      <h3 style="margin-bottom:14px;">Otros principios de captura</h3>
+      <div class="grid3">
+        <div class="card">
+          <div class="viewport" style="margin-bottom:10px;"><svg viewBox="0 0 200 150" id="confocal-svg"></svg></div>
+          <h3>Confocal de barrido paralelo</h3>
+          <p style="margin-bottom:0;">Un lente oscila en el eje vertical; el sistema detecta en qué posición la luz reflejada vuelve perfectamente enfocada, y esa posición equivale a la profundidad exacta de ese punto.</p>
+        </div>
+        <div class="card">
+          <div class="viewport" style="margin-bottom:10px;"><svg viewBox="0 0 200 150" id="photo-svg"></svg></div>
+          <h3>Fotogrametría / structure-from-motion</h3>
+          <p style="margin-bottom:0;">Se toman muchas fotografías 2D desde ángulos distintos; el software encuentra puntos en común entre imágenes y reconstruye su posición 3D por triangulación entre tomas.</p>
+        </div>
+        <div class="card">
+          <div class="viewport" style="margin-bottom:10px;"><svg viewBox="0 0 200 150" id="volumetric-svg"></svg></div>
+          <h3>Captura volumétrica (CBCT)</h3>
+          <p style="margin-bottom:0;">No mide superficie reflejada, sino atenuación de radiación a través del volumen —el mismo principio que vimos en la clase de voxeles, aquí como contraste frente a los métodos ópticos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. COMPARACION TECNOLOGIAS -->
+    <section class="panel" data-name="Comparación" id="sec-comparacion">
+      <div class="kicker">04 · Métodos ópticos intraorales</div>
+      <h2>Comparación de tecnologías de escaneo</h2>
+      <p class="lead">Distintos fabricantes de escáneres intraorales implementan variantes de estos principios; ningún método es universalmente superior, cada uno negocia precisión, velocidad y costo de forma distinta.</p>
+
+      <div class="card">
+        <table class="formats">
+          <tr><th>Método</th><th>Principio</th><th>Uso típico</th><th>Limitación principal</th></tr>
+          <tr><td>Triangulación activa</td><td>Proyecta un patrón conocido (láser o luz estructurada) y calcula profundidad por geometría del reflejo</td><td>La mayoría de escáneres intraorales y de laboratorio actuales</td><td>Sensible a superficies muy reflejantes o translúcidas</td></tr>
+          <tr><td>Confocal paralelo</td><td>Mide el plano focal donde la luz reflejada regresa nítida</td><td>Escáneres intraorales de alta gama</td><td>Puede requerir más pasadas en zonas profundas</td></tr>
+          <tr><td>Fotogrametría</td><td>Reconstruye geometría a partir del traslape entre múltiples fotografías</td><td>Escaneo facial 3D, algunos flujos de laboratorio</td><td>Depende de buena iluminación y textura visible</td></tr>
+          <tr><td>Contacto (histórico)</td><td>Un palpador físico recorre la superficie del modelo</td><td>Primeros digitalizadores de laboratorio, hoy obsoleto</td><td>Muy lento; solo funciona sobre modelos rígidos, no en boca</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5. ANALOGICO VS DIGITAL -->
+    <section class="panel" data-name="Analógico vs digital" id="sec-avsd">
+      <div class="kicker">05 · El cambio de flujo de trabajo</div>
+      <h2>Impresión convencional vs. escaneo digital</h2>
+      <p class="lead">La discusión clínica no es solo "cuál es más preciso": cada flujo trae compromisos distintos de tiempo, comodidad y costo.</p>
+
+      <div class="card">
+        <table class="formats">
+          <tr><th>Aspecto</th><th>Impresión convencional</th><th>Escaneo digital</th></tr>
+          <tr><td>Comodidad</td><td>Material en boca; puede generar reflejo nauseoso</td><td>Sin material; generalmente mejor tolerado</td></tr>
+          <tr><td>Tiempo clínico</td><td>Tiempo de fraguado más envío físico al laboratorio</td><td>Captura en minutos; envío digital inmediato</td></tr>
+          <tr><td>Riesgo de distorsión</td><td>Contracción/expansión del material, manejo del vaciado</td><td>Ninguno una vez capturado el archivo</td></tr>
+          <tr><td>Almacenamiento</td><td>Modelos físicos: ocupan espacio, se pueden dañar</td><td>Archivo digital permanente y respaldable</td></tr>
+          <tr><td>Curva de aprendizaje</td><td>Técnica ampliamente establecida</td><td>Requiere entrenamiento en el manejo del escáner</td></tr>
+          <tr><td>Costo inicial</td><td>Bajo</td><td>Alto en el equipo; puede reducir costo por caso a largo plazo</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. APLICACIONES CLINICAS -->
+    <section class="panel" data-name="Aplicaciones clínicas" id="sec-aplicaciones">
+      <div class="kicker">06 · Dónde se usa el flujo digital</div>
+      <h2>Aplicaciones clínicas del escaneo digital</h2>
+      <div class="grid4" id="apps-grid"></div>
+    </section>
+
+    <!-- 7. LIMITACIONES -->
+    <section class="panel" data-name="Limitaciones" id="sec-limitaciones">
+      <div class="kicker">07 · Lo que el escáner óptico no resuelve</div>
+      <h2>Limitaciones del escaneo óptico</h2>
+      <p class="lead">Estas limitaciones son precisamente el origen de los errores de malla que vimos antes: huecos, ruido y zonas incompletas casi siempre nacen aquí, no en el software.</p>
+      <div class="grid2" id="limits-grid"></div>
+    </section>
+
+    <!-- 8. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">08 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>De análogo a digital · CAD/CAM dental</span>
+    <span>Métodos de escaneo y captura</span>
+  </footer>
+
+</div>
+
+<script>
+/* ============ TABS ============ */
+const sections = [...document.querySelectorAll('section.panel')];
+const tabsNav = document.getElementById('tabs');
+sections.forEach((s,i)=>{
+  const b = document.createElement('button');
+  b.innerHTML = `<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click', ()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active');
+tabsNav.children[0].classList.add('active');
+
+const SVGNS='http://www.w3.org/2000/svg';
+const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+
+/* ============ INTRO ILLUSTRATION ============ */
+(function(){
+  const svg = document.getElementById('intro-svg');
+  svg.setAttribute('viewBox','0 0 400 320');
+  // left: physical mold silhouette
+  svg.appendChild(g('rect',{x:40,y:190,width:110,height:70,rx:8,fill:'rgba(140,154,171,0.14)',stroke:'var(--line)'}));
+  svg.appendChild(g('path',{d:'M60,190 Q75,150 95,190 Q110,150 130,190 Z',fill:'rgba(140,154,171,0.22)',stroke:'#8C9AAB','stroke-width':1.2}));
+  svg.appendChild(g('text',{x:95,y:280,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#576273'})).textContent='Impresión física';
+  // arrow
+  svg.appendChild(g('line',{x1:165,y1:220,x2:245,y2:220,stroke:'var(--blue)','stroke-width':2}));
+  svg.appendChild(g('polygon',{points:'245,214 259,220 245,226',fill:'var(--blue)'}));
+  svg.appendChild(g('text',{x:205,y:205,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'10','fill':'var(--blue)'})).textContent='captura';
+  // right: point cloud / digital coordinates
+  const rng = (a)=>a; // seeded-ish pseudo random via sin
+  for(let i=0;i<70;i++){
+    const a = i*2.399;
+    const rad = 8+ (i%13)*2.6;
+    const cx = 315 + Math.cos(a)*rad*0.9;
+    const cy = 220 + Math.sin(a*1.3)*rad*0.55 - (i%9);
+    svg.appendChild(g('circle',{cx,cy,r:1.6,fill:'var(--blue)','fill-opacity':0.85}));
+  }
+  svg.appendChild(g('rect',{x:270,y:170,width:100,height:100,rx:10,fill:'none',stroke:'var(--line)','stroke-dasharray':'3,3'}));
+  svg.appendChild(g('text',{x:320,y:295,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#576273'})).textContent='Nube de puntos (X,Y,Z)';
+})();
+
+/* ============ TIMELINE ============ */
+const MILESTONES = [
+  {yr:'Antes de 1970', t:'Impresión y vaciado', d:'Toda captura es física: alginato o silicona sobre la boca, vaciado en yeso. No existe ningún registro digital de la geometría dental.'},
+  {yr:'1971–1973', t:'Concepto de CAD/CAM dental', d:'François Duret propone por primera vez, en su tesis doctoral, digitalizar la boca con una cámara óptica y fabricar la restauración con máquinas controladas por computadora.'},
+  {yr:'1985', t:'CEREC 1', d:'Werner Mörmann y Marco Brandestini, en la Universidad de Zúrich, presentan el primer sistema chairside: escanea, diseña y fresa una restauración cerámica en la misma cita.'},
+  {yr:'Década de 1990', t:'Escáneres de laboratorio', d:'Se popularizan los primeros digitalizadores que escanean modelos de yeso ya vaciados —el paso intermedio antes del escaneo intraoral directo.'},
+  {yr:'1996', t:'Primer CBCT dental', d:'Llega al mercado el primer equipo de tomografía de haz cónico diseñado específicamente para uso dental, abriendo la rama volumétrica de la digitalización.'},
+  {yr:'Años 2000', t:'Escaneo intraoral óptico directo', d:'Aparecen los primeros escáneres capaces de capturar la boca directamente por video, sin necesidad de imprimir primero un modelo físico.'},
+  {yr:'Década de 2010', t:'Escaneo sin polvo y mayor velocidad', d:'Los escáneres intraorales dejan de requerir polvo de contraste, capturan en color y a mayor velocidad; el flujo digital empieza a ser rutina clínica.'},
+  {yr:'Actualidad', t:'Flujo digital integrado', d:'Escaneo asistido por inteligencia artificial, expedientes completamente digitales, e intercambio de archivos en la nube entre clínica, laboratorio y especialistas.'}
+];
+(function(){
+  const track = document.getElementById('timeline-track');
+  const detail = document.getElementById('timeline-detail');
+  function show(idx){
+    [...track.children].forEach((c,i)=>c.classList.toggle('active', i===idx));
+    const m = MILESTONES[idx];
+    detail.innerHTML = `<div class="yr-big">${m.yr}</div><h3>${m.t}</h3><p style="margin-bottom:0;">${m.d}</p>`;
+  }
+  MILESTONES.forEach((m,i)=>{
+    const d = document.createElement('div');
+    d.className='tl-dot';
+    d.innerHTML = `<div class="yr">${m.yr}</div><div class="ttl">${m.t}</div>`;
+    d.addEventListener('click',()=>show(i));
+    track.appendChild(d);
+  });
+  show(0);
+})();
+
+/* ============ TRIANGULATION SIMULATOR ============ */
+(function(){
+  const svg = document.getElementById('tri-svg');
+  const baselineSlider = document.getElementById('tri-baseline');
+  const pointSlider = document.getElementById('tri-point');
+  const angleOut = document.getElementById('tri-angle');
+  const statusOut = document.getElementById('tri-status');
+  const statusStat = document.getElementById('tri-status-stat');
+  const readTitle = document.getElementById('tri-read-title');
+  const readText = document.getElementById('tri-read-text');
+
+  const W=460,H=300, baseY=232, emitY=52, emitX=90;
+  const bumpCx = W*0.5, bumpSigma=48, bumpHeight=95;
+
+  function surfaceH(x){ return baseY - bumpHeight*Math.exp(-((x-bumpCx)**2)/(2*bumpSigma*bumpSigma)); }
+
+  function occluded(p1,p2){
+    const steps=24;
+    const x0=Math.min(p1.x,p2.x), x1=Math.max(p1.x,p2.x);
+    if(x1-x0 < 4) return false;
+    for(let i=1;i<steps;i++){
+      const t=i/steps;
+      const x = p1.x + (p2.x-p1.x)*t;
+      const y = p1.y + (p2.y-p1.y)*t;
+      if(x<x0+1||x>x1-1) continue;
+      if(y > surfaceH(x)+1.5) return true;
+    }
+    return false;
+  }
+
+  function update(){
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    const baseline = parseInt(baselineSlider.value,10);
+    const camX = emitX + baseline, camY = emitY;
+    const p = parseInt(pointSlider.value,10)/100;
+    const px = 30 + p*(W-60);
+    const py = surfaceH(px);
+
+    // surface silhouette
+    let d = `M 10,${H-8} L 10,${surfaceH(10).toFixed(1)} `;
+    for(let x=10;x<=W-10;x+=8){ d+= `L ${x},${surfaceH(x).toFixed(1)} `; }
+    d += `L ${W-10},${H-8} Z`;
+    svg.appendChild(g('path',{d, fill:'rgba(110,168,254,0.10)', stroke:'rgba(110,168,254,0.4)','stroke-width':1.2}));
+
+    const point={x:px,y:py}, emit={x:emitX,y:emitY}, cam={x:camX,y:camY};
+    const emVisible = !occluded(emit,point);
+    const camVisible = !occluded(point,cam);
+    const visible = emVisible && camVisible;
+
+    // baseline dashed
+    svg.appendChild(g('line',{x1:emit.x,y1:emit.y,x2:cam.x,y2:cam.y, stroke:'#576273','stroke-width':1,'stroke-dasharray':'3,3'}));
+    svg.appendChild(g('text',{x:(emit.x+cam.x)/2, y:emit.y-10, 'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'10','fill':'#8C9AAB'})).textContent = 'base';
+
+    // rays
+    svg.appendChild(g('line',{x1:emit.x,y1:emit.y,x2:point.x,y2:point.y, stroke: emVisible?'#6EA8FE':'var(--red)','stroke-width':1.8, 'stroke-dasharray': emVisible?'0':'4,3'}));
+    svg.appendChild(g('line',{x1:point.x,y1:point.y,x2:cam.x,y2:cam.y, stroke: camVisible?'#F5C56E':'var(--red)','stroke-width':1.8, 'stroke-dasharray': camVisible?'0':'4,3'}));
+
+    // emitter icon
+    svg.appendChild(g('circle',{cx:emit.x,cy:emit.y,r:7,fill:'#6EA8FE'}));
+    svg.appendChild(g('text',{x:emit.x,y:emit.y-14,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'10','fill':'#6EA8FE'})).textContent='Emisor';
+    // camera icon
+    svg.appendChild(g('rect',{x:cam.x-9,y:cam.y-6,width:18,height:12,rx:2,fill:'#F5C56E'}));
+    svg.appendChild(g('text',{x:cam.x,y:cam.y-14,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'10','fill':'#F5C56E'})).textContent='Cámara';
+
+    // point marker
+    svg.appendChild(g('circle',{cx:point.x,cy:point.y,r:5, fill: visible? 'var(--text)':'var(--red)', stroke:'#0A0D12','stroke-width':1.5}));
+
+    // angle computation at point
+    const v1 = {x:emit.x-point.x, y:emit.y-point.y};
+    const v2 = {x:cam.x-point.x, y:cam.y-point.y};
+    const dot = v1.x*v2.x+v1.y*v2.y;
+    const m1 = Math.hypot(v1.x,v1.y), m2=Math.hypot(v2.x,v2.y);
+    let angleDeg = Math.acos(Math.max(-1,Math.min(1,dot/(m1*m2)))) * 180/Math.PI;
+
+    angleOut.textContent = angleDeg.toFixed(0)+'°';
+    statusOut.textContent = visible ? 'Visible' : 'Oculto';
+    statusStat.classList.toggle('warn', !visible);
+
+    if(!visible){
+      readTitle.textContent = 'Punto no capturable';
+      readText.textContent = 'Con este ángulo, la superficie de la cúspide bloquea la línea de visión entre el punto y ' + (!camVisible?'la cámara':'el emisor') + '. En un escaneo real, esta zona queda como un hueco hasta tomar la superficie desde otro ángulo.';
+    } else if(angleDeg < 12){
+      readTitle.textContent = 'Sensibilidad de profundidad baja';
+      readText.textContent = 'Con una base tan corta (o un punto casi alineado con emisor y cámara), pequeños cambios de profundidad casi no mueven el punto detectado en la cámara: la medición pierde precisión.';
+    } else if(angleDeg < 28){
+      readTitle.textContent = 'Sensibilidad de profundidad moderada';
+      readText.textContent = 'Un ángulo intermedio da una medición razonable, aunque no es el punto más sensible posible para detectar variaciones finas de profundidad en esta zona.';
+    } else {
+      readTitle.textContent = 'Buena sensibilidad de profundidad';
+      readText.textContent = 'Con este ángulo, un pequeño cambio de profundidad produce un desplazamiento notable del punto visto por la cámara: la triangulación es más precisa aquí.';
+    }
+  }
+  baselineSlider.addEventListener('input', update);
+  pointSlider.addEventListener('input', update);
+  update();
+})();
+
+/* ============ MINI DIAGRAMS: confocal / photogrammetry / volumetric ============ */
+(function(){
+  const svg = document.getElementById('confocal-svg');
+  svg.setAttribute('viewBox','0 0 200 150');
+  svg.appendChild(g('ellipse',{cx:100,cy:35,rx:26,ry:10,fill:'rgba(110,168,254,.18)',stroke:'#6EA8FE','stroke-width':1.3}));
+  svg.appendChild(g('line',{x1:100,y1:15,x2:100,y2:55,stroke:'#6EA8FE','stroke-width':1.6}));
+  svg.appendChild(g('polygon',{points:'95,18 105,18 100,10',fill:'#6EA8FE'}));
+  svg.appendChild(g('polygon',{points:'95,52 105,52 100,60',fill:'#6EA8FE'}));
+  svg.appendChild(g('line',{x1:100,y1:55,x2:100,y2:105,stroke:'#576273','stroke-width':1,'stroke-dasharray':'2,3'}));
+  svg.appendChild(g('path',{d:'M40,120 Q100,90 160,120 L160,135 L40,135 Z',fill:'rgba(110,168,254,.12)',stroke:'#6EA8FE','stroke-width':1}));
+  svg.appendChild(g('circle',{cx:100,cy:105,r:3.5,fill:'#F5C56E'}));
+})();
+(function(){
+  const svg = document.getElementById('photo-svg');
+  svg.setAttribute('viewBox','0 0 200 150');
+  svg.appendChild(g('circle',{cx:100,cy:78,r:20,fill:'rgba(110,168,254,.18)',stroke:'#6EA8FE','stroke-width':1.3}));
+  const camPos = [[40,30],[160,30],[30,120],[170,120],[100,20]];
+  camPos.forEach(([cx,cy])=>{
+    svg.appendChild(g('line',{x1:cx,y1:cy,x2:100,y2:78,stroke:'#576273','stroke-width':1,'stroke-dasharray':'2,3'}));
+    svg.appendChild(g('rect',{x:cx-7,y:cy-5,width:14,height:10,rx:2,fill:'#F5C56E'}));
+  });
+})();
+(function(){
+  const svg = document.getElementById('volumetric-svg');
+  svg.setAttribute('viewBox','0 0 200 150');
+  for(let i=0;i<5;i++){
+    svg.appendChild(g('rect',{x:55+i*4,y:35+i*3,width:70,height:70,rx:4,fill:'none',stroke:`rgba(110,168,254,${0.15+i*0.12})`,'stroke-width':1.2}));
+  }
+  svg.appendChild(g('line',{x1:20,y1:75,x2:180,y2:75,stroke:'#F5C56E','stroke-width':1.6,'stroke-dasharray':'4,3'}));
+  svg.appendChild(g('circle',{cx:20,cy:75,r:4,fill:'#F5C56E'}));
+  svg.appendChild(g('circle',{cx:180,cy:75,r:4,fill:'#F5C56E'}));
+})();
+
+/* ============ APLICACIONES CLINICAS ============ */
+const APPS = [
+  {t:'Prótesis fija', d:'Escaneo directo de preparaciones para coronas, puentes y carillas, con impresión digital que sustituye al alginato/silicona.'},
+  {t:'Ortodoncia', d:'Captura de arcadas completas para el diseño de alineadores transparentes y aparatología a medida.'},
+  {t:'Implantología', d:'Escaneo de la arcada para diseño de guías quirúrgicas y planeación protésica sobre implantes.'},
+  {t:'Restauraciones chairside', d:'Flujo completo en una sola cita: escaneo, diseño y fresado de la restauración sin enviar nada a laboratorio.'}
+];
+(function(){
+  const grid = document.getElementById('apps-grid');
+  APPS.forEach((a,i)=>{
+    const el = document.createElement('div');
+    el.className='app-card';
+    el.innerHTML = `<div class="idx">0${i+1}</div><h3>${a.t}</h3><p>${a.d}</p>`;
+    grid.appendChild(el);
+  });
+})();
+
+/* ============ LIMITACIONES ============ */
+const LIMITS = [
+  {t:'Reflectividad y translucidez', d:'Superficies muy brillantes (saliva, esmalte húmedo) o translúcidas dispersan la luz de forma irregular y confunden el cálculo de triangulación.'},
+  {t:'Sangre y saliva', d:'Cualquier líquido sobre el campo de escaneo interrumpe la captura óptica y puede generar ruido o zonas sin datos.'},
+  {t:'Movimiento', d:'Un movimiento del paciente o de la mano durante la captura genera desalineación entre tomas consecutivas, visible como escalones o duplicidad en la malla resultante.'},
+  {t:'Campo de visión y línea de vista', d:'El escáner solo captura lo que "ve" directamente; zonas subgingivales o muy anguladas quedan fuera sin retracción adecuada de tejido.'}
+];
+(function(){
+  const grid = document.getElementById('limits-grid');
+  LIMITS.forEach(l=>{
+    const el = document.createElement('div');
+    el.className='limit-card';
+    el.innerHTML = `<h3>${l.t}</h3><p>${l.d}</p>`;
+    grid.appendChild(el);
+  });
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ = [
+  {q:'¿Qué mide fundamentalmente un escáner por triangulación?', opts:['La temperatura de la superficie','El ángulo con el que la luz reflejada llega a la cámara, respecto a una base conocida','El color exacto del diente','La densidad interna del diente'], correct:1, exp:'Conociendo la distancia entre emisor y cámara (la base) y el ángulo con que la cámara recibe la luz reflejada, el sistema resuelve el triángulo y calcula la posición del punto.'},
+  {q:'¿Quién presentó el primer sistema chairside de escaneo, diseño y fresado en la misma cita?', opts:['François Duret','Mörmann y Brandestini con CEREC 1','Un laboratorio dental estadounidense','La compañía que introdujo el primer CBCT'], correct:1, exp:'CEREC 1, presentado en 1985 por Werner Mörmann y Marco Brandestini en la Universidad de Zúrich, fue el primer sistema capaz de escanear, diseñar y fresar una restauración en la misma visita.'},
+  {q:'En el simulador de triangulación, ¿por qué un punto puede quedar "oculto"?', opts:['Porque el diente tiene caries','Porque la superficie (por ejemplo una cúspide) bloquea la línea de visión entre el punto y el emisor o la cámara','Porque la base es demasiado corta siempre','Porque el escáner se apagó'], correct:1, exp:'Si la geometría de la superficie se interpone en el trayecto óptico entre el punto y el emisor o la cámara, ese punto no puede capturarse desde ese ángulo —el origen físico de los huecos en una malla.'},
+  {q:'¿Cuál es una ventaja clara del escaneo digital sobre la impresión convencional?', opts:['Es inmune a la saliva y la sangre','No requiere ningún entrenamiento','Elimina el riesgo de distorsión del material de impresión al vaciar el modelo','Siempre es más barato desde el primer caso'], correct:2, exp:'Al no depender de un material que se contrae o expande durante el fraguado y vaciado, el archivo digital evita esa fuente específica de distorsión.'},
+  {q:'¿En qué se diferencia la captura del CBCT respecto a los métodos ópticos vistos en esta clase?', opts:['El CBCT también usa triangulación de luz','El CBCT mide atenuación de radiación a través de todo el volumen, no luz reflejada en la superficie','El CBCT es un método de contacto','No hay ninguna diferencia real'], correct:1, exp:'Los métodos ópticos capturan solo la superficie visible reflejando luz; el CBCT atraviesa el volumen completo con radiación y mide cuánto se atenúa en cada punto, generando datos internos, no solo de superficie.'}
+];
+(function(){
+  const container = document.getElementById('quiz-container');
+  const scoreBox = document.getElementById('quiz-score');
+  let score=0, answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div');
+    block.className='q-block';
+    const h3=document.createElement('h3');
+    h3.textContent=`${qi+1}. ${item.q}`;
+    block.appendChild(h3);
+    const explain=document.createElement('div');
+    explain.className='explain';
+    explain.innerHTML=item.exp;
+    item.opts.forEach((optText,oi)=>{
+      const btn=document.createElement('button');
+      btn.className='opt';
+      btn.textContent=optText;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){ btn.classList.add('correct'); score++; }
+        else { btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct'); }
+        explain.classList.add('show');
+        answered++;
+        if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain);
+    container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML = `<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--text-dim); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    document.getElementById('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
