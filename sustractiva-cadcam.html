@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manufactura Sustractiva: Ejes, Fresado Húmedo y Seco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#100C0A;
+    --panel:#1A130F;
+    --panel2:#221A14;
+    --line:#33271F;
+    --rust:#F2703C;
+    --rust-dim:#C9541F;
+    --red:#F2545B;
+    --green:#6BD98C;
+    --text:#F2ECE7;
+    --text-dim:#A99A8D;
+    --text-faint:#69594C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh;}
+  .app{max-width:1100px; margin:0 auto; padding:28px 20px 80px;}
+
+  header.top{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--rust-dim); display:flex; align-items:center; gap:8px;}
+  .eyebrow::before{content:''; width:7px; height:7px; background:var(--rust); border-radius:50%; box-shadow:0 0 8px var(--rust);}
+  h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(26px,4vw,40px); letter-spacing:-.01em; margin-top:10px; line-height:1.08;}
+  h1 span{color:var(--rust);}
+  .sub{color:var(--text-dim); font-size:15px; margin-top:10px; max-width:660px; line-height:1.5;}
+
+  nav.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:26px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; background:transparent; border:1px solid var(--line); color:var(--text-dim); padding:9px 14px; border-radius:7px; cursor:pointer; white-space:nowrap; transition:all .15s ease;}
+  nav.tabs button .n{color:var(--text-faint); margin-right:7px;}
+  nav.tabs button:hover{border-color:var(--rust-dim); color:var(--text);}
+  nav.tabs button.active{background:var(--rust); border-color:var(--rust); color:#2B0F02; font-weight:700;}
+  nav.tabs button.active .n{color:#2B0F02;}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:'Space Grotesk',sans-serif; font-size:clamp(20px,3vw,28px); font-weight:600; margin-bottom:14px; letter-spacing:-.01em;}
+  h3{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; margin-bottom:8px; color:var(--text);}
+  p{color:var(--text-dim); line-height:1.65; font-size:14.5px; margin-bottom:12px;}
+  p strong{color:var(--text); font-weight:600;}
+  .lead{color:var(--text); font-size:16px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid2e{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid2e{grid-template-columns:1fr;}}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px;}
+  .viewport{background:radial-gradient(ellipse at 50% 12%,#241B14,#100C0A); border:1px solid var(--line); border-radius:12px; padding:16px; position:relative;}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:100px; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:10px 12px;}
+  .stat .num{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; color:var(--rust);}
+  .stat .lab{font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+  .stat.ok .num{color:var(--green);}
+  .stat.bad .num{color:var(--red);}
+
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:'JetBrains Mono',monospace; font-size:11.5px; border:1px solid var(--line); background:var(--panel2); color:var(--text-dim); padding:7px 12px; border-radius:20px; cursor:pointer; transition:all .15s;}
+  .chip:hover{color:var(--text); border-color:var(--rust-dim);}
+  .chip.active{background:var(--rust); color:#2B0F02; border-color:var(--rust); font-weight:700;}
+
+  .tick-row{display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); margin-top:4px; padding:0 2px;}
+  .tick-row span{transition:color .15s;}
+  .tick-row span.active{color:var(--rust); font-weight:700;}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:18px; color:var(--text-dim); font-size:14px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'▸'; position:absolute; left:0; color:var(--rust-dim);}
+
+  .callout{border:1px dashed var(--rust-dim); border-radius:10px; padding:14px 16px; background:rgba(242,112,60,.06); margin-top:16px;}
+  .callout p{color:var(--text); font-size:13.5px; margin:0;}
+  .callout .lab{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--rust); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;}
+  table.formats th{font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); text-align:left; padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.formats td{padding:9px 10px; border-bottom:1px solid var(--line); color:var(--text-dim); vertical-align:top;}
+  table.formats td:first-child{color:var(--rust); font-family:'JetBrains Mono',monospace; font-weight:700; white-space:nowrap;}
+
+  .app-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;}
+  .app-card h3{font-size:14.5px;}
+  .app-card p{font-size:13px; margin-bottom:0;}
+
+  .q-block{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:14px;}
+  .q-block h3{font-size:14.5px; margin-bottom:12px; color:var(--text);}
+  .opt{display:block; width:100%; text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--text-dim); padding:11px 14px; border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:13.5px; transition:all .15s;}
+  .opt:hover{border-color:var(--rust-dim);}
+  .opt.correct{border-color:var(--rust); background:rgba(242,112,60,.1); color:var(--rust);}
+  .opt.wrong{border-color:var(--red); background:rgba(242,84,91,.1); color:var(--red);}
+  .opt[disabled]{cursor:default;}
+  .explain{font-size:12.5px; color:var(--text-faint); margin-top:8px; display:none; line-height:1.5; padding-top:8px; border-top:1px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:24px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; font-family:'JetBrains Mono',monospace;}
+  .score-box .big{font-size:34px; font-weight:700; color:var(--rust);}
+  .reset-btn{font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--rust); color:#2B0F02; border:none; padding:9px 18px; border-radius:8px; cursor:pointer; font-weight:700; margin-top:12px;}
+
+  footer{margin-top:50px; padding-top:18px; border-top:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">CAM · Manufactura sustractiva</div>
+    <h1>Manufactura <span>sustractiva</span></h1>
+    <p class="sub">Lo opuesto a la clase anterior: en vez de sumar material capa por capa, se parte de un bloque sólido y se remueve todo lo que sobra hasta llegar a la pieza final.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. INTRO -->
+    <section class="panel" data-name="Intro" id="sec-intro">
+      <div class="grid2">
+        <div>
+          <div class="kicker">01 · Punto de partida</div>
+          <h2>Construir removiendo material</h2>
+          <p class="lead">La manufactura sustractiva —fresado o "milling"— parte de un bloque sólido de material (un disco de zirconia, una pastilla de disilicato, un bloque de PMMA) y usa una fresa rotatoria, guiada por CNC, para remover todo el material que no forma parte de la pieza final.</p>
+          <p>El archivo digital que guía este proceso sigue siendo la misma malla de la primera clase, pero aquí el software CAM no genera imágenes de capas: calcula <strong>trayectorias de corte</strong> —el recorrido exacto que seguirá la fresa alrededor y a través del bloque.</p>
+          <ul class="clean">
+            <li>Punto de partida: un bloque sólido de material ya fabricado industrialmente (más uniforme que una resina fotopolimerizada).</li>
+            <li>Se remueve material —no se agrega—, por lo que hay desperdicio inherente al proceso.</li>
+            <li>Qué tan compleja puede ser la geometría final depende directamente de cuántos <strong>ejes de movimiento</strong> tiene la fresadora.</li>
+          </ul>
+        </div>
+        <div class="viewport">
+          <span class="tag">Del bloque sólido a la pieza</span>
+          <svg id="intro-svg" viewBox="0 0 400 320"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. EJES / GRADOS DE LIBERTAD -->
+    <section class="panel" data-name="Grados de libertad" id="sec-ejes">
+      <div class="kicker">02 · Laboratorio interactivo</div>
+      <h2>Ejes de movimiento: del torno a la fresadora de 6 ejes</h2>
+      <p class="lead">Cada eje adicional le da a la fresa una nueva dirección de aproximación. Selecciona una configuración y observa qué movimientos gana —y qué geometrías se vuelven alcanzables.</p>
+
+      <div class="card">
+        <div class="ctrl-row" style="width:100%;">
+          <label style="flex:1; width:100%;">Ejes de movimiento
+            <input type="range" id="axis-slider" min="1" max="5" value="1" step="1" style="width:100%; margin-top:6px;">
+          </label>
+        </div>
+        <div class="tick-row" id="axis-ticks"></div>
+      </div>
+
+      <div class="grid2" style="margin-top:14px;">
+        <div class="viewport">
+          <span class="tag">Ejes disponibles</span>
+          <svg id="axis-svg" viewBox="0 0 300 260"></svg>
+        </div>
+        <div class="viewport">
+          <span class="tag">¿Alcanza el contrasocavado?</span>
+          <svg id="undercut-svg" viewBox="0 0 200 170"></svg>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="stat-row">
+          <div class="stat"><div class="num" id="axis-count">2</div><div class="lab">Ejes totales</div></div>
+          <div class="stat" id="axis-reach"><div class="num" id="axis-reach-val">No</div><div class="lab">Alcanza contrasocavado</div></div>
+        </div>
+        <h3 style="margin-top:14px;" id="axis-title">Torno</h3>
+        <p id="axis-desc" style="margin-bottom:6px;"></p>
+        <p style="margin-bottom:0;"><strong>Ejemplo dental:</strong> <span id="axis-example"></span></p>
+      </div>
+    </section>
+
+    <!-- 3. HUMEDO VS SECO -->
+    <section class="panel" data-name="Húmedo vs. seco" id="sec-humedo">
+      <div class="kicker">03 · Dos formas de cortar</div>
+      <h2>Fresado húmedo vs. fresado seco</h2>
+      <p class="lead">La elección entre agua y sin agua no es de preferencia: la determina la dureza del material que se está cortando.</p>
+
+      <div class="card">
+        <table class="formats">
+          <tr><th>Aspecto</th><th>Fresado seco</th><th>Fresado húmedo</th></tr>
+          <tr><td>Refrigeración</td><td>Ninguna; solo aire/succión de polvo</td><td>Spray continuo de agua/refrigerante</td></tr>
+          <tr><td>Materiales típicos</td><td>PMMA, cera, zirconia pre-sinterizada ("verde")</td><td>Disilicato de litio, zirconia sinterizada, metales</td></tr>
+          <tr><td>Por qué</td><td>Materiales blandos generan poco calor de corte</td><td>Materiales duros/vítreos generan calor que puede fisurar la pieza sin enfriamiento</td></tr>
+          <tr><td>Residuo</td><td>Polvo fino, requiere aspiración</td><td>Lodo (slurry) húmedo, requiere limpieza del equipo</td></tr>
+          <tr><td>Desgaste de fresas</td><td>Menor</td><td>Mayor; las fresas son un consumible más costoso</td></tr>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Por qué importa clínicamente</div>
+        <p>Muchos flujos usan zirconia en estado <strong>pre-sinterizado</strong> ("verde", como tiza, fresado en seco) precisamente para poder fresarla rápido con fresas económicas; la pieza se fresa sobredimensionada porque encogerá 20-25% durante la sinterización final en horno, donde alcanza su dureza definitiva.</p>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h3>Fresas: desbaste vs. acabado</h3>
+        <p style="margin-bottom:0;">La mayoría de fresadoras dentales cambian automáticamente entre al menos dos fresas por pieza: una de <strong>desbaste</strong> (diámetro mayor, remueve volumen rápido con menor detalle) y una de <strong>acabado</strong> (diámetro menor, define anatomía fina como surcos oclusales y márgenes). Cada fresa es un consumible que se desgasta y debe reemplazarse periódicamente.</p>
+      </div>
+    </section>
+
+    <!-- 4. MATERIALES -->
+    <section class="panel" data-name="Materiales" id="sec-materiales">
+      <div class="kicker">04 · Qué se fresa en odontología</div>
+      <h2>Materiales dentales fresables</h2>
+      <div class="card">
+        <table class="formats">
+          <tr><th>Material</th><th>Tipo de fresado</th><th>Uso típico</th></tr>
+          <tr><td>Zirconia pre-sinterizada</td><td>Seco</td><td>Coronas y puentes; se sinteriza después en horno</td></tr>
+          <tr><td>Zirconia sinterizada</td><td>Húmedo</td><td>Piezas que requieren la dureza final inmediata, sin contracción posterior</td></tr>
+          <tr><td>Disilicato de litio</td><td>Húmedo</td><td>Coronas y carillas de alta estética, se cristaliza después en horno</td></tr>
+          <tr><td>PMMA</td><td>Seco</td><td>Provisionales y coronas temporales</td></tr>
+          <tr><td>Cera</td><td>Seco</td><td>Encerados digitales para colado posterior</td></tr>
+          <tr><td>Metal (Co-Cr, titanio)</td><td>Húmedo</td><td>Estructuras metálicas, barras sobre implantes; equipos industriales robustos</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5. ADITIVA VS SUSTRACTIVA -->
+    <section class="panel" data-name="Aditiva vs sustractiva" id="sec-comparacion">
+      <div class="kicker">05 · Las dos ramas del CAM dental</div>
+      <h2>Aditiva vs. sustractiva: comparación directa</h2>
+      <div class="card">
+        <table class="formats">
+          <tr><th>Aspecto</th><th>Aditiva</th><th>Sustractiva</th></tr>
+          <tr><td>Desperdicio de material</td><td>Mínimo, solo lo necesario</td><td>Alto, se remueve la mayoría del bloque</td></tr>
+          <tr><td>Materiales disponibles</td><td>Resinas fotopolimerizables</td><td>Cerámicos, metales, PMMA, cera</td></tr>
+          <tr><td>Acabado de superficie</td><td>Bueno, mejora con la resolución</td><td>Excelente; superficies muy lisas por naturaleza del corte</td></tr>
+          <tr><td>Geometrías internas/huecas</td><td>Muy buena, incluso cavidades cerradas</td><td>Limitada por el acceso físico de la fresa</td></tr>
+          <tr><td>Aplicación típica</td><td>Modelos, guías, provisionales, férulas</td><td>Coronas definitivas en cerámica/zirconia, estructuras metálicas</td></tr>
+        </table>
+      </div>
+      <div class="callout">
+        <div class="lab">No es una competencia</div>
+        <p>La mayoría de laboratorios digitales usan ambas: aditiva para modelos, guías y provisionales; sustractiva para las restauraciones definitivas en cerámica o metal. La elección la determina el material requerido para cada pieza, no una tecnología "superior" a la otra.</p>
+      </div>
+    </section>
+
+    <!-- 6. APLICACIONES -->
+    <section class="panel" data-name="Aplicaciones clínicas" id="sec-aplicaciones">
+      <div class="kicker">06 · Dónde se usa</div>
+      <h2>Aplicaciones clínicas de la manufactura sustractiva</h2>
+      <div class="grid3" id="apps-grid"></div>
+    </section>
+
+    <!-- 7. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">07 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Manufactura sustractiva · CAM dental</span>
+    <span>Ejes de libertad · húmedo y seco</span>
+  </footer>
+
+</div>
+
+<script>
+/* ============ TABS ============ */
+const sections = [...document.querySelectorAll('section.panel')];
+const tabsNav = document.getElementById('tabs');
+sections.forEach((s,i)=>{
+  const b = document.createElement('button');
+  b.innerHTML = `<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click', ()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active');
+tabsNav.children[0].classList.add('active');
+
+const SVGNS='http://www.w3.org/2000/svg';
+const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+
+/* ============ INTRO ILLUSTRATION ============ */
+(function(){
+  const svg = document.getElementById('intro-svg');
+  svg.setAttribute('viewBox','0 0 400 320');
+  // solid block (before)
+  svg.appendChild(g('rect',{x:50,y:120,width:110,height:110,rx:6,fill:'rgba(242,112,60,0.16)',stroke:'#F2703C','stroke-width':1.3}));
+  svg.appendChild(g('text',{x:105,y:255,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#69594C'})).textContent='Bloque sólido';
+  // arrow
+  svg.appendChild(g('line',{x1:175,y1:175,x2:245,y2:175, stroke:'#F2703C','stroke-width':2}));
+  svg.appendChild(g('polygon',{points:'245,169 259,175 245,181', fill:'#F2703C'}));
+  svg.appendChild(g('text',{x:210,y:160,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'10','fill':'#F2703C'})).textContent='fresado';
+  // final crown shape (after)
+  svg.appendChild(g('path',{d:'M290,220 C282,180 288,140 320,128 C352,140 358,180 350,220 C340,235 300,235 290,220 Z', fill:'rgba(242,112,60,0.28)', stroke:'#F2703C','stroke-width':1.4}));
+  // removed material chips (scattered small shapes)
+  const chips=[[265,150],[275,190],[365,155],[372,195],[255,210],[380,170]];
+  chips.forEach(([cx,cy],i)=>{
+    svg.appendChild(g('rect',{x:cx,y:cy,width:7,height:7,rx:1.5, fill:'rgba(242,112,60,0.35)', transform:`rotate(${i*37} ${cx+3} ${cy+3})`}));
+  });
+  svg.appendChild(g('text',{x:320,y:255,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#69594C'})).textContent='Pieza final + desperdicio';
+})();
+
+/* ============ AXIS SIMULATOR ============ */
+const AXES = {
+  torno:{label:'Torno (2 ejes)', linear:['Z'], rot:['C'], count:2, reach:false,
+    desc:'La pieza gira sobre su propio eje (C) mientras la herramienta se mueve linealmente (Z). Solo puede generar formas con simetría rotacional alrededor de ese eje.',
+    example:'Postes y núcleos cilíndricos para retenedores intrarradiculares.'},
+  ax3:{label:'3 ejes', linear:['X','Y','Z'], rot:[], count:3, reach:false,
+    desc:'La fresa se mueve en tres direcciones lineales, pero siempre corta desde una misma orientación vertical. No puede acceder a zonas con contrasocavado (undercuts).',
+    example:'Estructuras simples sin contorno anatómico complejo, como algunas cofias.'},
+  ax4:{label:'4 ejes', linear:['X','Y','Z'], rot:['A'], count:4, reach:'partial',
+    desc:'Se agrega una rotación de la pieza (A) alrededor de un eje horizontal: permite abordarla desde más de un costado sin reposicionarla manualmente, aunque no desde cualquier ángulo.',
+    example:'Piezas con algo de contorno lateral, o varias unidades simples en un mismo bloque.'},
+  ax5:{label:'5 ejes', linear:['X','Y','Z'], rot:['A','B'], count:5, reach:true,
+    desc:'Con dos rotaciones simultáneas (A y B), la fresa se aproxima a la pieza desde casi cualquier ángulo en una sola sujeción —el estándar para restauraciones anatómicas completas.',
+    example:'Coronas y puentes anatómicos completos, con superficie oclusal detallada.'},
+  ax6:{label:'6 ejes', linear:['X','Y','Z'], rot:['A','B','C'], count:6, reach:true,
+    desc:'Libertad de movimiento equivalente a un brazo robótico: tres traslaciones y tres rotaciones independientes. Poco común en clínica; aparece en manufactura dental industrial de alto volumen.',
+    example:'Mecanizado industrial multi-pieza a gran escala.'}
+};
+
+(function(){
+  const axisSvg = document.getElementById('axis-svg');
+  const undercutSvg = document.getElementById('undercut-svg');
+  const countOut = document.getElementById('axis-count');
+  const reachStat = document.getElementById('axis-reach');
+  const reachVal = document.getElementById('axis-reach-val');
+  const titleOut = document.getElementById('axis-title');
+  const descOut = document.getElementById('axis-desc');
+  const exampleOut = document.getElementById('axis-example');
+
+  function drawAxes(cfg){
+    while(axisSvg.firstChild) axisSvg.removeChild(axisSvg.firstChild);
+    axisSvg.setAttribute('viewBox','0 0 300 260');
+    const cx=150, cy=150;
+    // block
+    axisSvg.appendChild(g('rect',{x:cx-35,y:cy-35,width:70,height:70,rx:6, fill:'rgba(242,112,60,0.14)', stroke:'#F2703C','stroke-width':1.2}));
+
+    const has = (ax)=>cfg.linear.includes(ax)||cfg.rot.includes(ax);
+    // X linear
+    if(cfg.linear.includes('X')){
+      axisSvg.appendChild(g('line',{x1:cx-100,y1:cy,x2:cx+100,y2:cy, stroke:'#F2703C','stroke-width':1.8}));
+      axisSvg.appendChild(g('polygon',{points:`${cx+100},${cy-5} ${cx+112},${cy} ${cx+100},${cy+5}`, fill:'#F2703C'}));
+      axisSvg.appendChild(g('text',{x:cx+120,y:cy+4,'font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#F2703C'})).textContent='X';
+    }
+    // Y linear (iso diagonal)
+    if(cfg.linear.includes('Y')){
+      axisSvg.appendChild(g('line',{x1:cx-55,y1:cy+40,x2:cx+55,y2:cy-40, stroke:'#F5C56E','stroke-width':1.8}));
+      axisSvg.appendChild(g('polygon',{points:`${cx+50},${cy-46} ${cx+62},${cy-40} ${cx+52},${cy-30}`, fill:'#F5C56E'}));
+      axisSvg.appendChild(g('text',{x:cx+68,y:cy-42,'font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#F5C56E'})).textContent='Y';
+    }
+    // Z linear
+    if(cfg.linear.includes('Z')){
+      axisSvg.appendChild(g('line',{x1:cx,y1:cy+80,x2:cx,y2:cy-80, stroke:'#6EA8FE','stroke-width':1.8}));
+      axisSvg.appendChild(g('polygon',{points:`${cx-5},${cy-80} ${cx},${cy-92} ${cx+5},${cy-80}`, fill:'#6EA8FE'}));
+      axisSvg.appendChild(g('text',{x:cx+10,y:cy-88,'font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#6EA8FE'})).textContent='Z';
+    }
+    // rotational C (around Z - spindle)
+    if(cfg.rot.includes('C')){
+      axisSvg.appendChild(g('ellipse',{cx,cy,rx:48,ry:16, fill:'none', stroke:'#6BD98C','stroke-width':1.6,'stroke-dasharray':'4,3'}));
+      axisSvg.appendChild(g('polygon',{points:`${cx+46},${cy-6} ${cx+56},${cy} ${cx+44},${cy+4}`, fill:'#6BD98C'}));
+      axisSvg.appendChild(g('text',{x:cx+62,y:cy+16,'font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#6BD98C'})).textContent='C';
+    }
+    // rotational A (around X)
+    if(cfg.rot.includes('A')){
+      axisSvg.appendChild(g('path',{d:`M ${cx-24},${cy-58} A 30 30 0 1 1 ${cx-24},${cy-2}`, fill:'none', stroke:'#B18CFF','stroke-width':1.6}));
+      axisSvg.appendChild(g('polygon',{points:`${cx-30},${cy-8} ${cx-24},${cy-2} ${cx-16},${cy-10}`, fill:'#B18CFF'}));
+      axisSvg.appendChild(g('text',{x:cx-46,y:cy-30,'font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#B18CFF'})).textContent='A';
+    }
+    // rotational B (around Y)
+    if(cfg.rot.includes('B')){
+      axisSvg.appendChild(g('path',{d:`M ${cx+30},${cy+30} A 26 26 0 1 1 ${cx+56},${cy-4}`, fill:'none', stroke:'#FF9F6E','stroke-width':1.6}));
+      axisSvg.appendChild(g('polygon',{points:`${cx+50},${cy-14} ${cx+56},${cy-4} ${cx+44},${cy-2}`, fill:'#FF9F6E'}));
+      axisSvg.appendChild(g('text',{x:cx+62,y:cy+34,'font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#FF9F6E'})).textContent='B';
+    }
+  }
+
+  function drawUndercut(cfg){
+    while(undercutSvg.firstChild) undercutSvg.removeChild(undercutSvg.firstChild);
+    undercutSvg.setAttribute('viewBox','0 0 200 175');
+    // TRUE anatomical contour (outer + undercut) — the real crown shape
+    const trueD = 'M60,25 Q80,42 100,56 Q120,42 140,25 C156,35 162,58 162,86 C162,113 141,121 126,152 L74,152 C59,121 38,113 38,86 C38,58 44,35 60,25 Z';
+    // MILLABLE contour — what a single top-down pass can actually reach (pulled in below the height of contour)
+    const millableD = 'M60,25 Q80,42 100,56 Q120,42 140,25 C150,33 150,50 148,70 C146,96 132,108 120,138 L80,138 C68,108 54,96 52,70 C50,50 50,33 60,25 Z';
+
+    const defs = document.createElementNS(SVGNS,'defs');
+    const clip = document.createElementNS(SVGNS,'clipPath');
+    clip.setAttribute('id','crownClip');
+    clip.appendChild(g('path',{d:millableD}));
+    defs.appendChild(clip);
+    undercutSvg.appendChild(defs);
+
+    // solid dark true surface underneath — this is what peeks out where the tool can't follow the anatomy
+    undercutSvg.appendChild(g('path',{d:trueD, fill:'#14100A', stroke:'#3A2E20','stroke-width':1}));
+
+    // yellow meshed millable surface on top
+    undercutSvg.appendChild(g('path',{d:millableD, fill:'rgba(217,196,110,0.85)', stroke:'#D9C46E','stroke-width':1.4}));
+    const grid = g('g',{'clip-path':'url(#crownClip)', stroke:'rgba(80,66,30,0.55)','stroke-width':0.8, fill:'none'});
+    for(let x=44;x<=156;x+=14){ grid.appendChild(g('line',{x1:x,y1:15,x2:x,y2:150})); }
+    for(let y=40;y<=140;y+=16){ grid.appendChild(g('path',{d:`M25,${y} Q100,${y-9} 175,${y}`})); }
+    undercutSvg.appendChild(grid);
+    undercutSvg.appendChild(g('path',{d:millableD, fill:'none', stroke:'#D9C46E','stroke-width':1.6}));
+
+    undercutSvg.appendChild(g('text',{x:100,y:12,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'9','fill':'#A99A8D'})).textContent='oclusal';
+    undercutSvg.appendChild(g('text',{x:100,y:169,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'9','fill':'#A99A8D'})).textContent='margen cervical';
+    undercutSvg.appendChild(g('text',{x:182,y:76,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'8','fill':'#A99A8D'})).textContent='superficie';
+    undercutSvg.appendChild(g('text',{x:182,y:86,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'8','fill':'#A99A8D'})).textContent='real (oscura)';
+    undercutSvg.appendChild(g('line',{x1:167,y1:88,x2:158,y2:98, stroke:'#A99A8D','stroke-width':0.8}));
+
+    // straight vertical tool from occlusal (baseline 3-axis approach)
+    undercutSvg.appendChild(g('line',{x1:100,y1:0,x2:100,y2:24, stroke:'#8C9AAB','stroke-width':4,'stroke-linecap':'round'}));
+
+    // reach indicator sits right in the exposed gap between the two surfaces
+    const ix=148, iy=108;
+    if(cfg.reach===true){
+      undercutSvg.appendChild(g('line',{x1:196,y1:88,x2:160,y2:102, stroke:'#6BD98C','stroke-width':4,'stroke-linecap':'round'}));
+      undercutSvg.appendChild(g('circle',{cx:ix,cy:iy,r:9, fill:'none', stroke:'#6BD98C','stroke-width':2}));
+      undercutSvg.appendChild(g('line',{x1:ix-5,y1:iy-2,x2:ix-1,y2:iy+4, stroke:'#6BD98C','stroke-width':2}));
+      undercutSvg.appendChild(g('line',{x1:ix-1,y1:iy+4,x2:ix+7,y2:iy-7, stroke:'#6BD98C','stroke-width':2}));
+    } else if(cfg.reach==='partial'){
+      undercutSvg.appendChild(g('circle',{cx:ix,cy:iy,r:9, fill:'none', stroke:'#F5C56E','stroke-width':2}));
+      undercutSvg.appendChild(g('text',{x:ix,y:iy+4,'text-anchor':'middle','font-family':'JetBrains Mono, monospace','font-size':'11','fill':'#F5C56E'})).textContent='?';
+    } else {
+      undercutSvg.appendChild(g('circle',{cx:ix,cy:iy,r:9, fill:'none', stroke:'#F2545B','stroke-width':2}));
+      undercutSvg.appendChild(g('line',{x1:ix-6,y1:iy-6,x2:ix+6,y2:iy+6, stroke:'#F2545B','stroke-width':2}));
+      undercutSvg.appendChild(g('line',{x1:ix+6,y1:iy-6,x2:ix-6,y2:iy+6, stroke:'#F2545B','stroke-width':2}));
+    }
+  }
+
+  function select(key){
+    const cfg = AXES[key];
+    drawAxes(cfg);
+    drawUndercut(cfg);
+    countOut.textContent = cfg.count;
+    reachVal.textContent = cfg.reach===true?'Sí':(cfg.reach==='partial'?'Parcial':'No');
+    reachStat.className = 'stat'+(cfg.reach===true?' ok':(cfg.reach===false?' bad':''));
+    titleOut.textContent = cfg.label;
+    descOut.textContent = cfg.desc;
+    exampleOut.textContent = cfg.example;
+  }
+
+  const stageKeys = ['torno','ax3','ax4','ax5','ax6'];
+  const tickRow = document.getElementById('axis-ticks');
+  const tickLabels = ['2 ejes','3 ejes','4 ejes','5 ejes','6 ejes'];
+  tickLabels.forEach((lab,i)=>{
+    const sp = document.createElement('span');
+    sp.textContent = lab;
+    tickRow.appendChild(sp);
+  });
+  function selectStage(stageIdx){
+    [...tickRow.children].forEach((sp,i)=>sp.classList.toggle('active', i===stageIdx));
+    select(stageKeys[stageIdx]);
+  }
+  const slider = document.getElementById('axis-slider');
+  slider.addEventListener('input', ()=> selectStage(parseInt(slider.value,10)-1));
+  selectStage(0);
+})();
+
+/* ============ APLICACIONES CLINICAS ============ */
+const APPS = [
+  {t:'Coronas y puentes definitivos', d:'Restauraciones en zirconia o disilicato de litio, fresadas a partir de bloques industriales de alta uniformidad.'},
+  {t:'Estructuras metálicas', d:'Cofias y barras sobre implantes en cobalto-cromo o titanio, típicamente fresadas en centros de manufactura con equipos robustos.'},
+  {t:'Provisionales fresados', d:'Coronas temporales en PMMA, como alternativa al fresado seco rápido dentro del mismo flujo chairside.'},
+  {t:'Núcleos y postes', d:'Piezas cilíndricas fresadas en torno para retenedores intrarradiculares.'},
+  {t:'Encerados digitales', d:'Patrones de cera fresados que después se cuelan por técnicas convencionales de fundición.'},
+  {t:'Modelos de trabajo', d:'En algunos flujos de laboratorio, los modelos también se fresan en vez de imprimirse.'}
+];
+(function(){
+  const grid = document.getElementById('apps-grid');
+  APPS.forEach((a)=>{
+    const el = document.createElement('div');
+    el.className='app-card';
+    el.innerHTML = `<h3>${a.t}</h3><p>${a.d}</p>`;
+    grid.appendChild(el);
+  });
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ = [
+  {q:'¿Qué determina principalmente cuántos ángulos distintos puede alcanzar una fresa sobre la pieza?', opts:['El tipo de refrigeración usada','El número de ejes de movimiento de la fresadora','El tamaño del bloque de material','El software de diseño usado'], correct:1, exp:'Cada eje adicional —lineal o rotacional— agrega una dirección de aproximación posible. Un torno de 2 ejes solo genera simetría rotacional; una fresadora de 5 ejes alcanza casi cualquier ángulo.'},
+  {q:'¿Por qué un sistema de 3 ejes no puede fresar una corona con contrasocavado (undercut) desde una sola sujeción?', opts:['Porque 3 ejes son insuficientes en velocidad','Porque la fresa siempre corta desde una misma orientación vertical y no puede rodear el obstáculo','Porque el material se rompe con 3 ejes','Porque el software no lo permite'], correct:1, exp:'Sin rotación de la pieza o de la herramienta, la fresa solo puede atacar desde una dirección fija: cualquier zona "escondida" detrás de un saliente queda fuera de su alcance.'},
+  {q:'¿Qué caracteriza al fresado húmedo frente al seco?', opts:['El fresado húmedo se usa para materiales más blandos como cera','El fresado húmedo usa refrigerante continuo, necesario para materiales duros o vítreos que generan más calor de corte','El fresado húmedo no requiere ningún tipo de fresa especial','El fresado húmedo es siempre más rápido'], correct:1, exp:'Materiales como disilicato de litio o zirconia sinterizada generan suficiente calor de corte para fisurarse sin refrigeración; el spray de agua controla esa temperatura.'},
+  {q:'¿Por qué la zirconia suele fresarse en su estado "pre-sinterizado" (verde)?', opts:['Porque así queda más dura que la sinterizada','Porque en ese estado es blanda como tiza y se fresa rápido en seco; luego se sinteriza en horno y encoge a su tamaño final','Porque no requiere ningún proceso posterior','Porque solo existe en ese estado'], correct:1, exp:'La zirconia pre-sinterizada es fácil y económica de fresar en seco; la pieza se diseña sobredimensionada porque encogerá 20-25% al sinterizarse, alcanzando ahí su dureza definitiva.'},
+  {q:'Frente a la manufactura aditiva, ¿cuál es una desventaja característica de la sustractiva?', opts:['No puede usar materiales cerámicos','Genera más desperdicio de material porque se remueve la mayoría del bloque original','Siempre produce peor acabado de superficie','No puede fabricar coronas definitivas'], correct:1, exp:'Al partir de un bloque sólido y remover todo lo que sobra, la sustractiva genera considerablemente más desperdicio que la aditiva, que solo deposita el material necesario.'}
+];
+(function(){
+  const container = document.getElementById('quiz-container');
+  const scoreBox = document.getElementById('quiz-score');
+  let score=0, answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div');
+    block.className='q-block';
+    const h3=document.createElement('h3');
+    h3.textContent=`${qi+1}. ${item.q}`;
+    block.appendChild(h3);
+    const explain=document.createElement('div');
+    explain.className='explain';
+    explain.innerHTML=item.exp;
+    item.opts.forEach((optText,oi)=>{
+      const btn=document.createElement('button');
+      btn.className='opt';
+      btn.textContent=optText;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){ btn.classList.add('correct'); score++; }
+        else { btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct'); }
+        explain.classList.add('show');
+        answered++;
+        if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain);
+    container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML = `<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--text-dim); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    document.getElementById('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
