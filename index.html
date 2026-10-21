@@ -19,13 +19,14 @@
     --blue:#6EA8FE;
     --violet:#B18CFF;
     --rust:#F2703C;
+    --pink:#FF6FAE;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; min-height:100vh;}
   .wrap{max-width:920px; margin:0 auto; padding:56px 22px 90px;}
 
   .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); display:flex; align-items:center; gap:8px;}
-  .eyebrow::before{content:''; width:7px; height:7px; background:linear-gradient(135deg,var(--cyan),var(--blue),var(--violet),var(--rust),var(--amber)); border-radius:2px;}
+  .eyebrow::before{content:''; width:7px; height:7px; background:linear-gradient(135deg,var(--cyan),var(--blue),var(--violet),var(--rust),var(--pink),var(--amber)); border-radius:2px;}
   h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(30px,5vw,46px); letter-spacing:-.01em; margin-top:12px; line-height:1.06;}
   .sub{color:var(--text-dim); font-size:15.5px; margin-top:14px; max-width:600px; line-height:1.6;}
 
@@ -49,6 +50,17 @@
   .card.escaneo{--accent:var(--blue);}
   .card.aditiva{--accent:var(--violet);}
   .card.sustractiva{--accent:var(--rust);}
+  .card.software{--accent:#FF4F9A; background:#FFF9EE; color:#1B1530; border:2px solid #FFF9EE; box-shadow:4px 4px 0 #FF4F9A;}
+  .card.software::before{background:#FF4F9A; width:6px;}
+  .card.software .info p{color:#4A4266;}
+  .card.software .arrow{color:#8C84A8;}
+  .card.software:hover{border-color:#FFC53D; box-shadow:6px 6px 0 #FF4F9A;}
+
+  .unit{margin-top:14px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; font-family:'Space Grotesk',sans-serif;}
+  .unit:first-child{margin-top:0;}
+  .unit b{font-size:12px; font-family:'JetBrains Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--text);}
+  .unit span{font-size:13px; color:var(--text-dim);}
+  .unit.u2 b{background:#FFC53D; color:#1B1530; padding:3px 10px; border-radius:20px;}
 
   .empty{margin-top:14px; border:1px dashed var(--line); border-radius:14px; padding:20px 22px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:12.5px; text-align:center;}
 
@@ -62,6 +74,8 @@
   <p class="sub">Material didáctico interactivo sobre los fundamentos digitales de la odontología asistida por computadora. Cada clase se abre directamente en el navegador, sin instalar nada.</p>
 
   <div class="list">
+    <div class="unit"><b>Unidad 1</b><span>Bases teóricas</span></div>
+
     <a class="card mallas" href="mallas-cadcam.html">
       <div class="idx">01</div>
       <div class="info">
@@ -111,9 +125,21 @@
       </div>
       <div class="arrow">→</div>
     </a>
+
+    <div class="unit u2" style="margin-top:30px;"><b>Unidad 2</b><span>Herramientas específicas: primero el software, al final el hardware</span></div>
+
+    <a class="card software" href="software-cadcam.html">
+      <div class="idx">06</div>
+      <div class="info">
+        <h2>Software de diseño: licencias y comparativa</h2>
+        <p>Panorama de la Unidad 2, qué hace un software de diseño, tipos de licencia, sistemas abiertos vs. cerrados, catálogo y matriz comparativa.</p>
+        <span class="tag">Software · diseño</span>
+      </div>
+      <div class="arrow">→</div>
+    </a>
   </div>
 
-  <div class="empty">+ próximas clases se agregarán aquí</div>
+  <div class="empty">+ próximas clases de la Unidad 2: nesting y planeación, accesorios de software y, al final, hardware</div>
 
   <footer>ESEST · Cirujano Dentista · Serie de clases CAD/CAM digital</footer>
 </div>
