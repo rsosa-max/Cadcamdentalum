@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 2 · Software de Diseño CAD/CAM: Licencias y Comparativa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9EE;
+    --card:#FFFFFF;
+    --ink:#1B1530;
+    --ink2:#4A4266;
+    --ink3:#8C84A8;
+    --soft:#F3EEFF;
+    --line:#E4DCF5;
+    --pink:#FF4F9A;
+    --pink-d:#D6226F;
+    --pink-l:#FFE3F0;
+    --violet:#6C4DF6;
+    --violet-l:#E9E4FF;
+    --mint:#12B886;
+    --mint-l:#D5F5E8;
+    --sun:#FFC53D;
+    --sun-l:#FFF1C2;
+    --sky:#339AF0;
+    --sky-l:#DCEEFF;
+    --red:#E03131;
+    --orange:#F59F00;
+    --disp:'Bricolage Grotesque','Trebuchet MS',sans-serif;
+    --body:'Geist','Inter',system-ui,sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh; background-image:radial-gradient(rgba(27,21,48,.09) 1.2px, transparent 1.4px); background-size:22px 22px;}
+  .app{max-width:1100px; margin:0 auto; padding:30px 20px 80px;}
+
+  header.top{padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); background:var(--sun); border:2px solid var(--ink); border-radius:30px; padding:5px 12px; box-shadow:3px 3px 0 var(--ink);}
+  h1{font-family:var(--disp); font-weight:800; font-size:clamp(32px,5.4vw,56px); letter-spacing:-.02em; margin-top:18px; line-height:1.02;}
+  h1 .mark{background:linear-gradient(transparent 58%, var(--pink) 58%, var(--pink) 92%, transparent 92%); padding:0 4px;}
+  .sub{color:var(--ink2); font-size:16px; margin-top:14px; max-width:700px; line-height:1.55;}
+
+  nav.tabs{display:flex; gap:8px; overflow-x:auto; padding:4px 4px 10px; margin:0 -4px 22px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:var(--mono); font-size:12px; font-weight:500; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:9px 14px; border-radius:30px; cursor:pointer; white-space:nowrap; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; box-shadow:2px 2px 0 var(--ink);}
+  nav.tabs button .n{color:var(--ink3); margin-right:7px;}
+  nav.tabs button:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active{background:var(--pink); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active .n{color:var(--ink);}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:var(--mono); font-size:11px; font-weight:700; color:var(--violet); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:var(--disp); font-size:clamp(24px,3.4vw,36px); font-weight:800; margin-bottom:14px; letter-spacing:-.015em; line-height:1.1;}
+  h3{font-family:var(--disp); font-size:17px; font-weight:700; margin-bottom:8px; color:var(--ink);}
+  p{color:var(--ink2); line-height:1.65; font-size:15px; margin-bottom:12px;}
+  p strong{color:var(--ink); font-weight:600;}
+  .lead{color:var(--ink); font-size:17px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid2e{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid2e{grid-template-columns:1fr;}}
+
+  .card{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; box-shadow:4px 4px 0 var(--ink);}
+  .card.soft{background:var(--soft);}
+  .card.sun{background:var(--sun-l);}
+  .viewport{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:16px; position:relative; box-shadow:4px 4px 0 var(--ink);}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink3); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:140px; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .stat .num{font-family:var(--disp); font-weight:800; font-size:24px; color:var(--pink-d); line-height:1.1;}
+  .stat .lab{font-family:var(--mono); font-size:10px; color:var(--ink3); text-transform:uppercase; letter-spacing:.06em; margin-top:4px; font-weight:500;}
+  .stat.ok{background:var(--mint-l);}
+  .stat.ok .num{color:#0A7A59;}
+
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:var(--mono); font-size:12px; font-weight:500; border:2px solid var(--ink); background:var(--card); color:var(--ink); padding:7px 13px; border-radius:30px; cursor:pointer; transition:transform .12s, box-shadow .12s, background .12s; box-shadow:2px 2px 0 var(--ink);}
+  .chip:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  .chip.active{background:var(--sun); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:20px; color:var(--ink2); font-size:14.5px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'●'; font-size:9px; position:absolute; left:2px; top:5px; color:var(--pink);}
+  ul.pros li::before{content:'+'; font-size:15px; top:-1px; color:var(--mint); font-weight:800;}
+  ul.cons li::before{content:'–'; font-size:15px; top:-1px; color:var(--red); font-weight:800;}
+
+  .callout{border:2px solid var(--ink); border-radius:16px; padding:14px 18px; background:var(--sun-l); margin-top:18px; box-shadow:4px 4px 0 var(--ink);}
+  .callout p{color:var(--ink); font-size:14px; margin:0;}
+  .callout .lab{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  .sticker{display:inline-block; background:var(--sun); border:2px solid var(--ink); border-radius:20px; padding:2px 10px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink); transform:rotate(-3deg); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:6px;}
+  table.formats th{font-family:var(--mono); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink2); text-align:left; padding:9px 10px; background:var(--soft); border-bottom:2px solid var(--ink);}
+  table.formats td{padding:10px; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top;}
+  table.formats td:first-child{color:var(--pink-d); font-family:var(--mono); font-weight:700;}
+  .table-wrap{overflow-x:auto;}
+
+  .app-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink);}
+  .app-card h3{font-size:15.5px;}
+  .app-card p{font-size:13.5px; margin-bottom:0;}
+
+  /* controls */
+  .ctrl-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
+  .ctrl label{display:block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink2); letter-spacing:.03em;}
+  .ctrl label b{color:var(--pink-d); font-weight:700;}
+  .ctrl input[type=range]{width:100%; margin-top:8px; accent-color:var(--pink);}
+  .ctrl input[type=number]{width:100%; margin-top:6px; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:8px 10px; border-radius:10px; font-family:var(--mono); font-size:13px;}
+  .ctrl input[type=number]:focus{outline:none; box-shadow:3px 3px 0 var(--pink);}
+  .check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink2); margin-top:12px; cursor:pointer;}
+  .check input{accent-color:var(--pink); width:16px; height:16px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-family:var(--mono); font-size:11px; color:var(--ink2);}
+  .legend i{display:inline-block; width:12px; height:12px; border-radius:4px; border:1.5px solid var(--ink); margin-right:6px; vertical-align:-2px;}
+
+  /* badges */
+  .badge{display:inline-block; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:20px; border:2px solid var(--ink); text-transform:uppercase; white-space:nowrap; color:var(--ink);}
+  .b-perp{background:var(--sun-l);}
+  .b-sub{background:var(--pink-l);}
+  .b-uso{background:var(--mint-l);}
+  .b-fm{background:var(--violet-l);}
+  .b-open{background:#E3F8D4;}
+  .b-free{background:var(--sky-l);}
+  .b-otro{background:#EDEAF3;}
+
+  .sw-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:8px; box-shadow:3px 3px 0 var(--ink);}
+  .sw-card h3{margin-bottom:0; font-size:16px;}
+  .sw-card p{font-size:13.5px; margin:0;}
+
+  /* unit map */
+  .umap{display:grid; gap:14px;}
+  .u1{border:2px dashed var(--ink3); border-radius:18px; padding:16px 18px; background:rgba(255,255,255,.6);}
+  .u1 .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px;}
+  .pills{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{font-family:var(--mono); font-size:11.5px; border:1.5px solid var(--ink3); color:var(--ink2); background:var(--card); border-radius:30px; padding:4px 11px;}
+  .u2{display:grid; grid-template-columns:1.5fr .9fr; gap:14px; align-items:stretch;}
+  @media(max-width:760px){.u2{grid-template-columns:1fr;}}
+  .block{border:2px solid var(--ink); border-radius:18px; padding:18px; box-shadow:4px 4px 0 var(--ink);}
+  .block.a{background:var(--pink-l);}
+  .block.b{background:var(--sky-l);}
+  .block .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); margin-bottom:12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .step{display:grid; grid-template-columns:34px 1fr auto; gap:12px; align-items:center; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:11px 12px; margin-bottom:10px;}
+  .step:last-child{margin-bottom:0;}
+  .step .no{width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; font-family:var(--disp); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .step .tx{font-size:14px; font-weight:600; color:var(--ink); line-height:1.3;}
+  .step .tx small{display:block; font-weight:400; color:var(--ink2); font-size:12.5px; margin-top:2px;}
+  .step.now{background:var(--sun); box-shadow:3px 3px 0 var(--ink);}
+  .step.now .no{background:var(--pink); color:var(--ink); border:2px solid var(--ink);}
+  .step.later{background:rgba(255,255,255,.65); border-style:dashed;}
+  .flow4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:860px){.flow4{grid-template-columns:1fr 1fr;}}
+  @media(max-width:520px){.flow4{grid-template-columns:1fr;}}
+  .fstage{position:relative; background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px 14px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .fstage .fn{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink3); letter-spacing:.08em;}
+  .fstage h3{font-size:17px; margin:2px 0 8px;}
+  .fstage .ftag{display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700; border:2px solid var(--ink); border-radius:20px; padding:3px 9px; background:#EDEAF3; color:var(--ink);}
+  .fstage .ftag.sw{background:var(--pink-l);}
+  .fstage .ftag.hw{background:var(--sky-l);}
+  .fstage .ftag.up{background:var(--card); border-style:dashed;}
+  .fstage.here{background:var(--sun-l); box-shadow:5px 5px 0 var(--ink);}
+  .fstage.here .sticker{position:absolute; top:-12px; right:10px;}
+
+  .src{font-size:12.5px; color:var(--ink2); line-height:1.8;}
+  .src a{color:var(--pink-d); text-decoration:none; border-bottom:2px solid var(--pink);}
+  .src a:hover{background:var(--pink-l);}
+
+  /* heat + rank */
+  .heat td.s{text-align:center; font-family:var(--disp); font-size:17px; font-weight:800; color:var(--ink);}
+  .heat td.name{white-space:nowrap; color:var(--ink); font-family:var(--disp); font-weight:700; font-size:14px;}
+  .rank-row{display:grid; grid-template-columns:200px 1fr 54px; gap:12px; align-items:center; margin-bottom:12px;}
+  .rank-row .nm{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .rank-row .bar{height:18px; background:var(--soft); border-radius:10px; overflow:hidden; border:2px solid var(--ink);}
+  .rank-row .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--violet),var(--pink)); transition:width .3s ease;}
+  .rank-row .val{font-family:var(--disp); font-size:18px; font-weight:800; color:var(--pink-d); text-align:right;}
+  .rank-row.top .nm{color:var(--pink-d);}
+  .rank-row.top .nm::after{content:' ★'; color:var(--orange);}
+  @media(max-width:560px){.rank-row{grid-template-columns:110px 1fr 44px;}}
+
+  .q-block{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; margin-bottom:16px; box-shadow:4px 4px 0 var(--ink);}
+  .q-block h3{font-size:16px; margin-bottom:14px; color:var(--ink); line-height:1.4;}
+  .opt{display:block; width:100%; text-align:left; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:11px 14px; border-radius:12px; margin-bottom:9px; cursor:pointer; font-family:var(--body); font-size:14px; transition:transform .12s, background .12s;}
+  .opt:hover{transform:translateX(3px); background:var(--soft);}
+  .opt.correct{background:var(--mint-l); font-weight:600;}
+  .opt.wrong{background:var(--pink-l);}
+  .opt[disabled]{cursor:default;}
+  .opt[disabled]:hover{transform:none;}
+  .explain{font-size:13px; color:var(--ink2); margin-top:10px; display:none; line-height:1.55; padding-top:10px; border-top:2px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:26px; background:var(--sun-l); border:2px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); font-family:var(--mono);}
+  .score-box .big{font-family:var(--disp); font-size:44px; font-weight:800; color:var(--ink);}
+  .reset-btn{font-family:var(--mono); font-size:12px; font-weight:700; background:var(--pink); color:var(--ink); border:2px solid var(--ink); padding:9px 18px; border-radius:30px; cursor:pointer; margin-top:12px; box-shadow:3px 3px 0 var(--ink);}
+
+  footer{margin-top:54px; padding-top:18px; border-top:2px solid var(--ink); font-family:var(--mono); font-size:11px; color:var(--ink2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">Unidad 2 · Software · Diseño</div>
+    <h1>Software de <span class="mark">diseño</span><br>y sus licencias</h1>
+    <p class="sub">Primera clase de la Unidad 2: del “qué es” de la Unidad 1 pasamos al “con qué”. Hoy: los programas donde se diseña, cómo se licencian y cómo compararlos con criterio.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. UNIDAD 2 -->
+    <section class="panel" data-name="Unidad 2" id="sec-unidad">
+      <div class="kicker">01 · Panorama de la unidad</div>
+      <h2>De las bases teóricas a las herramientas</h2>
+      <p class="lead">En la Unidad 1 construimos las bases: qué es una malla, qué es un voxel, cómo se captura y cómo se fabrica. En la Unidad 2 bajamos a lo específico: <strong>qué programas y qué equipos</strong> hacen real el flujo digital. Primero el software; al final de la unidad, el hardware.</p>
+
+      <div class="umap">
+        <div class="u1">
+          <div class="ulabel">Unidad 1 · Bases teóricas (ya vistas)</div>
+          <div class="pills">
+            <span class="pill">Mallas</span><span class="pill">Voxeles</span><span class="pill">Escaneo</span><span class="pill">Manufactura aditiva</span><span class="pill">Manufactura sustractiva</span>
+          </div>
+        </div>
+
+        <div class="u2">
+          <div class="block a">
+            <div class="ulabel"><span>Unidad 2 · Bloque A · Software (primero)</span></div>
+            <div class="step now">
+              <div class="no">1</div>
+              <div class="tx">Software de diseño<small>Programas CAD, licencias y comparativa</small></div>
+              <span class="sticker">Hoy</span>
+            </div>
+            <div class="step later">
+              <div class="no" style="background:var(--ink3)">2</div>
+              <div class="tx">Software de nesting y planeación<small>Próxima clase</small></div>
+            </div>
+            <div class="step later">
+              <div class="no" style="background:var(--ink3)">3</div>
+              <div class="tx">Otros accesorios de software<small>Complementos del flujo digital</small></div>
+            </div>
+          </div>
+          <div class="block b">
+            <div class="ulabel"><span>Unidad 2 · Bloque B · Hardware (al final)</span></div>
+            <div class="step later" style="height:calc(100% - 30px); align-items:center;">
+              <div class="no" style="background:var(--ink3)">4</div>
+              <div class="tx">Equipos del flujo digital<small>Se revisan una vez entendido el software que los alimenta</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px;">El flujo digital como mapa permanente</h3>
+      <p>En cada clase volvemos al mismo mapa para ubicar dónde entra la herramienta que estamos estudiando.</p>
+      <div class="flow4">
+        <div class="fstage"><div class="fn">PASO 1</div><h3>Captura</h3><span class="ftag hw">Hardware · cierre</span></div>
+        <div class="fstage here"><span class="sticker">Estás aquí</span><div class="fn">PASO 2</div><h3>Diseño</h3><span class="ftag sw">Software · hoy</span></div>
+        <div class="fstage"><div class="fn">PASO 3</div><h3>Preparación</h3><span class="ftag up">Nesting y planeación · próximas</span></div>
+        <div class="fstage"><div class="fn">PASO 4</div><h3>Fabricación</h3><span class="ftag hw">Hardware · cierre</span></div>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Regla de la unidad</div>
+        <p>Primero el software, al final el hardware, y siempre ubicando cada herramienta en el flujo digital. La clase de hoy es <strong>solo software de diseño</strong>: nesting, planeación y demás accesorios tienen su propia clase.</p>
+      </div>
+    </section>
+
+    <!-- 2. QUE HACE UN SOFTWARE DE DISEÑO -->
+    <section class="panel" data-name="Qué hace el diseño" id="sec-hace">
+      <div class="kicker">02 · Paso 2 del flujo</div>
+      <h2>Qué hace un software de diseño</h2>
+      <p class="lead">Recibe los datos de la captura y los convierte en el modelo digital de una restauración o estructura. Aunque cada marca tiene su propia interfaz, la secuencia de trabajo se parece mucho. Recorre los seis pasos de un diseño de corona.</p>
+
+      <div class="btn-row" id="wf-chips" style="margin-bottom:14px;"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="kicker" id="wf-no"></div>
+          <h3 id="wf-title" style="font-size:22px;"></h3>
+          <p id="wf-text"></p>
+          <p style="margin-bottom:0;"><strong>Conexión con la serie:</strong> <span id="wf-link"></span></p>
+        </div>
+        <div class="viewport">
+          <span class="tag">Recorrido de un diseño</span>
+          <svg id="wf-svg" viewBox="0 0 300 260" style="margin-top:12px;"></svg>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 3. TIPOS DE LICENCIA -->
+    <section class="panel" data-name="Tipos de licencia" id="sec-licencias">
+      <div class="kicker">03 · Cómo se vende el software</div>
+      <h2>Seis formas de licenciar un programa</h2>
+      <p class="lead">Una licencia es el permiso que el proveedor te otorga para usar el software. Selecciona un tipo y compara qué ganas, qué arriesgas y qué ocurre si dejas de pagar.</p>
+
+      <div class="btn-row" id="lic-chips" style="margin-bottom:16px;"></div>
+
+      <div class="grid2e">
+        <div class="card">
+          <span class="badge" id="lic-badge"></span>
+          <h3 id="lic-title" style="margin-top:12px; font-size:21px;"></h3>
+          <p id="lic-how"></p>
+          <p style="margin-bottom:0;"><strong>Si dejas de pagar:</strong> <span id="lic-quit"></span></p>
+        </div>
+        <div class="card">
+          <h3>A favor</h3>
+          <ul class="clean pros" id="lic-pros"></ul>
+          <h3 style="margin-top:14px;">En contra</h3>
+          <ul class="clean cons" id="lic-cons"></ul>
+        </div>
+      </div>
+      <div class="card soft" style="margin-top:16px;">
+        <div class="kicker">Ejemplo dental</div>
+        <p id="lic-example" style="margin-bottom:0;"></p>
+      </div>
+
+      <div class="callout">
+        <div class="lab">“Libre” no es lo mismo que “gratis”</div>
+        <p><strong>Gratis</strong> habla del precio. <strong>Libre</strong> (código abierto) habla del permiso: poder ver el código, modificarlo y redistribuirlo. Un programa puede ser gratis y cerrado (como Meshmixer) o de pago y abierto. Y una licencia gratuita no garantiza que siga siéndolo: el proveedor puede cambiarla.</p>
+      </div>
+
+      <h3 style="margin-top:28px;">Aparte del modelo de pago: ¿cómo se valida la licencia?</h3>
+      <div class="grid2e">
+        <div class="app-card"><h3>Llave física (dongle)</h3><p>Un dispositivo USB habilita el programa. Es portátil entre equipos, pero si se pierde o se daña se detiene el trabajo.</p></div>
+        <div class="app-card"><h3>Ligada a un equipo</h3><p>La licencia queda asociada a una computadora concreta. Cambiar de equipo implica un trámite de transferencia.</p></div>
+        <div class="app-card"><h3>Flotante o de red</h3><p>Un número limitado de licencias se comparte entre varios puestos de una misma red. Útil en laboratorios con turnos.</p></div>
+        <div class="app-card"><h3>En la nube</h3><p>La licencia se valida por internet y ligada a una cuenta de usuario. Facilita trabajar desde varios sitios, pero depende de la conexión.</p></div>
+      </div>
+    </section>
+
+    <!-- 4. SIMULADOR DE COSTO -->
+    <section class="panel" data-name="Simulador de costo" id="sec-costo">
+      <div class="kicker">04 · Laboratorio interactivo</div>
+      <h2>¿Cuánto cuesta cada modelo con el tiempo?</h2>
+      <p class="lead">El modelo más barato depende de cuántos casos haces y de cuánto tiempo usarás el software. Mueve los controles y observa dónde se cruzan las curvas.</p>
+
+      <div class="card">
+        <div class="ctrl-grid">
+          <div class="ctrl"><label>Casos por mes: <b id="v-cases">20</b><input type="range" id="in-cases" min="0" max="200" step="5" value="20"></label></div>
+          <div class="ctrl"><label>Horizonte (años): <b id="v-years">5</b><input type="range" id="in-years" min="1" max="10" step="1" value="5"></label></div>
+        </div>
+        <div class="ctrl-grid" style="margin-top:18px;">
+          <div class="ctrl"><label>Perpetua · pago inicial (u)<input type="number" id="p-init" value="100" min="0" step="5"></label></div>
+          <div class="ctrl"><label>Perpetua · contrato anual (u)<input type="number" id="p-maint" value="12" min="0" step="1"></label></div>
+          <div class="ctrl"><label>Suscripción · cuota mensual (u)<input type="number" id="s-month" value="4" min="0" step="0.5"></label></div>
+          <div class="ctrl"><label>Pago por uso · por caso (u)<input type="number" id="u-case" value="0.5" min="0" step="0.1"></label></div>
+        </div>
+        <label class="check"><input type="checkbox" id="in-maint" checked> Mantener el contrato de actualización de la licencia perpetua</label>
+      </div>
+
+      <div class="viewport" style="margin-top:16px;">
+        <span class="tag">Costo acumulado (unidades relativas)</span>
+        <svg id="cost-svg" viewBox="0 0 560 300" style="margin-top:14px;"></svg>
+        <div class="legend">
+          <span><i style="background:var(--orange)"></i>Perpetua</span>
+          <span><i style="background:var(--pink)"></i>Suscripción</span>
+          <span><i style="background:var(--mint)"></i>Pago por uso</span>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="num" id="t-perp">–</div><div class="lab">Perpetua · total</div></div>
+        <div class="stat"><div class="num" id="t-sub">–</div><div class="lab">Suscripción · total</div></div>
+        <div class="stat"><div class="num" id="t-uso">–</div><div class="lab">Pago por uso · total</div></div>
+        <div class="stat ok"><div class="num" id="t-best">–</div><div class="lab">Más económica en el horizonte</div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="num" id="be-perp">–</div><div class="lab">Perpetua se iguala a suscripción</div></div>
+        <div class="stat"><div class="num" id="be-uso">–</div><div class="lab">Pago por uso = suscripción a partir de</div></div>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Cómo leerlo</div>
+        <p>Las cifras son <strong>unidades relativas ilustrativas</strong>, no precios reales: sustitúyelas por cotizaciones de tu distribuidor. Lo que importa es la forma: con pocos casos gana el pago por uso; con volumen alto y años de uso suele ganar la perpetua; la suscripción compra flexibilidad (actualizaciones, módulos, IA) a cambio de un costo acumulado mayor. No se incluye el costo de capacitación ni el tiempo de aprender cada programa.</p>
+      </div>
+    </section>
+
+    <!-- 5. ABIERTO VS CERRADO -->
+    <section class="panel" data-name="Abierto vs. cerrado" id="sec-abierto">
+      <div class="kicker">05 · Con quién puede trabajar tu software</div>
+      <h2>Sistemas cerrados vs. sistemas abiertos</h2>
+      <p class="lead">La licencia dice cuánto pagas; la arquitectura dice con qué equipos puedes combinarlo. Alterna entre ambos modos y observa qué conexiones funcionan.</p>
+
+      <div class="btn-row" style="margin-bottom:16px;">
+        <button class="chip active" id="mode-closed">Sistema cerrado</button>
+        <button class="chip" id="mode-open">Sistema abierto</button>
+      </div>
+
+      <div class="viewport">
+        <span class="tag" id="oc-tag">Todo dentro de la misma marca</span>
+        <svg id="oc-svg" viewBox="0 0 560 270" style="margin-top:14px;"></svg>
+      </div>
+
+      <div class="grid2e" style="margin-top:16px;">
+        <div class="card">
+          <h3>A favor</h3>
+          <ul class="clean pros" id="oc-pros"></ul>
+        </div>
+        <div class="card">
+          <h3>En contra</h3>
+          <ul class="clean cons" id="oc-cons"></ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h3>Los formatos son el idioma común</h3>
+        <div class="table-wrap">
+        <table class="formats">
+          <tr><th>Formato</th><th>Qué transporta</th><th>Naturaleza</th></tr>
+          <tr><td>STL</td><td>Solo geometría (triángulos); sin color ni textura</td><td>Estándar abierto de facto</td></tr>
+          <tr><td>PLY / OBJ</td><td>Geometría y, según el caso, color o textura</td><td>Abiertos, ampliamente soportados</td></tr>
+          <tr><td>DICOM</td><td>Volúmenes de CBCT y metadatos clínicos (clase 02)</td><td>Estándar internacional de imagen médica</td></tr>
+          <tr><td>Archivo de proyecto</td><td>Diseño completo con parámetros editables (p. ej., .dentalProject en exocad)</td><td>Propio de cada software; normalmente solo lo abre ese programa</td></tr>
+        </table>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Conexión con la clase 01</div>
+        <p>Recuerda que un STL es solo una malla de triángulos. Exportar a un formato abierto permite cambiar de marca, pero pierde la información editable del proyecto: por eso conviene guardar siempre el archivo de proyecto original, además del STL.</p>
+      </div>
+    </section>
+
+    <!-- 6. CATALOGO -->
+    <section class="panel" data-name="Catálogo de diseño" id="sec-catalogo">
+      <div class="kicker">06 · Qué existe y cómo se licencia</div>
+      <h2>Catálogo de software de diseño</h2>
+      <p class="lead">Se agrupa por el tipo de uso, no por marca. Cada categoría enlaza con una clase de la Unidad 1.</p>
+
+      <div class="btn-row" id="cat-chips" style="margin-bottom:6px;"></div>
+      <p id="cat-link" style="margin:14px 0 14px; font-family:var(--mono); font-size:12px; font-weight:500; color:var(--violet);"></p>
+      <div class="grid2e" id="cat-grid"></div>
+
+      <div class="callout">
+        <div class="lab">Los modelos cambian</div>
+        <p>Ejemplo reciente: en 2025 Medit pasó parte de su ecosistema de aplicaciones de gratuito a suscripción, empezando por ClinicCAD. Lo que hoy es gratis puede dejar de serlo; este catálogo refleja información pública a octubre de 2026 y debe confirmarse con el distribuidor antes de comprar.</p>
+      </div>
+
+      <div class="card soft" style="margin-top:18px;">
+        <div class="kicker">Fuentes consultadas</div>
+        <p class="src" style="margin:0;">
+          <a href="https://exocad.com/our-products/dentalcad" target="_blank" rel="noopener">exocad · DentalCAD</a> ·
+          <a href="https://www.3shape.com/en/software/dental-system" target="_blank" rel="noopener">3Shape · Dental System</a> ·
+          <a href="https://www.3shape.com/en-us/software/trios-design-studio" target="_blank" rel="noopener">3Shape · TRIOS Design Studio</a> ·
+          <a href="https://www.3shape.com/en/services/labcare" target="_blank" rel="noopener">3Shape · LabCare y paquetes</a> ·
+          <a href="https://support.medit.com/hc/en-us/articles/43136291020057--Guide-Medit-Apps-Paid-Plans" target="_blank" rel="noopener">Medit · Apps de pago</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- 7. COMPARATIVA -->
+    <section class="panel" data-name="Comparativa" id="sec-comparativa">
+      <div class="kicker">07 · Cierre de la clase</div>
+      <h2>Comparativa: ¿cuál conviene y para quién?</h2>
+      <p class="lead">Cinco opciones de software de diseño, valoradas de 1 a 5 en seis criterios (5 siempre es lo más favorable para quien compra). No hay un ganador absoluto: cambia el perfil y cambia el resultado.</p>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-wrap">
+        <table class="formats heat" id="heat-table" style="margin-top:0;"></table>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">Puntajes ilustrativos con criterio docente, basados en información pública a octubre de 2026. No son un benchmark ni un ranking comercial. “Software de fabricante” es un arquetipo (programas ligados al ecosistema de una marca de equipos), no un producto concreto.</p>
+
+      <h3 style="margin-top:26px;">Matriz ponderada: tú decides qué importa</h3>
+      <div class="card">
+        <div class="kicker">1 · Elige un perfil (o ajusta los pesos)</div>
+        <div class="btn-row" id="prof-chips" style="margin-top:6px; margin-bottom:18px;"></div>
+        <div class="ctrl-grid" id="weights"></div>
+        <label class="check"><input type="checkbox" id="in-general" checked> Incluir Blender + MeshLab (modelado general, no es software dental)</label>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="kicker">Resultado (promedio ponderado sobre 5)</div>
+        <div id="rank" style="margin-top:14px;"></div>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Primero la tarea, luego el precio</div>
+        <p>Prueba el perfil “Estudiante”: Blender + MeshLab sube hasta los primeros lugares simplemente porque cuesta cero, aunque no ofrezca herramientas dentales. Desmarca la casilla y compara solo software dental. Una comparativa solo tiene sentido entre opciones que resuelven el mismo problema: define primero la tarea y después pondera costo, apertura y soporte.</p>
+      </div>
+    </section>
+
+    <!-- 8. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">08 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Unidad 2 · Software de diseño · CAD/CAM dental</span>
+    <span>Licencias · sistemas abiertos · comparativa</span>
+  </footer>
+
+</div>
+
+<script>
+/* ============ PALETA PARA SVG ============ */
+const C={ink:'#1B1530',ink2:'#4A4266',ink3:'#8C84A8',line:'#E4DCF5',soft:'#F3EEFF',pink:'#FF4F9A',pinkL:'#FFE3F0',violet:'#6C4DF6',mint:'#12B886',orange:'#F59F00',sun:'#FFC53D',sunL:'#FFF1C2',red:'#E03131',white:'#FFFFFF'};
+const FONT_MONO='Geist Mono, monospace';
+
+/* ============ TABS ============ */
+const sections = [...document.querySelectorAll('section.panel')];
+const tabsNav = document.getElementById('tabs');
+sections.forEach((s,i)=>{
+  const b = document.createElement('button');
+  b.innerHTML = `<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click', ()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active');
+tabsNav.children[0].classList.add('active');
+
+const SVGNS='http://www.w3.org/2000/svg';
+const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+
+/* ============ QUE HACE UN SOFTWARE DE DISEÑO ============ */
+const WF=[
+  {c:'Importar',t:'Importar los escaneos',x:'Se cargan los datos de la captura: la preparación, el diente antagonista y el registro de mordida. Cada uno es una malla; su calidad determina todo lo que sigue.',l:'Clase 01 (mallas) y clase 03 (escaneo): un hueco o ruido en la malla se arrastra al diseño.'},
+  {c:'Márgenes',t:'Marcar el margen',x:'Se traza la línea de terminación sobre la preparación. Es el paso más sensible al detalle: de ella depende el ajuste marginal de la restauración.',l:'Clase 01: huecos y picos en la malla justo en el margen dificultan trazarlo con precisión.'},
+  {c:'Eje',t:'Definir el eje de inserción',x:'Se fija la dirección en que la restauración se asentará. El software señala los contrasocavados de la preparación para decidir si se bloquean o se corrigen.',l:'Clase 05: los contrasocavados condicionan qué puede alcanzar la fresa y con cuántos ejes.'},
+  {c:'Anatomía',t:'Proponer la anatomía',x:'El programa sugiere una forma a partir de bibliotecas de dientes, del diente contralateral o de IA, según el modelo de licencia y los módulos disponibles.',l:'Pestaña 03: algunos servicios de IA se pagan por créditos o por uso.'},
+  {c:'Ajustes',t:'Ajustar contactos y espesores',x:'Se afinan los puntos de contacto proximales y oclusales —con ayuda del antagonista escaneado— y se verifican los espesores mínimos del material elegido.',l:'Un defecto en la malla del antagonista se traslada al contacto oclusal final.'},
+  {c:'Exportar',t:'Exportar el diseño',x:'Se guarda el proyecto y se exporta (STL u otro formato) para pasar a la preparación y fabricación, aditiva o sustractiva.',l:'Clases 04 y 05, y pestaña 05: un formato abierto permite cambiar de marca en el siguiente paso.'}
+];
+(function(){
+  const chips=document.getElementById('wf-chips'), svg=document.getElementById('wf-svg');
+  function drawSvg(k){
+    svg.innerHTML='';
+    // diente simple + línea de margen y barra de progreso
+    svg.appendChild(g('rect',{x:0,y:0,width:300,height:260,fill:'none'}));
+    // encía
+    svg.appendChild(g('path',{d:'M20,190 Q70,170 110,185 L190,185 Q230,170 280,190 L280,250 L20,250 Z',fill:C.pinkL,stroke:C.ink,'stroke-width':2}));
+    // muñón preparado
+    svg.appendChild(g('path',{d:'M105,185 L115,115 Q150,100 185,115 L195,185 Z',fill:C.white,stroke:C.ink,'stroke-width':2}));
+    // corona (aparece desde paso 4)
+    if(k>=3){
+      svg.appendChild(g('path',{d:'M92,190 C84,150 90,100 118,86 Q150,70 182,86 C210,100 216,150 208,190 Z',fill:k>=5?'rgba(108,77,246,0.22)':'rgba(108,77,246,0.10)',stroke:C.violet,'stroke-width':2,'stroke-dasharray':k>=5?'0':'6 4'}));
+    }
+    // margen (desde paso 1)
+    if(k>=1){
+      svg.appendChild(g('line',{x1:104,y1:185,x2:196,y2:185,stroke:C.pink,'stroke-width':4,'stroke-linecap':'round'}));
+      svg.appendChild(g('text',{x:150,y:208,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.pink})).textContent='margen';
+    }
+    // eje de inserción
+    if(k>=2){
+      svg.appendChild(g('line',{x1:150,y1:30,x2:150,y2:150,stroke:C.mint,'stroke-width':2.5,'stroke-dasharray':'5 4'}));
+      svg.appendChild(g('polygon',{points:'144,40 150,28 156,40',fill:C.mint}));
+      svg.appendChild(g('text',{x:160,y:36,'font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.mint})).textContent='eje';
+    }
+    // contactos (paso 5)
+    if(k>=4){
+      [[93,140],[207,140]].forEach(([cx,cy])=>svg.appendChild(g('circle',{cx,cy,r:7,fill:C.sun,stroke:C.ink,'stroke-width':2})));
+      svg.appendChild(g('text',{x:219,y:144,'font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink})).textContent='contactos';
+    }
+    // exportar (paso 6)
+    if(k>=5){
+      svg.appendChild(g('rect',{x:222,y:20,width:62,height:28,rx:8,fill:C.sun,stroke:C.ink,'stroke-width':2}));
+      svg.appendChild(g('text',{x:253,y:39,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'12','font-weight':'700',fill:C.ink})).textContent='STL ✓';
+    }
+    // barra de progreso
+    for(let i=0;i<WF.length;i++){
+      svg.appendChild(g('rect',{x:20+i*43,y:236,width:38,height:8,rx:4,fill:i<=k?C.pink:C.line,stroke:C.ink,'stroke-width':1.5}));
+    }
+  }
+  function show(k){
+    [...chips.children].forEach((c,i)=>c.classList.toggle('active',i===k));
+    const d=WF[k];
+    document.getElementById('wf-no').textContent='Paso '+(k+1)+' de '+WF.length;
+    document.getElementById('wf-title').textContent=d.t;
+    document.getElementById('wf-text').textContent=d.x;
+    document.getElementById('wf-link').textContent=d.l;
+    drawSvg(k);
+  }
+  WF.forEach((d,i)=>{
+    const b=document.createElement('button'); b.className='chip'; b.textContent=(i+1)+' · '+d.c;
+    b.addEventListener('click',()=>show(i)); chips.appendChild(b);
+  });
+  show(0);
+})();
+
+/* ============ TIPOS DE LICENCIA ============ */
+const LIC = {
+  perp:{chip:'Perpetua',badge:'b-perp',title:'Licencia perpetua',
+    how:'Pagas una vez y puedes usar esa versión de forma indefinida. Las versiones nuevas y el soporte suelen requerir un contrato de actualización aparte.',
+    quit:'sigues usando la versión que compraste, pero sin actualizaciones.',
+    pros:['Costo predecible después de la compra inicial','La versión comprada sigue funcionando aunque no renueves el contrato'],
+    cons:['Inversión inicial alta','Con los años la versión puede volverse incompatible con equipos o sistemas operativos nuevos','Sin contrato no hay nuevas funciones'],
+    ex:'exocad DentalCAD se ofrece con licencia perpetua y contrato de actualización opcional. En 3Shape, el paquete Basic licencia la versión del año de compra, mientras que la suscripción LabCare incluye las actualizaciones.'},
+  sub:{chip:'Suscripción',badge:'b-sub',title:'Suscripción',
+    how:'Pagas de forma periódica (mensual o anual) por usar el software y recibir sus actualizaciones mientras la mantengas activa.',
+    quit:'pierdes el acceso al software, según los términos del proveedor.',
+    pros:['Menor compromiso inicial','Actualizaciones —y a veces soporte, entrenamiento e IA— incluidos','Posibilidad de activar o desactivar módulos según necesidad'],
+    cons:['El costo acumulado a largo plazo puede superar al de una perpetua','Dependes de las decisiones de precio del proveedor','Sin pago activo no hay acceso'],
+    ex:'exocad ofrece su modalidad FLEX por suscripción, con módulos activables. La suscripción LabCare de 3Shape agrupa actualizaciones, soporte y diseño asistido por IA con un límite de uso justo por puesto.'},
+  uso:{chip:'Pago por uso',badge:'b-uso',title:'Pago por uso (por caso, diente o exportación)',
+    how:'No pagas por tener el programa sino por lo que produces: cada arcada, diente o archivo exportado consume un cobro o un crédito.',
+    quit:'dejas de pagar en cuanto dejas de usarlo; no hay cuota fija.',
+    pros:['Ideal para volumen bajo o intermitente','Sin compromiso fijo ni inversión inicial'],
+    cons:['Se encarece rápido con volumen alto','El costo variable es más difícil de presupuestar'],
+    ex:'Algunas aplicaciones de Medit, como ClinicCAD, permiten pagar por diente además de la mensualidad (según región y versión). Los servicios de diseño con IA suelen consumir créditos incluidos en la licencia.'},
+  fm:{chip:'Freemium',badge:'b-fm',title:'Freemium',
+    how:'La base es gratuita; las funciones avanzadas, la exportación o el soporte se pagan. Permite aprender sin barrera, pero la función clave puede quedar detrás del muro de pago.',
+    quit:'conservas la parte gratuita; pierdes las funciones de pago.',
+    pros:['Permite aprender y probar sin costo','Sin barrera de entrada'],
+    cons:['La función que necesitas (p. ej., exportar) puede ser la de pago','Los límites de lo gratuito pueden cambiar'],
+    ex:'Medit incluye varias aplicaciones sin costo adicional para quien tiene su escáner, mientras que ClinicCAD nació como suscripción.'},
+  open:{chip:'Código abierto',badge:'b-open',title:'Código abierto (open source)',
+    how:'El código fuente es público y la licencia permite usar, modificar y redistribuir. Las licencias “copyleft” (como GPL) exigen compartir las modificaciones; las permisivas (MIT, BSD) imponen menos condiciones.',
+    quit:'no aplica: no hay pagos, y nadie puede retirarte el programa.',
+    pros:['Sin costo de licencia','Sin dependencia de un solo proveedor','Formatos abiertos y comunidad activa'],
+    cons:['Curva de aprendizaje alta','Sin soporte comercial garantizado','Normalmente no están registrados como dispositivo médico para uso clínico definitivo'],
+    ex:'Blender y MeshLab sirven para modelar y editar mallas. No son software dental: no traen márgenes, bibliotecas de dientes ni flujos de restauración. Cada programa usa su propia licencia (GPL u otra).'},
+  free:{chip:'Gratuita cerrada',badge:'b-free',title:'Gratuita de código cerrado (freeware)',
+    how:'Se usa sin pagar, pero el código es privado y el proveedor decide si lo mantiene, lo cambia o lo retira. Gratis no significa libre.',
+    quit:'no aplica, pero el proveedor puede descontinuarlo o empezar a cobrar.',
+    pros:['Sin costo','Suele ser sencillo de usar'],
+    cons:['Puede descontinuarse o pasar a pago','No se puede modificar ni auditar','Sin garantía de soporte ni compatibilidad futura'],
+    ex:'Meshmixer: fue durante años una herramienta gratuita muy usada para editar mallas, pero Autodesk dejó de desarrollarla. Sigue funcionando, sin garantías de soporte ni de compatibilidad.'}
+};
+(function(){
+  const chips=document.getElementById('lic-chips');
+  const keys=Object.keys(LIC);
+  function show(k){
+    const d=LIC[k];
+    [...chips.children].forEach(c=>c.classList.toggle('active',c.dataset.k===k));
+    const bd=document.getElementById('lic-badge'); bd.className='badge '+d.badge; bd.textContent=d.chip;
+    document.getElementById('lic-title').textContent=d.title;
+    document.getElementById('lic-how').textContent=d.how;
+    document.getElementById('lic-quit').textContent=d.quit;
+    document.getElementById('lic-example').textContent=d.ex;
+    const fill=(id,arr)=>{const ul=document.getElementById(id); ul.innerHTML=''; arr.forEach(t=>{const li=document.createElement('li'); li.textContent=t; ul.appendChild(li);});};
+    fill('lic-pros',d.pros); fill('lic-cons',d.cons);
+  }
+  keys.forEach(k=>{
+    const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=LIC[k].chip;
+    b.addEventListener('click',()=>show(k)); chips.appendChild(b);
+  });
+  show('perp');
+})();
+
+/* ============ SIMULADOR DE COSTO ============ */
+(function(){
+  const $=id=>document.getElementById(id);
+  const svg=$('cost-svg');
+  const fmt=n=>n>=100?Math.round(n).toString():n.toFixed(1);
+  function num(id){const v=parseFloat($(id).value); return isNaN(v)||v<0?0:v;}
+  function render(){
+    const cases=parseInt($('in-cases').value), years=parseInt($('in-years').value);
+    $('v-cases').textContent=cases; $('v-years').textContent=years;
+    const P=num('p-init'), M=$('in-maint').checked?num('p-maint'):0, S=num('s-month'), Cc=num('u-case');
+    const perp=t=>P+M*t, sub=t=>S*12*t, uso=t=>Cc*cases*12*t;
+    const series=[{f:perp,col:C.orange},{f:sub,col:C.pink},{f:uso,col:C.mint}];
+    const W=560,H=300,L=52,R=16,T=16,B=36;
+    const maxY=Math.max(1,...series.map(s=>s.f(years)))*1.08;
+    const X=t=>L+(W-L-R)*t/years, Y=v=>H-B-(H-T-B)*v/maxY;
+    svg.innerHTML='';
+    for(let i=0;i<=4;i++){
+      const v=maxY*i/4, y=Y(v);
+      svg.appendChild(g('line',{x1:L,y1:y,x2:W-R,y2:y,stroke:C.line,'stroke-width':1.5}));
+      svg.appendChild(g('text',{x:L-8,y:y+3,'text-anchor':'end','font-family':FONT_MONO,'font-size':'10',fill:C.ink3})).textContent=fmt(v);
+    }
+    for(let t=0;t<=years;t++){
+      svg.appendChild(g('text',{x:X(t),y:H-B+16,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10',fill:C.ink3})).textContent=t;
+    }
+    svg.appendChild(g('text',{x:(L+W-R)/2,y:H-4,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10',fill:C.ink3})).textContent='años de uso';
+    series.forEach(s=>{
+      let d='';
+      for(let i=0;i<=years*4;i++){const t=i/4; d+=(i?'L':'M')+X(t).toFixed(1)+','+Y(s.f(t)).toFixed(1);}
+      svg.appendChild(g('path',{d,fill:'none',stroke:s.col,'stroke-width':3.4,'stroke-linejoin':'round','stroke-linecap':'round'}));
+      svg.appendChild(g('circle',{cx:X(years),cy:Y(s.f(years)),r:5.5,fill:s.col,stroke:C.ink,'stroke-width':2}));
+    });
+    const totals=[perp(years),sub(years),uso(years)];
+    $('t-perp').textContent=fmt(totals[0]); $('t-sub').textContent=fmt(totals[1]); $('t-uso').textContent=fmt(totals[2]);
+    const names=['Perpetua','Suscripción','Pago por uso'];
+    const min=Math.min(...totals), best=names.filter((n,i)=>totals[i]-min<1e-9);
+    $('t-best').textContent=best.join(' / ');
+    if(12*S>M){
+      const t=P/(12*S-M);
+      $('be-perp').textContent=t<=years?('~'+t.toFixed(1)+' años'):('~'+t.toFixed(1)+' años (fuera del horizonte)');
+    } else $('be-perp').textContent='Nunca: la suscripción es más barata';
+    if(Cc>0){ const c=S/Cc; $('be-uso').textContent=(c>=1?'~'+Math.round(c):'~'+c.toFixed(1))+' casos/mes'; }
+    else $('be-uso').textContent='Pago por uso sin costo';
+  }
+  ['in-cases','in-years','p-init','p-maint','s-month','u-case','in-maint'].forEach(id=>{
+    $(id).addEventListener('input',render); $(id).addEventListener('change',render);
+  });
+  render();
+})();
+
+/* ============ ABIERTO VS CERRADO ============ */
+(function(){
+  const svg=document.getElementById('oc-svg');
+  const MODES={
+    closed:{tag:'Todo dentro de la misma marca',
+      pros:['Integración muy fluida entre captura, diseño y fabricación','Un solo proveedor para soporte y actualizaciones','Menos decisiones técnicas para el usuario'],
+      cons:['Solo funciona bien con equipos de la misma marca','Cambiar de proveedor significa rehacer la cadena','Los archivos de proyecto suelen ser propietarios']},
+    open:{tag:'Intercambio por formatos estándar',
+      pros:['Puedes combinar equipos y software de marcas distintas','Libertad para cambiar un eslabón sin rehacer todo','Puedes comparar proveedores y negociar'],
+      cons:['La compatibilidad fina depende de ti (calibraciones, perfiles de material)','Varios proveedores implican varios soportes','Al exportar a STL se pierde la información editable del proyecto']}
+  };
+  const nodes={
+    sa:{x:20,y:40,w:130,h:56,label:'Escáner',brand:'A',col:C.pink},
+    sb:{x:20,y:170,w:130,h:56,label:'Escáner',brand:'B',col:C.violet},
+    sw:{x:215,y:105,w:130,h:60,label:'Software de diseño',brand:'A',col:C.pink},
+    ma:{x:410,y:40,w:130,h:56,label:'Fresadora',brand:'A',col:C.pink},
+    mb:{x:410,y:170,w:130,h:56,label:'Impresora',brand:'B',col:C.violet}
+  };
+  const links=[['sa','sw'],['sb','sw'],['sw','ma'],['sw','mb']];
+  function draw(mode){
+    svg.innerHTML='';
+    const open=mode==='open';
+    links.forEach(([a,b])=>{
+      const A=nodes[a],B=nodes[b];
+      const x1=A.x+A.w, y1=A.y+A.h/2, x2=B.x, y2=B.y+B.h/2;
+      const ok=open||(A.brand===B.brand);
+      const col=ok?C.mint:C.red;
+      svg.appendChild(g('line',{x1,y1,x2,y2,stroke:col,'stroke-width':ok?3.2:2.6,'stroke-dasharray':ok?'0':'6 6','stroke-linecap':'round'}));
+      const mx=(x1+x2)/2,my=(y1+y2)/2;
+      if(ok){
+        svg.appendChild(g('rect',{x:mx-19,y:my-10,width:38,height:20,rx:10,fill:C.white,stroke:C.ink,'stroke-width':2}));
+        const tx=g('text',{x:mx,y:my+4,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10.5','font-weight':'700',fill:C.ink}); tx.textContent=open?'STL':'✓'; svg.appendChild(tx);
+      } else {
+        svg.appendChild(g('circle',{cx:mx,cy:my,r:11,fill:C.white,stroke:C.ink,'stroke-width':2}));
+        const tx=g('text',{x:mx,y:my+4.5,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'13','font-weight':'700',fill:C.red}); tx.textContent='✕'; svg.appendChild(tx);
+      }
+    });
+    Object.values(nodes).forEach(n=>{
+      svg.appendChild(g('rect',{x:n.x+4,y:n.y+4,width:n.w,height:n.h,rx:12,fill:C.ink}));
+      svg.appendChild(g('rect',{x:n.x,y:n.y,width:n.w,height:n.h,rx:12,fill:n.brand==='A'?C.pinkL:'#E9E4FF',stroke:C.ink,'stroke-width':2.2}));
+      svg.appendChild(g('text',{x:n.x+n.w/2,y:n.y+n.h/2-3,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'11.5','font-weight':'700',fill:C.ink})).textContent=n.label;
+      svg.appendChild(g('text',{x:n.x+n.w/2,y:n.y+n.h/2+14,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10.5','font-weight':'500',fill:C.ink2})).textContent='Marca '+n.brand;
+    });
+    svg.appendChild(g('text',{x:280,y:258,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10.5',fill:C.ink3})).textContent=open?'Verde: se comunican mediante formatos abiertos':'Rojo: el formato propietario bloquea la conexión entre marcas';
+    document.getElementById('oc-tag').textContent=MODES[mode].tag;
+    const fill=(id,arr)=>{const ul=document.getElementById(id); ul.innerHTML=''; arr.forEach(t=>{const li=document.createElement('li'); li.textContent=t; ul.appendChild(li);});};
+    fill('oc-pros',MODES[mode].pros); fill('oc-cons',MODES[mode].cons);
+    document.getElementById('mode-closed').classList.toggle('active',!open);
+    document.getElementById('mode-open').classList.toggle('active',open);
+  }
+  document.getElementById('mode-closed').addEventListener('click',()=>draw('closed'));
+  document.getElementById('mode-open').addEventListener('click',()=>draw('open'));
+  draw('closed');
+})();
+
+/* ============ CATALOGO (solo diseño) ============ */
+const CAT=[
+  {k:'lab',chip:'CAD de laboratorio',link:'Se conecta con: clase 01 (mallas) y clase 05 (sustractiva)',items:[
+    {n:'exocad DentalCAD',b:'b-perp',bl:'Perpetua o suscripción',t:'Se ofrece con licencia perpetua (contrato de actualización opcional) o en modalidad FLEX por suscripción; los módulos se agrupan en paquetes. Se le conoce por su arquitectura abierta.'},
+    {n:'3Shape Dental System',b:'b-sub',bl:'Perpetua (Basic) o suscripción',t:'CAD de laboratorio con módulos para corona y puente, implantes, prótesis removibles y ortodoncia, que se venden en paquetes por una red de distribuidores. Acepta escáneres TRIOS y de terceros. El paquete Basic licencia la versión del año de compra; LabCare, por suscripción, añade actualizaciones, soporte y diseño con IA con límite de uso justo (los diseños extra se compran aparte).'},
+    {n:'Dental Wings (DWOS)',b:'b-otro',bl:'Comercial · consultar',t:'Software CAD comercial para laboratorio; el modelo de licencia depende del distribuidor y la región.'},
+    {n:'Software de fabricante (inLab, Ceramill, Zirkonzahn…)',b:'b-otro',bl:'Ligado a su ecosistema',t:'Programas de diseño que suelen venderse junto con los equipos de la misma marca. Verifica qué formatos aceptan antes de comprometerte.'}
+  ]},
+  {k:'chair',chip:'CAD chairside',link:'Se conecta con: clase 03 (escaneo)',items:[
+    {n:'Medit Link y aplicaciones',b:'b-fm',bl:'Freemium / suscripción',t:'Varias apps se incluyen con el escáner; ClinicCAD nació como suscripción, con opción de pago por diente o mensual. El esquema puede variar por región.'},
+    {n:'3Shape TRIOS Design Studio',b:'b-otro',bl:'Consultar con el distribuidor',t:'Software de diseño para el consultorio (chairside): coronas, inlays/onlays, puentes y carillas, con una propuesta automática por IA que el clínico puede editar. Forma parte de la solución integrada escaneo–diseño–fresado de 3Shape, con 3Shape Unite como motor del flujo de trabajo. El modelo de licencia no se detalla públicamente, así que confírmalo con el distribuidor.'},
+    {n:'Software de otros escáneres intraorales (iTero, CEREC…)',b:'b-otro',bl:'Incluido con el equipo',t:'Cada escáner trae su programa de captura. Los módulos de diseño o de ortodoncia suelen ser opcionales y de pago aparte.'}
+  ]},
+  {k:'ia',chip:'Diseño con IA',link:'Modelo emergente: licencias por créditos o unidades de uso',items:[
+    {n:'Créditos de IA en exocad',b:'b-uso',bl:'Créditos incluidos según licencia',t:'Los servicios de diseño con IA se pagan con créditos mensuales; la cantidad incluida depende del tipo de licencia y de tener el contrato activo.'},
+    {n:'Unidades de diseño IA en 3Shape',b:'b-uso',bl:'Uso justo por puesto',t:'LabCare incluye propuestas de diseño asistidas por IA hasta un límite anual por puesto.'}
+  ]},
+  {k:'gen',chip:'Modelado general',link:'Se conecta con: clase 01 (mallas)',items:[
+    {n:'Blender',b:'b-open',bl:'Código abierto (GPL)',t:'Modelado 3D general, muy potente; no es un programa dental, pero permite modelar y preparar mallas.'},
+    {n:'MeshLab',b:'b-open',bl:'Código abierto (GPL)',t:'Especializado en procesar mallas: reparar huecos, simplificar, medir. Útil para revisar errores como los de la clase 01.'},
+    {n:'Meshmixer',b:'b-free',bl:'Gratuita cerrada · descontinuada',t:'Muy usada para recortar y reparar STL. Autodesk dejó de desarrollarla: sigue funcionando, sin garantías futuras.'}
+  ]}
+];
+(function(){
+  const chips=document.getElementById('cat-chips'), grid=document.getElementById('cat-grid'), link=document.getElementById('cat-link');
+  function show(k){
+    [...chips.children].forEach(c=>c.classList.toggle('active',c.dataset.k===k));
+    const c=CAT.find(x=>x.k===k); link.textContent=c.link; grid.innerHTML='';
+    c.items.forEach(it=>{
+      const d=document.createElement('div'); d.className='sw-card';
+      const h=document.createElement('h3'); h.textContent=it.n;
+      const s=document.createElement('span'); s.className='badge '+it.b; s.textContent=it.bl; s.style.alignSelf='flex-start';
+      const p=document.createElement('p'); p.textContent=it.t;
+      d.appendChild(h); d.appendChild(s); d.appendChild(p); grid.appendChild(d);
+    });
+  }
+  CAT.forEach(c=>{
+    const b=document.createElement('button'); b.className='chip'; b.dataset.k=c.k; b.textContent=c.chip;
+    b.addEventListener('click',()=>show(c.k)); chips.appendChild(b);
+  });
+  show('lab');
+})();
+
+/* ============ COMPARATIVA ============ */
+const CRIT=['Costo de entrada','Especialización dental','Apertura de formatos','Facilidad de aprendizaje','Soporte y capacitación','Independencia del proveedor'];
+const SOFT=[
+  {n:'exocad DentalCAD',general:false,s:[2,5,5,3,4,4]},
+  {n:'3Shape Dental System',general:false,s:[2,5,4,4,5,2]},
+  {n:'Medit (apps de diseño)',general:false,s:[4,3,3,5,4,2]},
+  {n:'Software de fabricante',general:false,s:[3,4,2,4,4,1]},
+  {n:'Blender + MeshLab',general:true,s:[5,1,5,1,2,5]}
+];
+const PROFILES=[
+  {l:'Laboratorio de alto volumen',w:[2,5,4,2,4,3]},
+  {l:'Clínica con escáner',w:[3,3,2,5,4,1]},
+  {l:'Estudiante, presupuesto limitado',w:[5,2,2,3,1,3]},
+  {l:'Docencia e investigación',w:[4,2,5,3,2,5]}
+];
+(function(){
+  const $=id=>document.getElementById(id);
+  const tbl=$('heat-table');
+  let html='<tr><th>Software</th>'+CRIT.map(c=>`<th style="text-align:center">${c}</th>`).join('')+'</tr>';
+  SOFT.forEach(s=>{
+    html+=`<tr><td class="name">${s.n}</td>`+s.s.map(v=>{
+      const a=0.06+0.15*v; return `<td class="s" style="background:rgba(255,79,154,${a.toFixed(2)})">${v}</td>`;
+    }).join('')+'</tr>';
+  });
+  tbl.innerHTML=html;
+  let weights=[3,3,3,3,3,3];
+  const pchips=$('prof-chips'), wbox=$('weights');
+  PROFILES.forEach((p,i)=>{
+    const b=document.createElement('button'); b.className='chip'; b.dataset.i=i; b.textContent=p.l;
+    b.addEventListener('click',()=>{
+      weights=p.w.slice();
+      [...pchips.children].forEach(c=>c.classList.toggle('active',c===b));
+      CRIT.forEach((c,j)=>{ $('w'+j).value=weights[j]; $('wv'+j).textContent=weights[j]; });
+      rank();
+    });
+    pchips.appendChild(b);
+  });
+  CRIT.forEach((c,j)=>{
+    const d=document.createElement('div'); d.className='ctrl';
+    d.innerHTML=`<label>${c}: <b id="wv${j}">3</b><input type="range" id="w${j}" min="0" max="5" step="1" value="3"></label>`;
+    wbox.appendChild(d);
+    d.querySelector('input').addEventListener('input',e=>{
+      weights[j]=parseInt(e.target.value); $('wv'+j).textContent=weights[j];
+      [...pchips.children].forEach(c=>c.classList.remove('active'));
+      rank();
+    });
+  });
+  $('in-general').addEventListener('change',rank);
+  function rank(){
+    const pool=SOFT.filter(s=>!s.general||$('in-general').checked);
+    const sum=weights.reduce((a,b)=>a+b,0);
+    const res=pool.map(s=>({n:s.n,v:sum?s.s.reduce((a,v,i)=>a+v*weights[i],0)/sum:0})).sort((a,b)=>b.v-a.v);
+    const box=$('rank'); box.innerHTML='';
+    if(!sum){ box.innerHTML='<p style="margin:0;">Asigna al menos un peso mayor que 0 para ver el resultado.</p>'; return; }
+    res.forEach((r,i)=>{
+      const row=document.createElement('div'); row.className='rank-row'+(i===0?' top':'');
+      row.innerHTML=`<div class="nm"></div><div class="bar"><i style="width:${(r.v/5*100).toFixed(1)}%"></i></div><div class="val">${r.v.toFixed(2)}</div>`;
+      row.querySelector('.nm').textContent=r.n; box.appendChild(row);
+    });
+  }
+  rank();
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ = [
+  {q:'Una clínica pequeña procesa muy pocos casos al mes y quiere evitar un compromiso fijo. ¿Qué modelo de licencia suele resultarle más conveniente?', opts:['Licencia perpetua con contrato de mantenimiento','Suscripción anual con todos los módulos','Pago por uso (por caso o por diente)','Un sistema cerrado de un solo fabricante'], correct:2, exp:'Con volumen bajo o intermitente, pagar solo lo que se produce evita cuotas fijas. El simulador de costo lo muestra: la curva de pago por uso queda por debajo hasta cierto número de casos por mes.'},
+  {q:'Un laboratorio deja de pagar la suscripción de su software de diseño. ¿Qué ocurre normalmente?', opts:['Puede seguir usando para siempre la versión instalada','Solo pierde el soporte telefónico','La suscripción se convierte en perpetua automáticamente','Pierde el acceso al software mientras no renueve'], correct:3, exp:'La suscripción da acceso mientras esté activa; la licencia perpetua es la que permite seguir usando la versión comprada (sin actualizaciones). Los detalles dependen de los términos de cada proveedor.'},
+  {q:'¿Cuál afirmación distingue correctamente software “libre” de software “gratis”?', opts:['Son sinónimos en el contexto del software','Libre significa que no cuesta; gratis, que el código es público','Gratis se refiere al precio; libre, al permiso de usar, modificar y redistribuir el código','Libre solo aplica a programas con licencia perpetua'], correct:2, exp:'Meshmixer es gratuito pero de código cerrado; Blender es de código abierto. El precio y la libertad de modificar son dos ejes independientes.'},
+  {q:'Un laboratorio escanea con una marca y quiere fresar con una máquina de otra marca. ¿Qué característica del software facilita esa combinación?', opts:['Que exporte en formatos abiertos como STL','Que tenga licencia perpetua','Que sea de la misma marca que la máquina','Que la suscripción incluya más módulos'], correct:0, exp:'Los formatos abiertos funcionan como idioma común entre marcas. La licencia (perpetua, suscripción) define cuánto se paga, no con qué equipos puede trabajar.'},
+  {q:'En la comparativa, un programa de modelado general gratuito puede quedar arriba de un CAD dental simplemente por su precio. ¿Qué lección deja esto?', opts:['Que el software gratuito siempre es mejor','Que el costo es el único criterio válido','Que conviene sumar más criterios hasta que gane el dental','Que solo es válido comparar opciones que resuelven el mismo problema'], correct:3, exp:'Una matriz ponderada solo es útil entre opciones comparables. Blender no trae márgenes, bibliotecas de dientes ni flujos de restauración: gana en precio, no en la tarea clínica.'}
+];
+(function(){
+  const container = document.getElementById('quiz-container');
+  const scoreBox = document.getElementById('quiz-score');
+  let score=0, answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div');
+    block.className='q-block';
+    const h3=document.createElement('h3');
+    h3.textContent=`${qi+1}. ${item.q}`;
+    block.appendChild(h3);
+    const explain=document.createElement('div');
+    explain.className='explain';
+    explain.textContent=item.exp;
+    item.opts.forEach((optText,oi)=>{
+      const btn=document.createElement('button');
+      btn.className='opt';
+      btn.textContent=optText;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){ btn.classList.add('correct'); score++; }
+        else { btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct'); }
+        explain.classList.add('show');
+        answered++;
+        if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain);
+    container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML = `<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--ink2); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    document.getElementById('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
