@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 2 · Software de Preparación CAD/CAM: Nesting y Planeación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9EE;
+    --card:#FFFFFF;
+    --ink:#1B1530;
+    --ink2:#4A4266;
+    --ink3:#8C84A8;
+    --soft:#F3EEFF;
+    --line:#E4DCF5;
+    --pink:#FF4F9A;
+    --pink-d:#D6226F;
+    --pink-l:#FFE3F0;
+    --violet:#6C4DF6;
+    --violet-l:#E9E4FF;
+    --mint:#12B886;
+    --mint-l:#D5F5E8;
+    --sun:#FFC53D;
+    --sun-l:#FFF1C2;
+    --sky:#339AF0;
+    --sky-l:#DCEEFF;
+    --red:#E03131;
+    --orange:#F59F00;
+    --disp:'Bricolage Grotesque','Trebuchet MS',sans-serif;
+    --body:'Geist','Inter',system-ui,sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh; background-image:radial-gradient(rgba(27,21,48,.09) 1.2px, transparent 1.4px); background-size:22px 22px;}
+  .app{max-width:1100px; margin:0 auto; padding:30px 20px 80px;}
+
+  header.top{padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); background:var(--sun); border:2px solid var(--ink); border-radius:30px; padding:5px 12px; box-shadow:3px 3px 0 var(--ink);}
+  h1{font-family:var(--disp); font-weight:800; font-size:clamp(32px,5.4vw,56px); letter-spacing:-.02em; margin-top:18px; line-height:1.02;}
+  h1 .mark{background:linear-gradient(transparent 58%, var(--pink) 58%, var(--pink) 92%, transparent 92%); padding:0 4px;}
+  .sub{color:var(--ink2); font-size:16px; margin-top:14px; max-width:700px; line-height:1.55;}
+
+  nav.tabs{display:flex; gap:8px; overflow-x:auto; padding:4px 4px 10px; margin:0 -4px 22px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:var(--mono); font-size:12px; font-weight:500; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:9px 14px; border-radius:30px; cursor:pointer; white-space:nowrap; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; box-shadow:2px 2px 0 var(--ink);}
+  nav.tabs button .n{color:var(--ink3); margin-right:7px;}
+  nav.tabs button:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active{background:var(--pink); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active .n{color:var(--ink);}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:var(--mono); font-size:11px; font-weight:700; color:var(--violet); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:var(--disp); font-size:clamp(24px,3.4vw,36px); font-weight:800; margin-bottom:14px; letter-spacing:-.015em; line-height:1.1;}
+  h3{font-family:var(--disp); font-size:17px; font-weight:700; margin-bottom:8px; color:var(--ink);}
+  p{color:var(--ink2); line-height:1.65; font-size:15px; margin-bottom:12px;}
+  p strong{color:var(--ink); font-weight:600;}
+  .lead{color:var(--ink); font-size:17px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid2e{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid2e{grid-template-columns:1fr;}}
+
+  .card{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; box-shadow:4px 4px 0 var(--ink);}
+  .card.soft{background:var(--soft);}
+  .card.sun{background:var(--sun-l);}
+  .viewport{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:16px; position:relative; box-shadow:4px 4px 0 var(--ink);}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink3); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:140px; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .stat .num{font-family:var(--disp); font-weight:800; font-size:24px; color:var(--pink-d); line-height:1.1;}
+  .stat .lab{font-family:var(--mono); font-size:10px; color:var(--ink3); text-transform:uppercase; letter-spacing:.06em; margin-top:4px; font-weight:500;}
+  .stat.ok{background:var(--mint-l);}
+  .stat.ok .num{color:#0A7A59;}
+
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:var(--mono); font-size:12px; font-weight:500; border:2px solid var(--ink); background:var(--card); color:var(--ink); padding:7px 13px; border-radius:30px; cursor:pointer; transition:transform .12s, box-shadow .12s, background .12s; box-shadow:2px 2px 0 var(--ink);}
+  .chip:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  .chip.active{background:var(--sun); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:20px; color:var(--ink2); font-size:14.5px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'●'; font-size:9px; position:absolute; left:2px; top:5px; color:var(--pink);}
+  ul.pros li::before{content:'+'; font-size:15px; top:-1px; color:var(--mint); font-weight:800;}
+  ul.cons li::before{content:'–'; font-size:15px; top:-1px; color:var(--red); font-weight:800;}
+
+  .callout{border:2px solid var(--ink); border-radius:16px; padding:14px 18px; background:var(--sun-l); margin-top:18px; box-shadow:4px 4px 0 var(--ink);}
+  .callout p{color:var(--ink); font-size:14px; margin:0;}
+  .callout .lab{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  .sticker{display:inline-block; background:var(--sun); border:2px solid var(--ink); border-radius:20px; padding:2px 10px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink); transform:rotate(-3deg); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:6px;}
+  table.formats th{font-family:var(--mono); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink2); text-align:left; padding:9px 10px; background:var(--soft); border-bottom:2px solid var(--ink);}
+  table.formats td{padding:10px; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top;}
+  table.formats td:first-child{color:var(--pink-d); font-family:var(--mono); font-weight:700;}
+  .table-wrap{overflow-x:auto;}
+
+  .app-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink);}
+  .app-card h3{font-size:15.5px;}
+  .app-card p{font-size:13.5px; margin-bottom:0;}
+
+  /* controls */
+  .ctrl-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
+  .ctrl label{display:block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink2); letter-spacing:.03em;}
+  .ctrl label b{color:var(--pink-d); font-weight:700;}
+  .ctrl input[type=range]{width:100%; margin-top:8px; accent-color:var(--pink);}
+  .ctrl input[type=number]{width:100%; margin-top:6px; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:8px 10px; border-radius:10px; font-family:var(--mono); font-size:13px;}
+  .ctrl input[type=number]:focus{outline:none; box-shadow:3px 3px 0 var(--pink);}
+  .check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink2); margin-top:12px; cursor:pointer;}
+  .check input{accent-color:var(--pink); width:16px; height:16px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-family:var(--mono); font-size:11px; color:var(--ink2);}
+  .legend i{display:inline-block; width:12px; height:12px; border-radius:4px; border:1.5px solid var(--ink); margin-right:6px; vertical-align:-2px;}
+
+  /* badges */
+  .badge{display:inline-block; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:20px; border:2px solid var(--ink); text-transform:uppercase; white-space:nowrap; color:var(--ink);}
+  .b-perp{background:var(--sun-l);}
+  .b-sub{background:var(--pink-l);}
+  .b-uso{background:var(--mint-l);}
+  .b-fm{background:var(--violet-l);}
+  .b-open{background:#E3F8D4;}
+  .b-free{background:var(--sky-l);}
+  .b-otro{background:#EDEAF3;}
+
+  .sw-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:8px; box-shadow:3px 3px 0 var(--ink);}
+  .sw-card h3{margin-bottom:0; font-size:16px;}
+  .sw-card p{font-size:13.5px; margin:0;}
+
+  /* unit map */
+  .umap{display:grid; gap:14px;}
+  .u1{border:2px dashed var(--ink3); border-radius:18px; padding:16px 18px; background:rgba(255,255,255,.6);}
+  .u1 .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px;}
+  .pills{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{font-family:var(--mono); font-size:11.5px; border:1.5px solid var(--ink3); color:var(--ink2); background:var(--card); border-radius:30px; padding:4px 11px;}
+  .u2{display:grid; grid-template-columns:1.5fr .9fr; gap:14px; align-items:stretch;}
+  @media(max-width:760px){.u2{grid-template-columns:1fr;}}
+  .block{border:2px solid var(--ink); border-radius:18px; padding:18px; box-shadow:4px 4px 0 var(--ink);}
+  .block.a{background:var(--pink-l);}
+  .block.b{background:var(--sky-l);}
+  .block .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); margin-bottom:12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .step{display:grid; grid-template-columns:34px 1fr auto; gap:12px; align-items:center; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:11px 12px; margin-bottom:10px;}
+  .step:last-child{margin-bottom:0;}
+  .step .no{width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; font-family:var(--disp); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .step .tx{font-size:14px; font-weight:600; color:var(--ink); line-height:1.3;}
+  .step .tx small{display:block; font-weight:400; color:var(--ink2); font-size:12.5px; margin-top:2px;}
+  .step.now{background:var(--sun); box-shadow:3px 3px 0 var(--ink);}
+  .step.now .no{background:var(--pink); color:var(--ink); border:2px solid var(--ink);}
+  .step.later{background:rgba(255,255,255,.65); border-style:dashed;}
+  .flow4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:860px){.flow4{grid-template-columns:1fr 1fr;}}
+  @media(max-width:520px){.flow4{grid-template-columns:1fr;}}
+  .fstage{position:relative; background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px 14px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .fstage .fn{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink3); letter-spacing:.08em;}
+  .fstage h3{font-size:17px; margin:2px 0 8px;}
+  .fstage .ftag{display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700; border:2px solid var(--ink); border-radius:20px; padding:3px 9px; background:#EDEAF3; color:var(--ink);}
+  .fstage .ftag.sw{background:var(--pink-l);}
+  .fstage .ftag.hw{background:var(--sky-l);}
+  .fstage .ftag.up{background:var(--card); border-style:dashed;}
+  .fstage.here{background:var(--sun-l); box-shadow:5px 5px 0 var(--ink);}
+  .fstage.here .sticker{position:absolute; top:-12px; right:10px;}
+
+  .src{font-size:12.5px; color:var(--ink2); line-height:1.8;}
+  .src a{color:var(--pink-d); text-decoration:none; border-bottom:2px solid var(--pink);}
+  .src a:hover{background:var(--pink-l);}
+
+  /* heat + rank */
+  .heat td.s{text-align:center; font-family:var(--disp); font-size:17px; font-weight:800; color:var(--ink);}
+  .heat td.name{white-space:nowrap; color:var(--ink); font-family:var(--disp); font-weight:700; font-size:14px;}
+  .rank-row{display:grid; grid-template-columns:200px 1fr 54px; gap:12px; align-items:center; margin-bottom:12px;}
+  .rank-row .nm{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .rank-row .bar{height:18px; background:var(--soft); border-radius:10px; overflow:hidden; border:2px solid var(--ink);}
+  .rank-row .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--violet),var(--pink)); transition:width .3s ease;}
+  .rank-row .val{font-family:var(--disp); font-size:18px; font-weight:800; color:var(--pink-d); text-align:right;}
+  .rank-row.top .nm{color:var(--pink-d);}
+  .rank-row.top .nm::after{content:' ★'; color:var(--orange);}
+  @media(max-width:560px){.rank-row{grid-template-columns:110px 1fr 44px;}}
+
+  .q-block{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; margin-bottom:16px; box-shadow:4px 4px 0 var(--ink);}
+  .q-block h3{font-size:16px; margin-bottom:14px; color:var(--ink); line-height:1.4;}
+  .opt{display:block; width:100%; text-align:left; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:11px 14px; border-radius:12px; margin-bottom:9px; cursor:pointer; font-family:var(--body); font-size:14px; transition:transform .12s, background .12s;}
+  .opt:hover{transform:translateX(3px); background:var(--soft);}
+  .opt.correct{background:var(--mint-l); font-weight:600;}
+  .opt.wrong{background:var(--pink-l);}
+  .opt[disabled]{cursor:default;}
+  .opt[disabled]:hover{transform:none;}
+  .explain{font-size:13px; color:var(--ink2); margin-top:10px; display:none; line-height:1.55; padding-top:10px; border-top:2px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:26px; background:var(--sun-l); border:2px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); font-family:var(--mono);}
+  .score-box .big{font-family:var(--disp); font-size:44px; font-weight:800; color:var(--ink);}
+  .reset-btn{font-family:var(--mono); font-size:12px; font-weight:700; background:var(--pink); color:var(--ink); border:2px solid var(--ink); padding:9px 18px; border-radius:30px; cursor:pointer; margin-top:12px; box-shadow:3px 3px 0 var(--ink);}
+
+  footer{margin-top:54px; padding-top:18px; border-top:2px solid var(--ink); font-family:var(--mono); font-size:11px; color:var(--ink2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  /* clase 07 */
+  .step.done{background:var(--mint-l);}
+  .prep-flow{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:760px){.prep-flow{grid-template-columns:1fr;}}
+  .pf{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink); position:relative;}
+  .pf .who{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3);}
+  .pf h3{margin:4px 0 6px; font-size:16px;}
+  .pf p{font-size:13.5px; margin:0;}
+  .pf.hl{background:var(--sun-l);}
+  .pf.hl .sticker{position:absolute; top:-12px; right:10px;}
+  .big-out{font-family:var(--mono); font-size:12px; color:var(--ink2); margin-top:10px; line-height:1.6;}
+  .big-out b{color:var(--ink);}
+  .tabsmall{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;}
+  .sw-card .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .sw-card ul{margin-top:4px;}
+  .note-mini{font-size:12px; color:var(--ink3); line-height:1.5; margin-top:6px;}
+  .b-task{background:var(--violet-l);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">Unidad 2 · Software · Preparación</div>
+    <h1>Software de <span class="mark">preparación</span><br>planeación y nesting</h1>
+    <p class="sub">Segunda clase de la Unidad 2. Entre el diseño y la máquina hay un paso que decide cuánto material se gasta, cómo se fabrica y, en cirugía, dónde va el implante. Hoy, en el orden del flujo: planeación guiada (ExoPlan y Blue Sky Plan), nesting y CAM (ExoCAM) y cómo compararlos.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. UNIDAD 2 -->
+    <section class="panel" data-name="Unidad 2" id="sec-unidad">
+      <div class="kicker">01 · Panorama de la unidad</div>
+      <h2>Dónde cae la preparación</h2>
+      <p class="lead">En la Unidad 2 bajamos de las bases teóricas a las herramientas: <strong>primero el software, al final el hardware</strong>, siempre ubicados en el flujo digital. Ya vimos el software de diseño; hoy el que prepara lo diseñado para fabricarlo.</p>
+
+      <div class="umap">
+        <div class="u1">
+          <div class="ulabel">Unidad 1 · Bases teóricas (ya vistas)</div>
+          <div class="pills">
+            <span class="pill">Mallas</span><span class="pill">Voxeles</span><span class="pill">Escaneo</span><span class="pill">Manufactura aditiva</span><span class="pill">Manufactura sustractiva</span>
+          </div>
+        </div>
+        <div class="u2">
+          <div class="block a">
+            <div class="ulabel"><span>Unidad 2 · Bloque A · Software (primero)</span></div>
+            <div class="step done">
+              <div class="no" style="background:var(--mint)">1</div>
+              <div class="tx">Software de diseño<small>Programas CAD, licencias y comparativa · clase 06</small></div>
+            </div>
+            <div class="step now">
+              <div class="no">2</div>
+              <div class="tx">Software de planeación y nesting<small>Preparar lo diseñado para fabricarlo</small></div>
+              <span class="sticker">Hoy</span>
+            </div>
+            <div class="step later">
+              <div class="no" style="background:var(--ink3)">3</div>
+              <div class="tx">Otros accesorios de software<small>Complementos del flujo digital</small></div>
+            </div>
+          </div>
+          <div class="block b">
+            <div class="ulabel"><span>Unidad 2 · Bloque B · Hardware (al final)</span></div>
+            <div class="step later" style="height:calc(100% - 30px); align-items:center;">
+              <div class="no" style="background:var(--ink3)">4</div>
+              <div class="tx">Equipos del flujo digital<small>Se revisan una vez entendido el software que los alimenta</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px;">El flujo digital como mapa permanente</h3>
+      <div class="flow4">
+        <div class="fstage"><div class="fn">PASO 1</div><h3>Captura</h3><span class="ftag hw">Hardware · cierre</span></div>
+        <div class="fstage"><div class="fn">PASO 2</div><h3>Diseño</h3><span class="ftag sw">Software · clase 06</span></div>
+        <div class="fstage here"><span class="sticker">Estás aquí</span><div class="fn">PASO 3</div><h3>Preparación</h3><span class="ftag sw">Software · hoy</span></div>
+        <div class="fstage"><div class="fn">PASO 4</div><h3>Fabricación</h3><span class="ftag hw">Hardware · cierre</span></div>
+      </div>
+    </section>
+
+    <!-- 2. QUE ES PREPARAR -->
+    <section class="panel" data-name="Qué es preparar" id="sec-que">
+      <div class="kicker">02 · Paso 3 del flujo</div>
+      <h2>Tres tareas, en este orden: planear, acomodar, instruir</h2>
+      <p class="lead">“Preparar” agrupa tareas distintas que a veces las hace un mismo programa y a veces tres. Elige un caso y mira qué tareas intervienen y en qué orden.</p>
+      <div class="btn-row" id="prep-chips" style="margin-bottom:16px;"></div>
+      <div class="prep-flow" id="prep-flow"></div>
+      <div class="callout">
+        <div class="lab">Idea central</div>
+        <p>El software de diseño entrega una forma; la máquina necesita <strong>instrucciones</strong>. Preparar es el puente: decidir dónde va cada pieza (en el disco o la plataforma) y traducirla a trayectorias de fresa o a capas. En cirugía guiada, además, <strong>se planea antes de diseñar la guía</strong>.</p>
+      </div>
+    </section>
+
+    <!-- 3. PLANEACION -->
+    <section class="panel" data-name="Planeación: ExoPlan y Blue Sky" id="sec-plan">
+      <div class="kicker">03 · Planear antes de diseñar la guía</div>
+      <h2>Planeación guiada: ExoPlan y Blue Sky Plan</h2>
+      <p class="lead">En cirugía guiada se planea el implante sobre una tomografía antes de diseñar la guía. Dos programas, mismo proceso: <strong>ExoPlan</strong>, de exocad, y <strong>Blue Sky Plan</strong>, de Blue Sky Bio. Recorre los seis pasos y compara cómo lo resuelve cada uno.</p>
+
+      <div class="btn-row" id="bs-chips" style="margin-bottom:14px;"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="kicker" id="bs-no"></div>
+          <h3 id="bs-title" style="font-size:22px;"></h3>
+          <p id="bs-text"></p>
+          <p><strong>Conexión con la serie:</strong> <span id="bs-link"></span></p>
+          <div class="grid2e" style="gap:10px; margin-top:6px;">
+            <div class="pf hl" style="padding:12px;"><div class="who">ExoPlan</div><p id="bs-ex" style="font-size:13px;"></p></div>
+            <div class="pf" style="padding:12px;"><div class="who">Blue Sky Plan</div><p id="bs-bs" style="font-size:13px;"></p></div>
+          </div>
+        </div>
+        <div class="viewport">
+          <span class="tag">Corte esquemático de un maxilar</span>
+          <svg id="bs-svg" viewBox="0 0 300 260" style="margin-top:12px;"></svg>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px;">Dos modelos de licencia opuestos</h3>
+      <div class="grid2e">
+        <div class="card sun">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-sub">Solo suscripción</span><span class="badge b-fm">Modular</span></div>
+          <h3>ExoPlan (exocad)</h3>
+          <ul class="clean">
+            <li>Cuota anual baja que incluye actualizaciones; según exocad, sin cobro por clic ni costos ocultos y con uso ilimitado por caso.</li>
+            <li>El componente de planeación y el módulo <strong>Guide Creator</strong> se compran por separado: pagas solo lo que necesitas.</li>
+            <li>Al ser software de dispositivo médico, <strong>no ofrece licencia perpetua</strong> y deja de funcionar si la suscripción vence (exocad lo atribuye al reglamento europeo 2017/745).</li>
+            <li>Arquitectura abierta: guías en STL y compatible con escáneres, impresoras y fresadoras abiertas. Se integra con DentalCAD.</li>
+          </ul>
+          <p class="note-mini">Precio no publicado; la disponibilidad varía por país, así que se consulta a un distribuidor exocad.</p>
+        </div>
+        <div class="card">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-free">Gratuito para planear</span><span class="badge b-uso">Pago por exportación</span><span class="badge b-sub">Premium opcional</span></div>
+          <h3>Blue Sky Plan (Blue Sky Bio)</h3>
+          <ul class="clean">
+            <li>Descargar e instalar no tiene cuota anual; el flujo manual estándar es gratuito.</li>
+            <li>Al exportar a una impresora o fresadora se descuentan <strong>créditos</strong>; el fabricante publica tarifas desde unos 11 USD por caso.</li>
+            <li>La versión 5.1 añade asistente automático y guías de arcada completa con <strong>Premium</strong> (39 USD al mes, según la página de descarga).</li>
+            <li>Acepta DICOM y STL y exporta STL.</li>
+          </ul>
+          <p class="note-mini">Las páginas del fabricante no coinciden en la plataforma (una indica solo Windows 10/11, otra “Mac o PC”). Verifica antes de instalar.</p>
+        </div>
+      </div>
+
+      <div class="card soft" style="margin-top:16px;">
+        <div class="kicker">Calculadora de punto de equilibrio: pago por guía vs. cuota anual</div>
+        <div class="ctrl-grid">
+          <div class="ctrl"><label>Guías exportadas al mes: <b id="bg-v">8</b></label><input type="range" id="bg" min="0" max="60" value="8"></div>
+          <div class="ctrl"><label>Tarifa por exportación, tipo Blue Sky (USD): <b id="bf-v">15</b></label><input type="range" id="bf" min="11" max="25" value="15"></div>
+          <div class="ctrl"><label>Cuota anual de una suscripción, tipo ExoPlan (USD/año): <b id="ba-v">1800</b></label><input type="range" id="ba" min="0" max="6000" step="100" value="1800"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="bp"> Sumar Premium de Blue Sky (39 USD/mes)</label>
+        <div class="stat-row">
+          <div class="stat"><div class="num" id="bs-cost">–</div><div class="lab">Pago por exportación (USD/año)</div></div>
+          <div class="stat"><div class="num" id="bs-alt">–</div><div class="lab">Suscripción anual (USD/año)</div></div>
+        </div>
+        <div class="big-out" id="bs-be"></div>
+      </div>
+      <p class="src" style="margin-top:12px;">La cuota de ExoPlan <strong>no es pública</strong>: el deslizador es solo para ilustrar el cálculo, no su precio. La tarifa por exportación varía en las fuentes (desde 11 USD según una página; de 11 a 25 según un blog de terceros). Un modelo no es mejor en sí: depende del volumen de casos.</p>
+    </section>
+
+    <!-- 4. NESTING -->
+    <section class="panel" data-name="Nesting y ExoCAM" id="sec-nesting">
+      <div class="kicker">04 · Acomodar piezas</div>
+      <h2>Nesting: cuántas piezas caben en un disco</h2>
+      <p class="lead">Ya con las piezas diseñadas (y, en cirugía, la guía planeada), el siguiente paso es prepararlas para la máquina. Nesting es acomodar varias restauraciones terminadas dentro de un bloque o disco del material (zirconia, cera, PMMA) para fresarlas en un solo ciclo. Mueve los controles y observa cómo cambian el número de piezas y el aprovechamiento.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Disco visto desde arriba (esquemático)</span>
+          <svg id="nest-svg" viewBox="0 0 300 300" style="margin-top:12px;"></svg>
+          <div class="legend"><span><i style="background:var(--pink-l)"></i>Pieza</span><span><i style="background:#fff; border-style:dashed"></i>Zona útil</span></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ctrl-grid" style="grid-template-columns:1fr;">
+              <div class="ctrl"><label>Ancho de la pieza: <b id="nw-v">14</b> mm</label><input type="range" id="nw" min="6" max="30" value="14"></div>
+              <div class="ctrl"><label>Alto de la pieza: <b id="nh-v">12</b> mm</label><input type="range" id="nh" min="6" max="30" value="12"></div>
+              <div class="ctrl"><label>Separación entre piezas: <b id="ns-v">3</b> mm</label><input type="range" id="ns" min="1" max="10" value="3"></div>
+              <div class="ctrl"><label>Borde sin usar: <b id="nm-v">6</b> mm</label><input type="range" id="nm" min="2" max="16" value="6"></div>
+            </div>
+            <label class="check"><input type="checkbox" id="nrot"> Rotar las piezas 90°</label>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="num" id="n-cnt">–</div><div class="lab">piezas por disco</div></div>
+            <div class="stat ok"><div class="num" id="n-use">–</div><div class="lab">uso del disco</div></div>
+          </div>
+          <div class="big-out" id="n-note"></div>
+        </div>
+      </div>
+
+      <div class="grid3" style="margin-top:22px;">
+        <div class="app-card"><h3>Separación</h3><p>Entre piezas debe caber la fresa y quedar material para sostenerlas. Más separación, menos piezas.</p></div>
+        <div class="app-card"><h3>Conectores</h3><p>Cada pieza queda unida al disco por pequeños puentes que se cortan al final. El software los coloca y puedes moverlos.</p></div>
+        <div class="app-card"><h3>Altura del bloque</h3><p>Además del plano, hay que verificar que la pieza quepa en el espesor del disco. ExoCAM, por ejemplo, propone el bloque según la altura de la unidad.</p></div>
+      </div>
+
+      <h3 style="margin-top:26px;">El nesting en la práctica: ExoCAM</h3>
+      <div class="grid2e">
+        <div class="card">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-task">Nesting y CAM</span><span class="badge b-otro">exocad</span></div>
+          <ul class="clean">
+            <li>Recibe las unidades terminadas del CAD (por ejemplo, con la opción “Enqueue to Nesting”) y las <strong>acomoda en el bloque</strong> del material elegido: zirconia, cera o PMMA.</li>
+            <li>Propone el disco que corresponde a la <strong>altura</strong> de la unidad, según la base de datos dental.</li>
+            <li>Incluye <strong>cola de producción</strong> y gestión de materiales, y una interfaz para fresado de 3, 4 y 5 ejes con cálculo de trayectorias.</li>
+            <li>Muestra trayectorias y simulación de fresado antes de enviar a la máquina.</li>
+          </ul>
+        </div>
+        <div class="card soft">
+          <div class="kicker">Qué tan abierto es</div>
+          <ul class="clean">
+            <li>exocad indica que DentalCAD usa formatos de intercambio abiertos basados en XML, lo que permite integrarse con otros programas CAM.</li>
+            <li>La página del producto lista como equipos compatibles las fresadoras imes-icore (245i, 250i, 350i) y Roland DG (DWX-4, DWX-4W, DWX-51D, DWX-50).</li>
+            <li>El motor de cálculo viene de ModuleWorks, según un comunicado de 2017 (puede estar desactualizado).</li>
+            <li>Licencia: las páginas consultadas <strong>no indican</strong> cómo se vende; consúltalo con un distribuidor.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="src" style="margin-top:14px;">Simulación didáctica con rectángulos en filas; el disco de 98 mm es una medida habitual, pero varía según el sistema. Un software real también compensa la contracción de sinterizado del zirconia y respeta las zonas de sujeción del equipo.</p>
+    </section>
+
+    <!-- 5. CATALOGO -->
+    <section class="panel" data-name="Catálogo y licencias" id="sec-cat">
+      <div class="kicker">05 · Quién hace qué</div>
+      <h2>Catálogo de software de preparación</h2>
+      <p class="lead">Se agrupan por tarea, porque un programa de planeación y uno de fresado no compiten entre sí. Filtra por tarea y fíjate en el modelo de licencia de cada uno.</p>
+      <div class="btn-row" id="cat-chips" style="margin-bottom:16px;"></div>
+      <div class="cat-grid" id="cat-grid"></div>
+      <p class="src" style="margin-top:16px;"><b>Fuentes (consultadas en octubre de 2026):</b><br>
+        <a href="https://exocad.com/our-products/exoplan" target="_blank" rel="noopener">exocad · ExoPlan</a> ·
+        <a href="https://exocad.com/our-products/exocam" target="_blank" rel="noopener">exocad · ExoCAM</a> ·
+        <a href="https://www.moduleworks.com/new-features-extend-performance-of-exocam-powered-by-moduleworks/" target="_blank" rel="noopener">ModuleWorks · ExoCAM (2017)</a> ·
+        <a href="https://www.blueskybio.digital/download" target="_blank" rel="noopener">Blue Sky Bio · descarga y licencia</a> ·
+        <a href="https://blueskybio.com/pages/full-featured-treatment-planning-software-computer-guided-surgery" target="_blank" rel="noopener">Blue Sky Bio · planeación</a> ·
+        <a href="https://www.straumann.com/us/en/dental-professionals/digital-performance/software/codiagnostix.html" target="_blank" rel="noopener">Straumann · coDiagnostiX</a> ·
+        <a href="https://surgicalguide.pro/blog/implant-planning-software-comparison" target="_blank" rel="noopener">Comparativa de planeación (blog de terceros)</a> ·
+        <a href="https://wiki.exocad.com/wiki/index.php/ExoCAM_Module" target="_blank" rel="noopener">exocad · wiki ExoCAM</a> ·
+        <a href="https://voxeldental.com/products/hyperdent-dental-cam-software" target="_blank" rel="noopener">Voxel Dental · hyperDENT</a> ·
+        <a href="https://all3dp.com/2/chitubox-vs-lychee-slicer-compared/" target="_blank" rel="noopener">All3DP · Chitubox vs. Lychee</a></p>
+    </section>
+
+    <!-- 6. COMPARATIVA -->
+    <section class="panel" data-name="Comparativa" id="sec-comp">
+      <div class="kicker">06 · Cierre de la clase</div>
+      <h2>Comparativa dentro de cada tarea</h2>
+      <p class="lead">Elige primero la tarea y después pondera. Los puntajes van de 1 a 5 (5 es lo más favorable para quien compra) en seis criterios, y los pesos los decides tú.</p>
+
+      <div class="card">
+        <div class="kicker">1 · Tarea a comparar</div>
+        <div class="btn-row" id="task-chips" style="margin-top:6px; margin-bottom:18px;"></div>
+        <div class="kicker">2 · Perfil (o ajusta los pesos)</div>
+        <div class="btn-row" id="prof-chips" style="margin-top:6px; margin-bottom:18px;"></div>
+        <div class="ctrl-grid" id="weights"></div>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden; margin-top:16px;">
+        <div class="table-wrap"><table class="formats heat" id="heat-table" style="margin-top:0;"></table></div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="kicker">Resultado (promedio ponderado sobre 5)</div>
+        <div id="rank" style="margin-top:14px;"></div>
+      </div>
+      <p class="src" style="margin-top:12px;">Puntajes ilustrativos con criterio docente, basados en información pública a octubre de 2026; no son un benchmark. “Software de la fresadora/impresora” y “Slicer abierto” son arquetipos, no productos concretos.</p>
+
+      <div class="callout">
+        <div class="lab">Misma tarea, mismo criterio</div>
+        <p>Cambia de tarea y los resultados no son comparables entre sí: Blue Sky Plan no fresa y ExoCAM no planea implantes. Compara solo opciones que resuelven el mismo problema y, dentro de ellas, decide qué pesa más: costo, apertura o soporte.</p>
+      </div>
+    </section>
+
+    <!-- 7. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">07 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Unidad 2 · Software de preparación · CAD/CAM dental</span>
+    <span>ExoPlan · Blue Sky Plan · ExoCAM · comparativa</span>
+  </footer>
+
+</div>
+<script>
+const C={ink:'#1B1530',ink2:'#4A4266',ink3:'#8C84A8',line:'#E4DCF5',soft:'#F3EEFF',pink:'#FF4F9A',pinkL:'#FFE3F0',violet:'#6C4DF6',mint:'#12B886',orange:'#F59F00',sun:'#FFC53D',sunL:'#FFF1C2',red:'#E03131',white:'#FFFFFF'};
+const FONT_MONO='Geist Mono, monospace';
+const $=id=>document.getElementById(id);
+const SVGNS='http://www.w3.org/2000/svg';
+const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+
+/* TABS */
+const sections=[...document.querySelectorAll('section.panel')];
+const tabsNav=$('tabs');
+sections.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML=`<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click',()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active'); tabsNav.children[0].classList.add('active');
+
+/* ============ 02 QUE ES PREPARAR ============ */
+const PREP=[
+ {c:'Guía quirúrgica (planeación)',steps:[
+  {w:'Planeación (ExoPlan, Blue Sky Plan)',t:'Planear el implante',x:'Con la tomografía y el escaneo se decide posición, ángulo y profundidad del implante.',hl:true},
+  {w:'Planeación (Guide Creator, Blue Sky)',t:'Diseñar la guía',x:'La guía se construye a partir del plan, con sus casquillos alineados al eje del implante.'},
+  {w:'Slicer + impresora',t:'Exportar e imprimir',x:'La guía se exporta a STL y se imprime; después de planear sigue el flujo aditivo.'}]},
+ {c:'Corona de zirconia (fresado)',steps:[
+  {w:'Nesting / CAM (p. ej. ExoCAM)',t:'Acomodar',x:'Las coronas terminadas se colocan dentro del disco de zirconia, con separación y conectores.',hl:true},
+  {w:'CAM (p. ej. ExoCAM)',t:'Calcular trayectorias',x:'Se eligen fresas y estrategias, y se calculan los movimientos para 3, 4 o 5 ejes (clase 05).'},
+  {w:'Fresadora',t:'Enviar a la máquina',x:'El archivo de instrucciones pasa al equipo. Fabricar ya es el paso 4.'}]},
+ {c:'Modelo o guía impresa (resina)',steps:[
+  {w:'Slicer',t:'Orientar y acomodar',x:'Se gira la pieza y se distribuyen varias en la plataforma de impresión.',hl:true},
+  {w:'Slicer',t:'Generar soportes y capas',x:'El programa añade soportes y corta el modelo en capas (clase 04).'},
+  {w:'Impresora 3D',t:'Enviar a la máquina',x:'Se exporta el archivo de capas al equipo para fabricar.'}]}
+];
+(function(){
+  const chips=$('prep-chips'), box=$('prep-flow');
+  function show(k){
+    [...chips.children].forEach((c,i)=>c.classList.toggle('active',i===k));
+    box.innerHTML='';
+    PREP[k].steps.forEach((s,i)=>{
+      const d=document.createElement('div'); d.className='pf'+(s.hl?' hl':'');
+      d.innerHTML=`${s.hl?'<span class="sticker">Clave</span>':''}<div class="who"></div><h3></h3><p></p>`;
+      d.querySelector('.who').textContent=`${i+1} · ${s.w}`;
+      d.querySelector('h3').textContent=s.t; d.querySelector('p').textContent=s.x;
+      box.appendChild(d);
+    });
+  }
+  PREP.forEach((p,i)=>{const b=document.createElement('button'); b.className='chip'; b.textContent=p.c; b.onclick=()=>show(i); chips.appendChild(b);});
+  show(0);
+})();
+
+/* ============ 03 NESTING ============ */
+(function(){
+  const D=98, S=300/(D+8), cx=150, cy=150;
+  const svg=$('nest-svg');
+  function layout(w,h,s,m){
+    const R=D/2-m; if(R<=0) return [];
+    const pitchY=h+s; let best=[];
+    for(const off of [0,pitchY/2]){
+      const pcs=[]; const rows=Math.ceil(R/pitchY)+1;
+      for(let k=-rows;k<=rows;k++){
+        const yc=k*pitchY+off-(off?0:0);
+        const ytop=Math.abs(yc)+h/2;
+        if(ytop>R) continue;
+        const xmax=Math.sqrt(R*R-ytop*ytop);
+        const n=Math.floor((2*xmax+s)/(w+s));
+        for(let i=0;i<n;i++) pcs.push({x:-((n-1)/2)*(w+s)+i*(w+s), y:yc});
+      }
+      if(pcs.length>best.length) best=pcs;
+    }
+    return best;
+  }
+  function draw(){
+    let w=+$('nw').value,h=+$('nh').value; const s=+$('ns').value,m=+$('nm').value;
+    if($('nrot').checked)[w,h]=[h,w];
+    $('nw-v').textContent=$('nw').value;$('nh-v').textContent=$('nh').value;$('ns-v').textContent=s;$('nm-v').textContent=m;
+    const pcs=layout(w,h,s,m);
+    svg.innerHTML='';
+    svg.appendChild(g('circle',{cx,cy,r:D/2*S,fill:C.soft,stroke:C.ink,'stroke-width':2.5}));
+    svg.appendChild(g('circle',{cx,cy,r:Math.max(0,(D/2-m))*S,fill:C.white,stroke:C.ink3,'stroke-width':1.5,'stroke-dasharray':'5 4'}));
+    pcs.forEach(p=>svg.appendChild(g('rect',{x:cx+(p.x-w/2)*S,y:cy+(p.y-h/2)*S,width:w*S,height:h*S,rx:Math.min(w,h)*S*.28,fill:C.pinkL,stroke:C.pink,'stroke-width':1.8})));
+    svg.appendChild(g('text',{x:cx,y:294,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink3})).textContent='Ø '+D+' mm';
+    const n=pcs.length, use=n*w*h/(Math.PI*(D/2)**2)*100;
+    $('n-cnt').textContent=n; $('n-use').textContent=use.toFixed(0)+'%';
+    $('n-note').innerHTML= n===0?'<b>No cabe ninguna pieza.</b> Reduce el tamaño o el borde sin usar.':
+      `Material de sobra: <b>${(100-use).toFixed(0)}%</b> del disco. `+(use<35?'Mucho espacio libre: prueba piezas más pegadas o rotadas.':use>60?'Aprovechamiento alto; revisa que la separación siga dejando paso a la fresa.':'Aprovechamiento intermedio.');
+  }
+  ['nw','nh','ns','nm','nrot'].forEach(id=>$(id).addEventListener('input',draw));
+  draw();
+})();
+
+/* ============ 04 BLUE SKY PLAN ============ */
+const BS=[
+ {c:'DICOM',t:'Importar la tomografía',x:'Se carga el estudio en formato DICOM. El software lo reconstruye en cortes y en 3D para medir distancias, densidad y ángulos.',l:'Clase 02 (voxeles y CBCT): el tamaño de voxel y el campo de visión limitan qué tan fina es la planeación.',e:'Visor rápido para archivos CBCT grandes.',b:'Carga DICOM de cualquier equipo; mide distancias, densidad y ángulos.'},
+ {c:'Escaneo',t:'Fusionar con el escaneo',x:'Se alinea el STL del escaneo intraoral con la tomografía, para ver a la vez hueso y dientes o encía.',l:'Clases 01 y 03: la malla del escáner (superficie) se superpone al volumen del CBCT; un escaneo con errores afecta el alineado.',e:'Alinea el CBCT con escaneos de superficie y ofrece herramientas de refinado.',b:'Importa STL; fusiona, superpone y alinea superficies.'},
+ {c:'Anatomía',t:'Identificar estructuras',x:'Se revisan el grosor y la altura del hueso y las estructuras que hay que respetar, como el trayecto del nervio.',l:'Clase 02: la densidad del voxel permite distinguir hueso de tejidos blandos.',e:'Modo asistente (guiado paso a paso) o modo experto (más herramientas) para revisar el caso.',b:'Mediciones de distancia, densidad y ángulo sobre el volumen.'},
+ {c:'Implante',t:'Colocar el implante virtual',x:'Se elige el implante y se ubica según el diente que se va a restaurar: posición, ángulo y profundidad guiados por la prótesis.',l:'Clase 06: es un diseño “al revés”: parte de la prótesis y de ahí se decide el hueso. ExoPlan se conecta con DentalCAD.',e:'Coronas virtuales guían la posición del implante y del pilar. Biblioteca con Straumann, Dentsply Sirona, Zimmer, Camlog y otros.',b:'Dientes virtuales. Según un blog de terceros, bibliotecas multimarca amplias.'},
+ {c:'Guía',t:'Diseñar la guía',x:'A partir del plan se genera la guía con el casquillo alineado al eje del implante, en técnica “en clínica” o “en laboratorio”.',l:'Clase 06: la guía es un diseño CAD más, con márgenes y espesores que verificar.',e:'Módulo Guide Creator: casquillos, pilares, tapa, ventanas y barras de soporte; incluye casos edéntulos.',b:'Guías “en clínica” o “en laboratorio”.'},
+ {c:'Exportar',t:'Exportar a STL e imprimir',x:'La guía se exporta a STL y se manda a la impresora. Según el programa, aquí puede haber un cobro por exportación.',l:'Clase 04: la guía se imprime en resina y se postprocesa como cualquier pieza aditiva.',e:'STL estándar, sin cobro por clic según exocad; informes de planeación en PDF.',b:'STL para cualquier impresora; se descuentan créditos por exportación.'}
+];
+(function(){
+  const chips=$('bs-chips'), svg=$('bs-svg');
+  function draw(k){
+    svg.innerHTML='';
+    const cxI=150;
+    // hueso
+    svg.appendChild(g('path',{d:'M20,150 L280,150 L280,230 Q150,250 20,230 Z',fill:C.sunL,stroke:C.ink,'stroke-width':2}));
+    if(k===0){ for(let x=30;x<280;x+=18)for(let y=158;y<236;y+=14) svg.appendChild(g('rect',{x,y,width:12,height:9,fill:'none',stroke:C.ink3,'stroke-width':1,opacity:.7}));
+      svg.appendChild(g('text',{x:150,y:252,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink3})).textContent='DICOM · voxeles'; }
+    // dientes vecinos y encía (STL)
+    if(k>=1){
+      svg.appendChild(g('path',{d:'M20,150 L20,138 Q60,130 100,138 L100,150 Z',fill:C.pinkL,stroke:C.pink,'stroke-width':2.5}));
+      svg.appendChild(g('path',{d:'M200,150 L200,138 Q240,130 280,138 L280,150 Z',fill:C.pinkL,stroke:C.pink,'stroke-width':2.5}));
+      svg.appendChild(g('path',{d:'M52,138 C46,110 52,84 68,80 Q80,76 90,90 C98,104 96,126 96,138 Z',fill:C.white,stroke:C.pink,'stroke-width':2.5}));
+      svg.appendChild(g('path',{d:'M204,138 C204,126 202,104 210,90 Q220,76 232,80 C248,84 254,110 248,138 Z',fill:C.white,stroke:C.pink,'stroke-width':2.5}));
+      svg.appendChild(g('text',{x:150,y:70,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.pink})).textContent='STL del escaneo';
+    }
+    // nervio
+    if(k>=2){
+      svg.appendChild(g('circle',{cx:100,cy:208,r:11,fill:C.orange,stroke:C.ink,'stroke-width':2}));
+      svg.appendChild(g('circle',{cx:200,cy:208,r:11,fill:C.orange,stroke:C.ink,'stroke-width':2,opacity:.0}));
+      svg.appendChild(g('text',{x:120,y:228,'font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink})).textContent='nervio';
+    }
+    // implante + corona virtual
+    if(k>=3){
+      svg.appendChild(g('path',{d:`M${cxI-12},150 L${cxI+12},150 L${cxI+9},196 L${cxI-9},196 Z`,fill:C.violet,stroke:C.ink,'stroke-width':2}));
+      for(let y=156;y<194;y+=8) svg.appendChild(g('line',{x1:cxI-12,y1:y,x2:cxI+12,y2:y+3,stroke:C.white,'stroke-width':1.5}));
+      svg.appendChild(g('path',{d:`M${cxI-26},138 C${cxI-30},110 ${cxI-24},86 ${cxI-6},80 Q${cxI},78 ${cxI+6},80 C${cxI+24},86 ${cxI+30},110 ${cxI+26},138 Z`,fill:'rgba(108,77,246,0.12)',stroke:C.violet,'stroke-width':2,'stroke-dasharray':'6 4'}));
+      svg.appendChild(g('line',{x1:cxI,y1:70,x2:cxI,y2:196,stroke:C.mint,'stroke-width':2,'stroke-dasharray':'4 4'}));
+    }
+    // guia
+    if(k>=4){
+      svg.appendChild(g('path',{d:'M34,140 Q34,30 150,30 Q266,30 266,140',fill:'none',stroke:C.mint,'stroke-width':8,'stroke-linecap':'round'}));
+      svg.appendChild(g('rect',{x:cxI-8,y:24,width:16,height:26,rx:3,fill:C.sun,stroke:C.ink,'stroke-width':2}));
+      svg.appendChild(g('text',{x:cxI+14,y:46,'font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink})).textContent='casquillo';
+    }
+    if(k>=5){
+      svg.appendChild(g('rect',{x:216,y:182,width:62,height:28,rx:8,fill:C.sun,stroke:C.ink,'stroke-width':2}));
+      svg.appendChild(g('text',{x:247,y:201,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'12','font-weight':'700',fill:C.ink})).textContent='STL ✓';
+    }
+    for(let i=0;i<BS.length;i++) svg.appendChild(g('rect',{x:20+i*43,y:0+4,width:38,height:8,rx:4,fill:i<=k?C.pink:C.line,stroke:C.ink,'stroke-width':1.5}));
+  }
+  function show(k){
+    [...chips.children].forEach((c,i)=>c.classList.toggle('active',i===k));
+    const d=BS[k];
+    $('bs-no').textContent='Paso '+(k+1)+' de '+BS.length;
+    $('bs-title').textContent=d.t; $('bs-text').textContent=d.x; $('bs-link').textContent=d.l; $('bs-ex').textContent=d.e; $('bs-bs').textContent=d.b;
+    draw(k);
+  }
+  BS.forEach((d,i)=>{const b=document.createElement('button'); b.className='chip'; b.textContent=`${i+1} · ${d.c}`; b.onclick=()=>show(i); chips.appendChild(b);});
+  show(0);
+
+  // calculadora
+  function calc(){
+    const n=+$('bg').value, f=+$('bf').value, a=+$('ba').value, p=$('bp').checked?39*12:0;
+    $('bg-v').textContent=n;$('bf-v').textContent=f;$('ba-v').textContent=a;
+    const cost=n*f*12+p;
+    $('bs-cost').textContent=cost.toLocaleString('en-US'); $('bs-alt').textContent=a.toLocaleString('en-US');
+    const be=(a-p)/(f*12);
+    $('bs-be').innerHTML= be<=0 ? 'Con esa cuota y el Premium, la suscripción <b>sale más barata desde la primera guía</b>.' :
+      `Punto de equilibrio: <b>${be.toFixed(1)} guías al mes</b>. `+(n<be?'Por debajo de eso conviene pagar por exportación.':'Por encima, la cuota anual sale más barata.');
+  }
+  ['bg','bf','ba','bp'].forEach(id=>$(id).addEventListener('input',calc)); calc();
+})();
+
+/* ============ 05 CATALOGO ============ */
+const TASKS={plan:'Planeación guiada',cam:'Nesting y CAM (fresado)',slice:'Slicer (impresión)'};
+const CAT=[
+ {t:'plan',n:'ExoPlan',who:'exocad',lic:[['b-sub','Solo suscripción'],['b-fm','Modular']],d:'Planeación de implantes y diseño de guías sobre la plataforma exocad, con arquitectura abierta.',f:['Cuota anual baja con actualizaciones; sin cobro por clic (según exocad).','Planeación y Guide Creator se compran por separado.','Sin licencia perpetua: si vence la suscripción, deja de funcionar.','Guías en STL; se integra con DentalCAD.']},
+ {t:'plan',n:'Blue Sky Plan',who:'Blue Sky Bio',lic:[['b-free','Gratuito para planear'],['b-uso','Pago por exportación'],['b-sub','Premium opcional']],d:'Planeación de implantes y diseño de guías quirúrgicas. Importa DICOM y STL y exporta STL.',f:['Gratis descargar y planear con el flujo manual.','Créditos por exportar el caso (desde ~11 USD).','Premium (39 USD/mes) para asistente automático y guías de arcada completa.']},
+ {t:'plan',n:'coDiagnostiX',who:'Straumann',lic:[['b-sub','Suscripción'],['b-uso','Exportaciones por plan']],d:'Planeación guiada con IA para segmentación y detección del nervio, y envío de diseños a laboratorios.',f:['Planes “sin llave” (dongle-free), desde gratuito (Basic) hasta 375 USD/mes (Enterprise).','Exportaciones incluidas según el plan (0 a 10 al mes); extra de 25 a 39 USD.']},
+ {t:'plan',n:'3Shape Implant Studio',who:'3Shape',lic:[['b-perp','Licencia'],['b-otro','Ligado a 3Shape']],d:'Planeación quirúrgica integrada al ecosistema 3Shape, con flujo protésico–quirúrgico continuo.',f:['Según un blog de terceros, se vende ligado al CAD de 3Shape y es difícil justificarlo solo.','Aprovecha más con escáneres TRIOS.']},
+ {t:'cam',n:'ExoCAM',who:'exocad',lic:[['b-otro','Licencia no indicada']],d:'CAM de exocad: nesting en bloque, cola de producción, trayectorias y simulación de fresado.',f:['Recibe las unidades terminadas directamente del CAD.','Interfaz de 3, 4 y 5 ejes; propone el disco según la altura de la unidad.','Equipos listados: imes-icore y Roland DG.','Las páginas consultadas no detallan cómo se vende.']},
+ {t:'cam',n:'hyperDENT',who:'Voxel Dental',lic:[['b-otro','Cotización con el proveedor']],d:'CAM “agnóstico” de máquina para fresado dental, con nesting y simulación en tiempo real.',f:['4 y 5 ejes y “una amplia gama de sistemas abiertos”.','Zirconia (incluida multicapa), titanio y PMMA.','Licencias escalables: el precio se pide al proveedor.']},
+ {t:'cam',n:'Software de la fresadora',who:'Arquetipo',lic:[['b-otro','Incluido con el equipo']],d:'Programa CAM propio de la marca del equipo, optimizado para sus máquinas y materiales.',f:['Suele ser lo más sencillo de arrancar.','Lo habitual es que sirva solo para esa marca (sistema cerrado).']},
+ {t:'slice',n:'Chitubox',who:'Chitubox',lic:[['b-free','Basic gratuito'],['b-sub','Pro por suscripción']],d:'Slicer para impresoras de resina: orientación, soportes y acomodo en plataforma.',f:['Basic incluye soportes manuales y automáticos y auto-layout.','Pro (16 USD/mes o 169 USD/año) añade soportes personalizados, reparación manual y autoorientación.']},
+ {t:'slice',n:'Lychee Slicer',who:'Mango 3D',lic:[['b-free','Gratis con anuncios'],['b-sub','Pro y Premium']],d:'Slicer para resina con soportes, orientación y módulos extra por suscripción.',f:['La versión gratuita muestra anuncios de 20 s antes de rebanar.','Pro (~6 USD/mes o 76 USD/año): soportes automáticos y herramienta por lotes.']},
+ {t:'slice',n:'Software de la impresora',who:'Arquetipo',lic:[['b-otro','Incluido con el equipo']],d:'Slicer de la marca con perfiles de materiales y calibraciones listos para sus resinas.',f:['Perfiles validados que reducen pruebas.','Suele limitar los materiales a los de la propia marca.']}
+];
+(function(){
+  const chips=$('cat-chips'), grid=$('cat-grid'); let cur='all';
+  function render(){
+    [...chips.children].forEach(c=>c.classList.toggle('active',c.dataset.k===cur));
+    grid.innerHTML='';
+    CAT.filter(s=>cur==='all'||s.t===cur).forEach(s=>{
+      const d=document.createElement('div'); d.className='sw-card';
+      d.innerHTML=`<div class="badges"><span class="badge b-task"></span></div><h3></h3><div class="who" style="font-family:var(--mono);font-size:11px;color:var(--ink3);"></div><p></p><ul class="clean"></ul>`;
+      d.querySelector('.b-task').textContent=TASKS[s.t];
+      s.lic.forEach(([cl,tx])=>{const b=document.createElement('span'); b.className='badge '+cl; b.textContent=tx; d.querySelector('.badges').appendChild(b);});
+      d.querySelector('h3').textContent=s.n; d.querySelector('.who').textContent=s.who; d.querySelector('p').textContent=s.d;
+      s.f.forEach(x=>{const li=document.createElement('li'); li.textContent=x; d.querySelector('ul').appendChild(li);});
+      grid.appendChild(d);
+    });
+  }
+  [['all','Todas'],['plan',TASKS.plan],['cam',TASKS.cam],['slice',TASKS.slice]].forEach(([k,l])=>{const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=l; b.onclick=()=>{cur=k; render();}; chips.appendChild(b);});
+  render();
+})();
+
+/* ============ 06 COMPARATIVA ============ */
+const CRIT=['Costo de entrada','Especialización dental','Apertura de formatos','Facilidad de aprendizaje','Soporte y capacitación','Independencia del proveedor'];
+const POOL={
+ plan:[{n:'ExoPlan',s:[3,5,4,4,4,3]},{n:'Blue Sky Plan',s:[5,5,5,2,2,4]},{n:'coDiagnostiX',s:[2,5,4,4,4,3]},{n:'3Shape Implant Studio',s:[2,5,3,4,4,2]}],
+ cam:[{n:'ExoCAM',s:[3,5,3,3,4,3]},{n:'hyperDENT',s:[2,5,5,3,4,4]},{n:'Software de la fresadora',s:[4,4,1,4,4,1]}],
+ slice:[{n:'Chitubox',s:[4,2,5,4,3,4]},{n:'Lychee Slicer',s:[4,2,5,4,3,4]},{n:'Software de la impresora',s:[4,3,2,4,4,1]}]
+};
+const PROF={
+ 'Estudiante':[5,1,3,4,2,3],
+ 'Clínica pequeña':[3,3,2,4,4,2],
+ 'Laboratorio':[2,4,5,2,4,5]
+};
+(function(){
+  let task='plan'; const weights=[3,3,3,3,3,3];
+  const tchips=$('task-chips'), pchips=$('prof-chips'), wbox=$('weights');
+  Object.keys(TASKS).forEach(k=>{const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=TASKS[k]; b.onclick=()=>{task=k; draw();}; tchips.appendChild(b);});
+  Object.keys(PROF).forEach(p=>{const b=document.createElement('button'); b.className='chip'; b.textContent=p; b.onclick=()=>{
+    PROF[p].forEach((v,i)=>{weights[i]=v; $('w'+i).value=v; $('wv'+i).textContent=v;});
+    [...pchips.children].forEach(c=>c.classList.toggle('active',c===b)); draw();}; pchips.appendChild(b);});
+  CRIT.forEach((c,i)=>{const d=document.createElement('div'); d.className='ctrl';
+    d.innerHTML=`<label>${c}: <b id="wv${i}">3</b></label><input type="range" id="w${i}" min="0" max="5" value="3">`;
+    wbox.appendChild(d);
+    d.querySelector('input').addEventListener('input',e=>{weights[i]=+e.target.value; $('wv'+i).textContent=weights[i]; [...pchips.children].forEach(c=>c.classList.remove('active')); draw();});
+  });
+  function draw(){
+    [...tchips.children].forEach(c=>c.classList.toggle('active',c.dataset.k===task));
+    const pool=POOL[task];
+    // tabla
+    const colr=v=>['','#FFE3F0','#FFF1C2','#FFFFFF','#D5F5E8','#9FE6C8'][v];
+    $('heat-table').innerHTML='<tr><th>Opción</th>'+CRIT.map(c=>`<th style="text-align:center">${c}</th>`).join('')+'</tr>'+
+      pool.map(p=>`<tr><td class="name">${p.n}</td>`+p.s.map(v=>`<td class="s" style="background:${colr(v)}">${v}</td>`).join('')+'</tr>').join('');
+    // ranking
+    const sum=weights.reduce((a,b)=>a+b,0); const box=$('rank'); box.innerHTML='';
+    if(!sum){box.innerHTML='<p style="margin:0;">Asigna al menos un peso mayor que 0 para ver el resultado.</p>'; return;}
+    pool.map(p=>({n:p.n,v:p.s.reduce((a,v,i)=>a+v*weights[i],0)/sum})).sort((a,b)=>b.v-a.v).forEach((r,i)=>{
+      const row=document.createElement('div'); row.className='rank-row'+(i===0?' top':'');
+      row.innerHTML=`<div class="nm"></div><div class="bar"><i style="width:${(r.v/5*100).toFixed(1)}%"></i></div><div class="val">${r.v.toFixed(2)}</div>`;
+      row.querySelector('.nm').textContent=r.n; box.appendChild(row);
+    });
+  }
+  draw();
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ=[
+ {q:'¿Qué diferencia el modelo de licencia de ExoPlan del de Blue Sky Plan?',opts:['Ambos son gratuitos y se cobran por caso','ExoPlan se vende como licencia perpetua y Blue Sky como suscripción','Ambos exigen licencia perpetua con contrato de mantenimiento','ExoPlan es solo suscripción anual; Blue Sky es gratis para planear y cobra créditos al exportar'],correct:3,exp:'ExoPlan se licencia solo por suscripción y deja de funcionar si vence; Blue Sky Plan combina freemium con pago por exportación. El mejor modelo depende del volumen de casos: la calculadora muestra el punto de equilibrio.'},
+ {q:'¿Qué hace el nesting en el flujo digital?',opts:['Diseña la anatomía de la corona','Acomoda las restauraciones terminadas dentro del disco o bloque antes de fresar','Convierte la tomografía en una malla','Pule las piezas después de fabricarlas'],correct:1,exp:'El nesting es posterior al diseño: toma las piezas ya terminadas y decide dónde van dentro del bloque del material para fresarlas en un mismo ciclo.'},
+ {q:'En el simulador de nesting aumentas la separación entre piezas. ¿Qué ocurre normalmente?',opts:['Caben menos piezas y baja el aprovechamiento del disco','Caben más piezas porque se fresan más rápido','Nada, solo cambia el color','Aumenta el aprovechamiento porque sobra menos material'],correct:0,exp:'Cada pieza ocupa más espacio efectivo, así que caben menos por disco. La separación es el margen que necesitan la fresa y los conectores.'},
+ {q:'¿Por qué no tiene sentido comparar ExoPlan con ExoCAM en una matriz ponderada, aunque sean de la misma marca?',opts:['Porque uno es gratuito y el otro no','Porque ExoCAM no acepta archivos STL','Porque resuelven tareas distintas: planear implantes vs. preparar el fresado','Porque ExoPlan solo funciona en Windows'],correct:2,exp:'Misma marca no significa misma tarea. Una comparativa solo vale entre opciones que resuelven el mismo problema; por eso la matriz de esta clase se hace dentro de cada tarea.'},
+ {q:'En impresión 3D, ¿qué papel equivale al del nesting y el CAM en el fresado?',opts:['El de la impresora, que calcula el diseño','El del escáner intraoral','El del software de diseño CAD','El del slicer, que orienta, acomoda y genera soportes y capas'],correct:3,exp:'El slicer es el paso de preparación de la manufactura aditiva: orienta y acomoda piezas en la plataforma y las traduce a capas, como el CAM lo hace con trayectorias de fresa.'}
+];
+(function(){
+  const container=$('quiz-container'), scoreBox=$('quiz-score'); let score=0,answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div'); block.className='q-block';
+    const h3=document.createElement('h3'); h3.textContent=`${qi+1}. ${item.q}`; block.appendChild(h3);
+    const explain=document.createElement('div'); explain.className='explain'; explain.textContent=item.exp;
+    item.opts.forEach((t,oi)=>{
+      const btn=document.createElement('button'); btn.className='opt'; btn.textContent=t;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){btn.classList.add('correct'); score++;} else {btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct');}
+        explain.classList.add('show'); answered++; if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain); container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML=`<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--ink2); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    $('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
