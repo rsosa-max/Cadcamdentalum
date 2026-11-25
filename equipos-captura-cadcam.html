@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 2 · Hardware de Captura CAD/CAM: Escáneres Intraorales y de Escritorio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9EE;
+    --card:#FFFFFF;
+    --ink:#1B1530;
+    --ink2:#4A4266;
+    --ink3:#8C84A8;
+    --soft:#F3EEFF;
+    --line:#E4DCF5;
+    --pink:#FF4F9A;
+    --pink-d:#D6226F;
+    --pink-l:#FFE3F0;
+    --violet:#6C4DF6;
+    --violet-l:#E9E4FF;
+    --mint:#12B886;
+    --mint-l:#D5F5E8;
+    --sun:#FFC53D;
+    --sun-l:#FFF1C2;
+    --sky:#339AF0;
+    --sky-l:#DCEEFF;
+    --red:#E03131;
+    --orange:#F59F00;
+    --disp:'Bricolage Grotesque','Trebuchet MS',sans-serif;
+    --body:'Geist','Inter',system-ui,sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh; background-image:radial-gradient(rgba(27,21,48,.09) 1.2px, transparent 1.4px); background-size:22px 22px;}
+  .app{max-width:1100px; margin:0 auto; padding:30px 20px 80px;}
+
+  header.top{padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); background:var(--sun); border:2px solid var(--ink); border-radius:30px; padding:5px 12px; box-shadow:3px 3px 0 var(--ink);}
+  h1{font-family:var(--disp); font-weight:800; font-size:clamp(32px,5.4vw,56px); letter-spacing:-.02em; margin-top:18px; line-height:1.02;}
+  h1 .mark{background:linear-gradient(transparent 58%, var(--pink) 58%, var(--pink) 92%, transparent 92%); padding:0 4px;}
+  .sub{color:var(--ink2); font-size:16px; margin-top:14px; max-width:700px; line-height:1.55;}
+
+  nav.tabs{display:flex; gap:8px; overflow-x:auto; padding:4px 4px 10px; margin:0 -4px 22px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:var(--mono); font-size:12px; font-weight:500; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:9px 14px; border-radius:30px; cursor:pointer; white-space:nowrap; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; box-shadow:2px 2px 0 var(--ink);}
+  nav.tabs button .n{color:var(--ink3); margin-right:7px;}
+  nav.tabs button:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active{background:var(--pink); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active .n{color:var(--ink);}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:var(--mono); font-size:11px; font-weight:700; color:var(--violet); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:var(--disp); font-size:clamp(24px,3.4vw,36px); font-weight:800; margin-bottom:14px; letter-spacing:-.015em; line-height:1.1;}
+  h3{font-family:var(--disp); font-size:17px; font-weight:700; margin-bottom:8px; color:var(--ink);}
+  p{color:var(--ink2); line-height:1.65; font-size:15px; margin-bottom:12px;}
+  p strong{color:var(--ink); font-weight:600;}
+  .lead{color:var(--ink); font-size:17px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid2e{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid2e{grid-template-columns:1fr;}}
+
+  .card{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; box-shadow:4px 4px 0 var(--ink);}
+  .card.soft{background:var(--soft);}
+  .card.sun{background:var(--sun-l);}
+  .viewport{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:16px; position:relative; box-shadow:4px 4px 0 var(--ink);}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink3); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:140px; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .stat .num{font-family:var(--disp); font-weight:800; font-size:24px; color:var(--pink-d); line-height:1.1;}
+  .stat .lab{font-family:var(--mono); font-size:10px; color:var(--ink3); text-transform:uppercase; letter-spacing:.06em; margin-top:4px; font-weight:500;}
+  .stat.ok{background:var(--mint-l);}
+  .stat.ok .num{color:#0A7A59;}
+
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:var(--mono); font-size:12px; font-weight:500; border:2px solid var(--ink); background:var(--card); color:var(--ink); padding:7px 13px; border-radius:30px; cursor:pointer; transition:transform .12s, box-shadow .12s, background .12s; box-shadow:2px 2px 0 var(--ink);}
+  .chip:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  .chip.active{background:var(--sun); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:20px; color:var(--ink2); font-size:14.5px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'●'; font-size:9px; position:absolute; left:2px; top:5px; color:var(--pink);}
+  ul.pros li::before{content:'+'; font-size:15px; top:-1px; color:var(--mint); font-weight:800;}
+  ul.cons li::before{content:'–'; font-size:15px; top:-1px; color:var(--red); font-weight:800;}
+
+  .callout{border:2px solid var(--ink); border-radius:16px; padding:14px 18px; background:var(--sun-l); margin-top:18px; box-shadow:4px 4px 0 var(--ink);}
+  .callout p{color:var(--ink); font-size:14px; margin:0;}
+  .callout .lab{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  .sticker{display:inline-block; background:var(--sun); border:2px solid var(--ink); border-radius:20px; padding:2px 10px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink); transform:rotate(-3deg); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:6px;}
+  table.formats th{font-family:var(--mono); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink2); text-align:left; padding:9px 10px; background:var(--soft); border-bottom:2px solid var(--ink);}
+  table.formats td{padding:10px; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top;}
+  table.formats td:first-child{color:var(--pink-d); font-family:var(--mono); font-weight:700;}
+  .table-wrap{overflow-x:auto;}
+
+  .app-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink);}
+  .app-card h3{font-size:15.5px;}
+  .app-card p{font-size:13.5px; margin-bottom:0;}
+
+  /* controls */
+  .ctrl-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
+  .ctrl label{display:block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink2); letter-spacing:.03em;}
+  .ctrl label b{color:var(--pink-d); font-weight:700;}
+  .ctrl input[type=range]{width:100%; margin-top:8px; accent-color:var(--pink);}
+  .ctrl input[type=number]{width:100%; margin-top:6px; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:8px 10px; border-radius:10px; font-family:var(--mono); font-size:13px;}
+  .ctrl input[type=number]:focus{outline:none; box-shadow:3px 3px 0 var(--pink);}
+  .check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink2); margin-top:12px; cursor:pointer;}
+  .check input{accent-color:var(--pink); width:16px; height:16px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-family:var(--mono); font-size:11px; color:var(--ink2);}
+  .legend i{display:inline-block; width:12px; height:12px; border-radius:4px; border:1.5px solid var(--ink); margin-right:6px; vertical-align:-2px;}
+
+  /* badges */
+  .badge{display:inline-block; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:20px; border:2px solid var(--ink); text-transform:uppercase; white-space:nowrap; color:var(--ink);}
+  .b-perp{background:var(--sun-l);}
+  .b-sub{background:var(--pink-l);}
+  .b-uso{background:var(--mint-l);}
+  .b-fm{background:var(--violet-l);}
+  .b-open{background:#E3F8D4;}
+  .b-free{background:var(--sky-l);}
+  .b-otro{background:#EDEAF3;}
+
+  .sw-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:8px; box-shadow:3px 3px 0 var(--ink);}
+  .sw-card h3{margin-bottom:0; font-size:16px;}
+  .sw-card p{font-size:13.5px; margin:0;}
+
+  /* unit map */
+  .umap{display:grid; gap:14px;}
+  .u1{border:2px dashed var(--ink3); border-radius:18px; padding:16px 18px; background:rgba(255,255,255,.6);}
+  .u1 .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px;}
+  .pills{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{font-family:var(--mono); font-size:11.5px; border:1.5px solid var(--ink3); color:var(--ink2); background:var(--card); border-radius:30px; padding:4px 11px;}
+  .u2{display:grid; grid-template-columns:1.5fr .9fr; gap:14px; align-items:stretch;}
+  @media(max-width:760px){.u2{grid-template-columns:1fr;}}
+  .block{border:2px solid var(--ink); border-radius:18px; padding:18px; box-shadow:4px 4px 0 var(--ink);}
+  .block.a{background:var(--pink-l);}
+  .block.b{background:var(--sky-l);}
+  .block .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); margin-bottom:12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .step{display:grid; grid-template-columns:34px 1fr auto; gap:12px; align-items:center; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:11px 12px; margin-bottom:10px;}
+  .step:last-child{margin-bottom:0;}
+  .step .no{width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; font-family:var(--disp); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .step .tx{font-size:14px; font-weight:600; color:var(--ink); line-height:1.3;}
+  .step .tx small{display:block; font-weight:400; color:var(--ink2); font-size:12.5px; margin-top:2px;}
+  .step.now{background:var(--sun); box-shadow:3px 3px 0 var(--ink);}
+  .step.now .no{background:var(--pink); color:var(--ink); border:2px solid var(--ink);}
+  .step.later{background:rgba(255,255,255,.65); border-style:dashed;}
+  .flow4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:860px){.flow4{grid-template-columns:1fr 1fr;}}
+  @media(max-width:520px){.flow4{grid-template-columns:1fr;}}
+  .fstage{position:relative; background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px 14px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .fstage .fn{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink3); letter-spacing:.08em;}
+  .fstage h3{font-size:17px; margin:2px 0 8px;}
+  .fstage .ftag{display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700; border:2px solid var(--ink); border-radius:20px; padding:3px 9px; background:#EDEAF3; color:var(--ink);}
+  .fstage .ftag.sw{background:var(--pink-l);}
+  .fstage .ftag.hw{background:var(--sky-l);}
+  .fstage .ftag.up{background:var(--card); border-style:dashed;}
+  .fstage.here{background:var(--sun-l); box-shadow:5px 5px 0 var(--ink);}
+  .fstage.here .sticker{position:absolute; top:-12px; right:10px;}
+
+  .src{font-size:12.5px; color:var(--ink2); line-height:1.8;}
+  .src a{color:var(--pink-d); text-decoration:none; border-bottom:2px solid var(--pink);}
+  .src a:hover{background:var(--pink-l);}
+
+  /* heat + rank */
+  .heat td.s{text-align:center; font-family:var(--disp); font-size:17px; font-weight:800; color:var(--ink);}
+  .heat td.name{white-space:nowrap; color:var(--ink); font-family:var(--disp); font-weight:700; font-size:14px;}
+  .rank-row{display:grid; grid-template-columns:200px 1fr 54px; gap:12px; align-items:center; margin-bottom:12px;}
+  .rank-row .nm{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .rank-row .bar{height:18px; background:var(--soft); border-radius:10px; overflow:hidden; border:2px solid var(--ink);}
+  .rank-row .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--violet),var(--pink)); transition:width .3s ease;}
+  .rank-row .val{font-family:var(--disp); font-size:18px; font-weight:800; color:var(--pink-d); text-align:right;}
+  .rank-row.top .nm{color:var(--pink-d);}
+  .rank-row.top .nm::after{content:' ★'; color:var(--orange);}
+  @media(max-width:560px){.rank-row{grid-template-columns:110px 1fr 44px;}}
+
+  .q-block{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; margin-bottom:16px; box-shadow:4px 4px 0 var(--ink);}
+  .q-block h3{font-size:16px; margin-bottom:14px; color:var(--ink); line-height:1.4;}
+  .opt{display:block; width:100%; text-align:left; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:11px 14px; border-radius:12px; margin-bottom:9px; cursor:pointer; font-family:var(--body); font-size:14px; transition:transform .12s, background .12s;}
+  .opt:hover{transform:translateX(3px); background:var(--soft);}
+  .opt.correct{background:var(--mint-l); font-weight:600;}
+  .opt.wrong{background:var(--pink-l);}
+  .opt[disabled]{cursor:default;}
+  .opt[disabled]:hover{transform:none;}
+  .explain{font-size:13px; color:var(--ink2); margin-top:10px; display:none; line-height:1.55; padding-top:10px; border-top:2px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:26px; background:var(--sun-l); border:2px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); font-family:var(--mono);}
+  .score-box .big{font-family:var(--disp); font-size:44px; font-weight:800; color:var(--ink);}
+  .reset-btn{font-family:var(--mono); font-size:12px; font-weight:700; background:var(--pink); color:var(--ink); border:2px solid var(--ink); padding:9px 18px; border-radius:30px; cursor:pointer; margin-top:12px; box-shadow:3px 3px 0 var(--ink);}
+
+  footer{margin-top:54px; padding-top:18px; border-top:2px solid var(--ink); font-family:var(--mono); font-size:11px; color:var(--ink2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  /* clase 07 */
+  .step.done{background:var(--mint-l);}
+  .prep-flow{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:760px){.prep-flow{grid-template-columns:1fr;}}
+  .pf{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink); position:relative;}
+  .pf .who{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3);}
+  .pf h3{margin:4px 0 6px; font-size:16px;}
+  .pf p{font-size:13.5px; margin:0;}
+  .pf.hl{background:var(--sun-l);}
+  .pf.hl .sticker{position:absolute; top:-12px; right:10px;}
+  .big-out{font-family:var(--mono); font-size:12px; color:var(--ink2); margin-top:10px; line-height:1.6;}
+  .big-out b{color:var(--ink);}
+  .tabsmall{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;}
+  .sw-card .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .sw-card ul{margin-top:4px;}
+  .note-mini{font-size:12px; color:var(--ink3); line-height:1.5; margin-top:6px;}
+  .b-task{background:var(--violet-l);}
+  /* clase 08 */
+  .track{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:6px 0 10px;}
+  @media(max-width:760px){.track{grid-template-columns:repeat(2,1fr);}}
+  .tk{border:2px solid var(--ink); border-radius:14px; padding:12px 8px; text-align:center; background:var(--card); font-family:var(--disp); font-weight:700; font-size:14.5px; line-height:1.2; position:relative;}
+  .tk small{display:block; font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); margin-bottom:4px;}
+  .tk.acc{background:var(--pink-l);}
+  .tk.on{background:var(--sun); box-shadow:3px 3px 0 var(--ink); transform:translateY(-2px);}
+  .band{border:2px dashed var(--violet); border-radius:14px; padding:9px 12px; text-align:center; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--violet); background:var(--violet-l);}
+  .band.on{background:var(--sun); border-style:solid; border-color:var(--ink); color:var(--ink); box-shadow:3px 3px 0 var(--ink);}
+  .io{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px;}
+  @media(max-width:760px){.io{grid-template-columns:1fr;}}
+  .io div{background:var(--soft); border:2px solid var(--ink); border-radius:12px; padding:10px 12px; font-size:13px;}
+  .io b{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); margin-bottom:3px;}
+  .need{display:grid; gap:10px; margin:10px 0 18px;}
+  .need label{display:flex; gap:10px; align-items:flex-start; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; cursor:pointer; font-size:14.5px;}
+  .need label.on{background:var(--sun-l); box-shadow:3px 3px 0 var(--ink);}
+  .need input{margin-top:3px; accent-color:var(--pink); width:18px; height:18px; flex:none;}
+  .rec{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:14px 16px; box-shadow:3px 3px 0 var(--ink); margin-bottom:12px;}
+  .rec h3{margin:0 0 4px; font-size:17px;}
+  .rec ul{margin:6px 0 0; padding-left:18px; font-size:13.5px;}
+  .rec .dep{font-family:var(--mono); font-size:11.5px; color:var(--ink2); margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);}
+</style>
+</head><body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">Unidad 2 · Hardware · Captura</div>
+    <h1>Equipos de <span class="mark">captura</span><br>escáneres intraorales y de escritorio</h1>
+    <p class="sub">Primera clase del bloque de hardware. Ya sabes qué hace el software con un escaneo; hoy vemos los equipos que lo producen: cómo capturan, qué datos entregan y cómo se comparan los modelos vigentes, con un catálogo consultado en noviembre de 2026.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. UNIDAD 2 -->
+    <section class="panel" data-name="Unidad 2" id="sec-unidad">
+      <div class="kicker">01 · Panorama de la unidad</div>
+      <h2>Entramos al bloque de hardware</h2>
+      <p class="lead">En la Unidad 2 bajamos de las bases teóricas a las herramientas: <strong>primero el software, al final el hardware</strong>, siempre ubicados en el flujo digital. El bloque de software ya quedó atrás; hoy empieza el hardware, siguiendo el orden del flujo: primero lo que captura.</p>
+
+      <div class="umap">
+        <div class="u1">
+          <div class="ulabel">Unidad 1 · Bases teóricas (ya vistas)</div>
+          <div class="pills">
+            <span class="pill">Mallas</span><span class="pill">Voxeles</span><span class="pill">Escaneo</span><span class="pill">Manufactura aditiva</span><span class="pill">Manufactura sustractiva</span>
+          </div>
+        </div>
+        <div class="u2">
+          <div class="block a">
+            <div class="ulabel"><span>Unidad 2 · Bloque A · Software (visto)</span></div>
+            <div class="step done"><div class="no" style="background:var(--mint)">1</div><div class="tx">Software de diseño<small>Clase 06</small></div></div>
+            <div class="step done"><div class="no" style="background:var(--mint)">2</div><div class="tx">Planeación y nesting<small>Clase 07</small></div></div>
+            <div class="step done"><div class="no" style="background:var(--mint)">3</div><div class="tx">Software accesorio<small>Clase 08</small></div></div>
+          </div>
+          <div class="block b">
+            <div class="ulabel"><span>Unidad 2 · Bloque B · Hardware (ahora)</span></div>
+            <div class="step now"><div class="no">4</div><div class="tx">Equipos de captura<small>Escáneres intraorales y de escritorio</small></div><span class="sticker">Hoy</span></div>
+            <div class="step later"><div class="no" style="background:var(--ink3)">5</div><div class="tx">Impresoras 3D<small>Equipos aditivos y su postproceso</small></div></div>
+            <div class="step later"><div class="no" style="background:var(--ink3)">6</div><div class="tx">Fresadoras<small>Equipos sustractivos</small></div></div>
+            <div class="step later"><div class="no" style="background:var(--ink3)">7</div><div class="tx">Equipos de acabado<small>Sinterizado, cristalización y más</small></div></div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px;">El flujo digital como mapa permanente</h3>
+      <div class="flow4">
+        <div class="fstage here"><span class="sticker">Estás aquí</span><div class="fn">PASO 1</div><h3>Captura</h3><span class="ftag hw">Hardware · hoy</span></div>
+        <div class="fstage"><div class="fn">PASO 2</div><h3>Diseño</h3><span class="ftag sw">Software · visto</span></div>
+        <div class="fstage"><div class="fn">PASO 3</div><h3>Preparación</h3><span class="ftag sw">Software · visto</span></div>
+        <div class="fstage"><div class="fn">PASO 4</div><h3>Fabricación</h3><span class="ftag hw">Hardware · próximas</span></div>
+      </div>
+    </section>
+
+    <!-- 2. QUE CAPTURA -->
+    <section class="panel" data-name="Qué captura cada equipo" id="sec-que">
+      <div class="kicker">02 · El punto de partida de los datos</div>
+      <h2>Tres equipos, dos tipos de dato</h2>
+      <p class="lead">Todo el flujo depende de lo que entra por aquí. Elige un equipo y mira qué captura, qué archivo entrega y cuándo conviene usarlo.</p>
+      <div class="btn-row" id="eq-chips" style="margin-bottom:14px;"></div>
+      <div class="card">
+        <div class="kicker" id="eq-kind"></div>
+        <h3 id="eq-title" style="font-size:22px; margin-top:2px;"></h3>
+        <p id="eq-text"></p>
+        <div class="io">
+          <div><b>Captura</b><span id="eq-in"></span></div>
+          <div><b>Entrega</b><span id="eq-out"></span></div>
+          <div><b>Se conecta con</b><span id="eq-link"></span></div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:26px;">Formatos de salida más comunes</h3>
+      <div class="grid3">
+        <div class="app-card"><h3>STL</h3><p>Solo la geometría de la malla (clase 01). Es el formato abierto que casi cualquier software de diseño acepta; no guarda color.</p></div>
+        <div class="app-card"><h3>PLY y OBJ</h3><p>También entregan la malla y, según el caso, color o textura. Los fabricantes de escáneres intraorales suelen listar STL, PLY y OBJ como salidas.</p></div>
+        <div class="app-card"><h3>DICOM</h3><p>Es el formato del CBCT: no una superficie, sino un volumen de voxeles (clase 02). Se trabaja con software de planeación, como vimos en la clase 07.</p></div>
+      </div>
+      <div class="callout">
+        <div class="lab">Qué cubre el catálogo de hoy</div>
+        <p>El CBCT se explicó en la clase 02 y aquí solo se ubica. El catálogo se centra en los <strong>escáneres de superficie</strong>: intraorales y de escritorio.</p>
+      </div>
+    </section>
+
+    <!-- 3. INTRAORAL -->
+    <section class="panel" data-name="Escáner intraoral" id="sec-intra">
+      <div class="kicker">03 · Captura en boca</div>
+      <h2>Cómo captura un escáner intraoral</h2>
+      <p class="lead">Un escáner intraoral no toma una sola imagen: toma muchas capturas pequeñas y el software las <strong>une</strong> en una malla continua. Cuantas más capturas se necesitan, más uniones hay y más puede acumularse el error. Por eso importa el campo de captura. Mueve los controles para verlo.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Arcada completa (recorrido esquemático)</span>
+          <svg id="st-svg" viewBox="0 0 320 185" style="margin-top:10px;"></svg>
+        </div>
+        <div>
+          <div class="card">
+            <div class="kicker">Preajustes de campo</div>
+            <div class="btn-row" id="st-pre" style="margin:8px 0 14px;"></div>
+            <div class="ctrl-grid" style="grid-template-columns:1fr;">
+              <div class="ctrl"><label>Campo de captura: <b id="st-f-v">19</b> mm</label><input type="range" id="st-f" min="8" max="30" value="19"></div>
+              <div class="ctrl"><label>Traslape entre capturas: <b id="st-o-v">60</b>%</label><input type="range" id="st-o" min="30" max="85" value="60"></div>
+              <div class="ctrl"><label>Longitud del recorrido: <b id="st-l-v">110</b> mm</label><input type="range" id="st-l" min="60" max="160" value="110"></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="num" id="st-n">–</div><div class="lab">capturas encadenadas</div></div>
+            <div class="stat"><div class="num" id="st-u">–</div><div class="lab">uniones (índice de error)</div></div>
+          </div>
+          <div class="big-out" id="st-note"></div>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">Modelo didáctico: no es una medida de ningún escáner. Los preajustes toman las dimensiones mayores del campo publicadas por los fabricantes (Aoralscan Elite con punta mini 12 mm y grande 19 mm; Medit i900, 22 mm).</p>
+
+      <h3 style="margin-top:26px;">Cuatro formas de capturar</h3>
+      <div class="grid2e">
+        <div class="app-card"><h3>Confocal</h3><p>Enfoca a distintas profundidades y reconstruye la superficie. Fue la base de varias generaciones de escáneres; Align la dejó con el iTero Lumina.</p></div>
+        <div class="app-card"><h3>Multi-Direct Capture</h3><p>Captura desde varios ángulos a la vez para cubrir más dentadura en un solo movimiento. Es la tecnología que Align puso en el iTero Lumina en lugar de la confocal.</p></div>
+        <div class="app-card"><h3>Luz estructurada y láser azul</h3><p>Proyectan patrones de luz y los leen con cámaras, como vimos en triangulación (clase 03). El Aoralscan Elite combina LED blanco con un láser azul de 450 nm, y el Aoralscan ELF usa luz estructurada.</p></div>
+        <div class="app-card"><h3>Hiperespectral</h3><p>3Shape presentó con el TRIOS 6 una captura hiperespectral y su software de diagnóstico asistido, TRIOS Dx Plus. Es una vía distinta: no solo medir forma, sino identificar lo que se ve.</p></div>
+      </div>
+    </section>
+
+    <!-- 4. ESCRITORIO -->
+    <section class="panel" data-name="Escáner de escritorio" id="sec-desk">
+      <div class="kicker">04 · Captura en el laboratorio</div>
+      <h2>Escáner de escritorio: modelos e impresiones</h2>
+      <p class="lead">El escáner de escritorio digitaliza un modelo de yeso o una impresión en un entorno controlado: el objeto va en una plataforma, las cámaras y la luz están fijas y el equipo mueve la pieza. Por eso suelen ser más precisos, aunque más voluminosos. Aquí el dato clave es cuántas cámaras, qué precisión y cuánto tarda.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Precisión vs. tiempo de arcada completa (cifras de los fabricantes)</span>
+          <svg id="ds-svg" viewBox="0 0 320 250" style="margin-top:10px;"></svg>
+          <div class="legend" id="ds-leg"></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="kicker">Marcas a mostrar</div>
+            <div class="btn-row" id="ds-brands" style="margin:8px 0 12px;"></div>
+            <div class="kicker">Modelo seleccionado</div>
+            <h3 id="ds-name" style="font-size:20px; margin:4px 0;">Toca un punto</h3>
+            <div class="big-out" id="ds-info" style="margin-top:6px;">Los puntos más cerca de la esquina inferior izquierda son más rápidos y más precisos.</div>
+          </div>
+          <div class="callout" style="margin-top:12px;">
+            <div class="lab">Cuidado al comparar</div>
+            <p>Cada fabricante mide con su propio protocolo y su cifra es <strong>declarada por él</strong>. Sirve para ubicar una gama, no para ganar una competencia de micras.</p>
+          </div>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">Datos de Dental Axess (3Shape E1–E4, línea “Generation Red”) y Dental Compare (Medit T310, T510 y T710). El inEos X5 no se grafica: su página reporta desviaciones por prueba con probetas (2.1 ± 2.8 µm en puentes y 1.3 ± 0.4 µm en inlays, bajo ISO 12836:2015) y menos de 60 s por arcada completa en un protocolo distinto.</p>
+
+      <h3 style="margin-top:26px;">Qué cambia entre un modelo y otro</h3>
+      <div class="grid3">
+        <div class="app-card"><h3>Cámaras</h3><p>Los modelos de entrada usan 2 cámaras de 5 MP; los de gama alta, 4. En 3Shape y en Medit, pasar de 2 a 4 cámaras acompaña la mejora en velocidad y precisión.</p></div>
+        <div class="app-card"><h3>Ejes de movimiento</h3><p>El inEos X5 mueve la pieza con un brazo robótico de 5 ejes, para capturar zonas profundas y socavados sin reposicionar.</p></div>
+        <div class="app-card"><h3>Tipo de trabajo</h3><p>Modelos completos, muñones individuales (hasta cuatro automáticos en el inEos X5), impresiones, implantes con scanbodies o dentaduras. Cada equipo declara cuáles hace.</p></div>
+      </div>
+    </section>
+
+    <!-- 5. CATALOGO -->
+    <section class="panel" data-name="Catálogo 2026" id="sec-cat">
+      <div class="kicker">05 · Modelos vigentes</div>
+      <h2>Catálogo de escáneres (noviembre de 2026)</h2>
+      <p class="lead">Fichas de los modelos principales, con lo que dicen los fabricantes y, cuando se indica, lo que reportan fuentes de terceros. Cada ficha marca qué falta o qué debes verificar.</p>
+      <div class="btn-row" id="cat-type" style="margin-bottom:10px;"></div>
+      <div class="btn-row" id="cat-brand" style="margin-bottom:16px;"></div>
+      <div class="cat-grid" id="cat-grid"></div>
+
+      <h3 style="margin-top:26px;">Otras marcas con datos de terceros</h3>
+      <div class="card soft">
+        <ul class="clean">
+          <li><strong>Planmeca Emerald S:</strong> 65 fps, salida abierta y licencia de por vida, según un sitio de terceros.</li>
+          <li><strong>DEXIS IS 3800W (Envista):</strong> inalámbrico, 240 g y abierto, con DTX Studio Clinic, según un sitio de terceros.</li>
+          <li><strong>Dental Wings / Straumann Virtuo Vivo:</strong> abierto, según un sitio de terceros.</li>
+          <li><strong>Aident AI-30:</strong> sin polvo y de unos 10 µm de precisión declarada por el fabricante; verifica soporte local.</li>
+          <li><strong>Integrados con exocad (lista de exocad, no exhaustiva):</strong> intraorales como Heron, Alliedstar, Panda P2, Fussen, CORiTEC, Midmark True Definition, Opera Mach 2 y Runyes; de escritorio como Open Technologies Optor, Smart Optics Vinyl, Zirkonzahn S600 ARTI, Renishaw Incise y Optimet DS 6000. Cualquier escáner que escriba STL abierto puede usarse con DentalCAD.</li>
+        </ul>
+      </div>
+      <p class="src" style="margin-top:16px;"><b>Fuentes (consultadas en noviembre de 2026):</b><br>
+        <a href="https://dentalspecguide.com/intraoral-scanners/" target="_blank" rel="noopener">Dental Spec Guide</a> ·
+        <a href="https://conferences.dental/best-intraoral-scanners-2026/" target="_blank" rel="noopener">Conferences.dental · Best intraoral scanners 2026</a> ·
+        <a href="https://www.beckersdental.com/dental-technology/3shape-launches-new-intraoral-scanner" target="_blank" rel="noopener">Becker’s Dental · TRIOS 6</a> ·
+        <a href="https://www.aligntech.com/iterolumina" target="_blank" rel="noopener">Align · iTero Lumina</a> ·
+        <a href="https://investors.dentsplysirona.com/news-releases/news-release-details/dentsply-sirona-presents-primescanr-2-powered-ds-core-first" target="_blank" rel="noopener">Dentsply Sirona · Primescan 2</a> ·
+        <a href="https://instituteofdigitaldentistry.com/intraoral-scanner-reviews/choose-the-best-medit-intraoral-scanner-for-you-comparing-the-i900-i700-wireless-i700-i600-and-i500/" target="_blank" rel="noopener">Institute of Digital Dentistry · Medit</a> ·
+        <a href="https://docs.shining3d.com/intraoralscan/3.5.6/elite-wireless/en-us/specifications/" target="_blank" rel="noopener">Shining 3D · Aoralscan Elite</a> ·
+        <a href="https://starcona.com/blogs/product-articles/shining-3d-aoralscan-elf-next-generation-intraoral-scanning-for-precision-dentistry" target="_blank" rel="noopener">Starcona · Aoralscan ELF</a> ·
+        <a href="https://dentalaxess.com/product/3shape-e-lab-scanners/" target="_blank" rel="noopener">Dental Axess · 3Shape E-series</a> ·
+        <a href="https://www.dentalcompare.com/News/568387-New-Dental-Products-T-Series-Laboratory-Scanners-from-Medit/?catid=4660" target="_blank" rel="noopener">Dental Compare · Medit T-series</a> ·
+        <a href="https://www.dentsplysirona.com/en-us/discover/discover-by-brand/ineos-x5.html" target="_blank" rel="noopener">Dentsply Sirona · inEos X5</a> ·
+        <a href="https://top3dshop.com/blog/shining-3d-autoscan-ds-lineup-overview" target="_blank" rel="noopener">Top 3D Shop · AutoScan DS (2021)</a> ·
+        <a href="https://exocad.com/integration/scanner-integration" target="_blank" rel="noopener">exocad · Scanner integration</a></p>
+    </section>
+
+    <!-- 6. COMPARATIVA -->
+    <section class="panel" data-name="Comparativa" id="sec-comp">
+      <div class="kicker">06 · Cierre de la clase</div>
+      <h2>Comparativa dentro de cada tipo</h2>
+      <p class="lead">Un escáner intraoral y uno de escritorio resuelven problemas distintos, así que se comparan por separado. Elige el tipo, un perfil o ajusta tus pesos. Los puntajes van de 1 a 5 (5 es lo más favorable para quien compra).</p>
+
+      <div class="card">
+        <div class="kicker">1 · Tipo de escáner</div>
+        <div class="btn-row" id="kind-chips" style="margin-top:6px; margin-bottom:18px;"></div>
+        <div class="kicker">2 · Perfil (o ajusta los pesos)</div>
+        <div class="btn-row" id="prof-chips" style="margin-top:6px; margin-bottom:18px;"></div>
+        <div class="ctrl-grid" id="weights"></div>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden; margin-top:16px;">
+        <div class="table-wrap"><table class="formats heat" id="heat-table" style="margin-top:0;"></table></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="kicker">Resultado (promedio ponderado sobre 5)</div>
+        <div id="rank" style="margin-top:14px;"></div>
+      </div>
+      <p class="src" style="margin-top:12px;">Puntajes ilustrativos con criterio docente, basados en las fuentes de la pestaña anterior (varias de terceros); no son un benchmark. El costo se asigna por rangos de lista en EE. UU. publicados por terceros, que varían por país y distribuidor.</p>
+      <div class="callout">
+        <div class="lab">El mejor escáner depende del flujo</div>
+        <p>Si tu laboratorio o tu CAD acepta STL abierto, casi cualquier escáner abierto sirve. Si tu flujo vive en un ecosistema (aligners, nube, CEREC), un modelo cerrado puede ser la mejor opción, pero te ata a esa marca.</p>
+      </div>
+    </section>
+
+    <!-- 7. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">07 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Unidad 2 · Equipos de captura · CAD/CAM dental</span>
+    <span>Escáneres intraorales · escáneres de escritorio · catálogo 2026</span>
+  </footer>
+
+</div>
+<script>
+const C={ink:'#1B1530',ink2:'#4A4266',ink3:'#8C84A8',line:'#E4DCF5',soft:'#F3EEFF',pink:'#FF4F9A',pinkL:'#FFE3F0',violet:'#6C4DF6',mint:'#12B886',orange:'#F59F00',sun:'#FFC53D',sunL:'#FFF1C2',red:'#E03131',sky:'#339AF0',white:'#FFFFFF'};
+const FONT_MONO='Geist Mono, monospace';
+const $=id=>document.getElementById(id);
+const SVGNS='http://www.w3.org/2000/svg';
+const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+const txt=(svg,x,y,t,o={})=>{const e=g('text',Object.assign({x,y,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink3},o)); e.textContent=t; svg.appendChild(e); return e;};
+
+/* TABS */
+const sections=[...document.querySelectorAll('section.panel')];
+const tabsNav=$('tabs');
+sections.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML=`<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click',()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active'); tabsNav.children[0].classList.add('active');
+
+/* ============ 02 EQUIPOS ============ */
+const EQ=[
+ {c:'Intraoral',k:'En boca del paciente',t:'Escáner intraoral',x:'Se mueve por la boca y captura la superficie de los dientes y los tejidos. Sustituye la impresión con material por un archivo, y es el punto de partida del flujo en la clínica.',i:'Dientes, encía y mordida, en vivo',o:'Una malla (STL, PLY u OBJ)',l:'Software de diseño o plataforma del fabricante (clases 06 y 08)'},
+ {c:'Escritorio',k:'En el laboratorio',t:'Escáner de escritorio',x:'Digitaliza un modelo de yeso o una impresión sobre una plataforma, con cámaras y luz fijas. Es la forma de entrar al flujo digital con trabajo analógico y de escanear con más control.',i:'Modelos de yeso, impresiones, muñones',o:'Una malla (casi siempre STL)',l:'Software de diseño del laboratorio (clase 06)'},
+ {c:'CBCT',k:'Imagen volumétrica',t:'Tomografía (CBCT)',x:'No captura la superficie sino el volumen: hueso, raíces y estructuras. Se estudió en la clase 02 y aquí solo se ubica, porque alimenta la planeación (clase 07).',i:'Volumen de voxeles del maxilar',o:'Un estudio DICOM',l:'Software de planeación guiada (clase 07)'}
+];
+(function(){
+  const chips=$('eq-chips');
+  function show(k){
+    [...chips.children].forEach((c,i)=>c.classList.toggle('active',i===k));
+    const d=EQ[k];
+    $('eq-kind').textContent=d.k; $('eq-title').textContent=d.t; $('eq-text').textContent=d.x;
+    $('eq-in').textContent=d.i; $('eq-out').textContent=d.o; $('eq-link').textContent=d.l;
+  }
+  EQ.forEach((d,i)=>{const b=document.createElement('button'); b.className='chip'; b.textContent=`${i+1} · ${d.c}`; b.onclick=()=>show(i); chips.appendChild(b);});
+  show(0);
+})();
+
+/* ============ 03 INTRAORAL: UNIONES ============ */
+(function(){
+  const svg=$('st-svg'); const a=120,b=95,cx=160,cy=30;
+  const pre=[['Mini · 12 mm',12],['Grande · 19 mm',19],['Amplio · 22 mm',22]];
+  const pc=$('st-pre');
+  pre.forEach(([l,v])=>{const bt=document.createElement('button'); bt.className='chip'; bt.textContent=l; bt.onclick=()=>{$('st-f').value=v; draw();}; pc.appendChild(bt);});
+  // curva de la arcada: semielipse, t de pi a 0
+  const N=400, pts=[]; let len=0;
+  for(let i=0;i<=N;i++){const t=Math.PI*(1-i/N); const x=cx+a*Math.cos(t), y=cy+b*Math.sin(t); pts.push({x,y}); if(i) len+=Math.hypot(x-pts[i-1].x,y-pts[i-1].y);}
+  const cum=[0]; for(let i=1;i<=N;i++) cum.push(cum[i-1]+Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y));
+  const at=s=>{let i=1; while(i<N&&cum[i]<s)i++; const t=(s-cum[i-1])/(cum[i]-cum[i-1]||1); return {x:pts[i-1].x+(pts[i].x-pts[i-1].x)*t,y:pts[i-1].y+(pts[i].y-pts[i-1].y)*t,dx:pts[i].x-pts[i-1].x,dy:pts[i].y-pts[i-1].y};};
+  function draw(){
+    const F=+$('st-f').value, O=+$('st-o').value/100, L=+$('st-l').value;
+    $('st-f-v').textContent=F; $('st-o-v').textContent=+$('st-o').value; $('st-l-v').textContent=L;
+    [...pc.children].forEach((c,i)=>c.classList.toggle('active',pre[i][1]===F));
+    const step=F*(1-O); const n=Math.max(1,Math.ceil((L-F)/step)+1);
+    svg.innerHTML='';
+    svg.appendChild(g('path',{d:'M'+pts.filter((_,i)=>i%8===0).map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L'),fill:'none',stroke:C.line,'stroke-width':14,'stroke-linecap':'round'}));
+    const k=len/L; // px por mm
+    for(let i=0;i<n;i++){
+      const s=Math.min(len, (F/2+i*step)*k);
+      const p=at(s); const ang=Math.atan2(p.dy,p.dx)*180/Math.PI;
+      const w=F*k, h=Math.max(10,F*k*.72);
+      const r=g('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:4,fill:i%2?'rgba(255,79,154,.18)':'rgba(108,77,246,.18)',stroke:i%2?C.pink:C.violet,'stroke-width':1.5,transform:`translate(${p.x.toFixed(1)},${p.y.toFixed(1)}) rotate(${ang.toFixed(1)})`});
+      svg.appendChild(r);
+    }
+    txt(svg,cx,cy+b*0.55,'arcada',{fill:C.ink3});
+    const u=n-1;
+    $('st-n').textContent=n; $('st-u').textContent=u;
+    $('st-note').innerHTML= n<=3 ? '<b>Pocas uniones.</b> Un campo amplio cubre la arcada en pocos pasos, lo que reduce los puntos donde puede acumularse error.' :
+      n<=8 ? '<b>Un número intermedio de capturas.</b> Es lo habitual en un escaneo de arcada completa.' :
+      '<b>Muchas uniones.</b> Cada una es una oportunidad de desalineación: un campo pequeño o un traslape alto exige más capturas y más cuidado del operador.';
+  }
+  ['st-f','st-o','st-l'].forEach(id=>$(id).addEventListener('input',draw)); draw();
+})();
+
+/* ============ 04 ESCRITORIO: PRECISION VS TIEMPO ============ */
+const DESK_PTS=[
+ {b:'3Shape',n:'E1',t:32,a:10,cam:'2 × 5 MP',tex:'sin textura'},
+ {b:'3Shape',n:'E2',t:24,a:10,cam:'2 × 5 MP',tex:'textura en blanco y negro'},
+ {b:'3Shape',n:'E3',t:18,a:7,cam:'2 × 5 MP',tex:'textura en color'},
+ {b:'3Shape',n:'E4',t:9,a:4,cam:'4 × 5 MP',tex:'textura en color, estrategia die-in-model'},
+ {b:'Medit',n:'T310',t:18,a:9,cam:'2 × 5 MP',tex:'sistema abierto'},
+ {b:'Medit',n:'T510',t:12,a:7,cam:'2 × 5 MP',tex:'sistema abierto'},
+ {b:'Medit',n:'T710',t:8,a:4,cam:'4 × 5 MP',tex:'sistema abierto, multi-die, implantes, impresiones y dentaduras de réplica'}
+];
+(function(){
+  const svg=$('ds-svg'); const col={'3Shape':C.pink,'Medit':C.violet}; const on={'3Shape':true,'Medit':true}; let sel='E4';
+  const bc=$('ds-brands'), lg=$('ds-leg');
+  Object.keys(on).forEach(k=>{const b=document.createElement('button'); b.className='chip active'; b.textContent=k; b.onclick=()=>{on[k]=!on[k]; b.classList.toggle('active',on[k]); draw();}; bc.appendChild(b);
+    const s=document.createElement('span'); s.innerHTML=`<i style="background:${col[k]}"></i>${k}`; lg.appendChild(s);});
+  const X0=64,X1=304,Y0=20,Y1=205; // x: tiempo 0-36 s ; y: precision 12-0 (arriba mejor? no: mas arriba = mas preciso)
+  const px=t=>X0+(t/36)*(X1-X0);
+  const posY=a=>Y0+ (a/12)*(Y1-Y0); // menor µm -> mas arriba
+  function draw(){
+    svg.innerHTML='';
+    svg.appendChild(g('rect',{x:X0,y:Y0,width:X1-X0,height:Y1-Y0,fill:C.white,stroke:C.line,'stroke-width':1.5}));
+    svg.appendChild(g('rect',{x:X0,y:Y0,width:(X1-X0)*0.3,height:(Y1-Y0)*0.45,fill:'rgba(18,184,134,.10)'}));
+    [0,12,24,36].forEach(t=>{svg.appendChild(g('line',{x1:px(t),y1:Y1,x2:px(t),y2:Y1+4,stroke:C.ink3})); txt(svg,px(t),Y1+16,t+' s');});
+    [0,4,8,12].forEach(a=>{svg.appendChild(g('line',{x1:X0-4,y1:posY(a),x2:X0,y2:posY(a),stroke:C.ink3})); txt(svg,X0-8,posY(a)+3,a+' µm',{'text-anchor':'end'});});
+    txt(svg,(X0+X1)/2,Y1+32,'tiempo de arcada completa →');
+    txt(svg,10,(Y0+Y1)/2,'precisión (menos µm = más arriba)',{transform:`rotate(-90 10 ${(Y0+Y1)/2})`});
+    DESK_PTS.filter(p=>on[p.b]).forEach(p=>{
+      const c=g('circle',{cx:px(p.t),cy:posY(p.a),r:p.n===sel?10:8,fill:col[p.b],stroke:C.ink,'stroke-width':p.n===sel?3:2,style:'cursor:pointer'});
+      c.addEventListener('click',()=>{sel=p.n; draw();});
+      svg.appendChild(c);
+      txt(svg,px(p.t),posY(p.a)+(p.b==='Medit'?24:-13),p.n,{fill:C.ink,'font-size':'9'});
+    });
+    const p=DESK_PTS.find(q=>q.n===sel);
+    if(p){ $('ds-name').textContent=p.b+' '+p.n; $('ds-info').innerHTML=`Precisión declarada: <b>${p.a} µm</b> · Arcada completa: <b>${p.t} s</b><br>Cámaras: ${p.cam} · ${p.tex}.`; }
+  }
+  draw();
+})();
+
+/* ============ 05 CATALOGO ============ */
+const CAT=[
+ {ty:'intra',br:'3Shape',n:'TRIOS 6',when:'Presentado en IDS 2025',tech:'Captura hiperespectral; hasta 110% más resolución que los escáneres 3Shape anteriores (según 3Shape).',ex:'TRIOS Dx Plus: IA que ayuda a identificar caries superficiales y proximales, placa, desgaste y recesión.',open:'Inalámbrico y abierto, según un sitio de terceros; 3Shape no lo detalla en la nota consultada.',com:'Gama alta; ~27,900 USD de lista (referencia de terceros, EE. UU.).',chk:'La nota consultada no indica peso, velocidad ni fecha de disponibilidad. Un sitio de terceros dice que el TRIOS 5 comparte el mismo hardware sin la capa de IA.'},
+ {ty:'intra',br:'Align',n:'iTero Lumina',when:'Anunciado en enero de 2024',tech:'Multi-Direct Capture en lugar de confocal: campo 3 veces mayor, varita 50% más pequeña y el doble de rápida que el iTero Element 5D (afirmaciones de Align).',ex:'Configuraciones de carrito y móvil, dentro de la plataforma iTero.',open:'Align no detalla la exportación abierta; un sitio de terceros la describe como cerrada. Verifica.',com:'Gama muy alta; 45,000–50,000 USD de lista (referencia de terceros, EE. UU.).',chk:'Las mejoras de precisión no traen cifras en el anuncio y la encuesta de usuarios citada fue pequeña (22 participantes).'},
+ {ty:'intra',br:'Dentsply Sirona',n:'Primescan 2',when:'Presentado en septiembre de 2024',tech:'Basado en la tecnología Primescan; inalámbrico, arcada completa en menos de 1 minuto, sensor táctil y punta más estrecha.',ex:'Nativo de la nube (DS Core): se procesa y guarda en la nube y requiere suscripción pagada. Se integra con CEREC, Primeprint y SureSmile.',open:'No detallada; un sitio de terceros dice “semiabierto”. Verifica.',com:'Gama alta; ~24,995 USD de lista (referencia de terceros, EE. UU.) más la suscripción a DS Core.',chk:'El anuncio no indica peso ni fecha general de disponibilidad, que varía por país.'},
+ {ty:'intra',br:'Medit',n:'i900',when:'Serie i900 (no se confirmó la fecha)',tech:'Cableado, 165 g, campo de 22 × 20 mm y 65–70 fps. Punta autoclavable (150 ciclos).',ex:'El más ligero y de mayor campo de la gama Medit; recomendado para escaneo de edéntulos.',open:'Abierto: exporta STL, PLY y OBJ (fuente de terceros).',com:'Gama media-alta; ~18,999 USD sin laptop (artículo de terceros).',chk:'Las fuentes no dan la fecha de lanzamiento. Quita el modo remoto y la desinfección UV-C del i700.'},
+ {ty:'intra',br:'Medit',n:'i700 Wireless',when:'Versión inalámbrica de la serie i700',tech:'Inalámbrico, 328 g con batería, unos 60 minutos de escaneo continuo, 70 fps.',ex:'La opción móvil de Medit; conserva control remoto y desinfección UV-C.',open:'Abierto: exporta STL, PLY y OBJ (fuente de terceros).',com:'Gama media; ~15,500 USD sin laptop (artículo de terceros). El i600, de entrada, ronda 10,500 USD y 35 fps.',chk:'Es el más pesado de la gama por la batería.'},
+ {ty:'intra',br:'Shining 3D',n:'Aoralscan Elite',when:'Versión inalámbrica documentada en 2025–2026',tech:'LED blanco y láser azul de 450 nm; 194 g con batería; campo de 19 × 14 mm (punta grande).',ex:'Un sitio de terceros indica que incluye fotogrametría intraoral para implantes.',open:'Abierto: exporta STL, OBJ y PLY (fabricante).',com:'Gama media-alta; ~20,000 USD de lista (referencia de terceros).',chk:'La ficha del fabricante consultada no trae precisión ni velocidad de escaneo.'},
+ {ty:'intra',br:'Shining 3D',n:'Aoralscan ELF',when:'2026 (según un sitio de terceros)',tech:'Luz estructurada sin contacto; 106 g; campo de hasta 19 × 14 mm; precisión de hasta 0.05 mm (según el fabricante, vía artículo de terceros).',ex:'Análisis oclusal con IA (IntelliBite) y visualización de placa. Conexión USB-C única.',open:'Abierto: STL, OBJ y PLY.',com:'Gama de entrada; ~11,999 USD de lista (referencia de terceros).',chk:'Las fuentes no dan fecha de lanzamiento ni tiempo de escaneo por arcada.'},
+ {ty:'desk',br:'3Shape',n:'E1 a E4 (Generation Red)',when:'Línea E desde 2017; versión “Red” más reciente',tech:'E1–E3: 2 cámaras de 5 MP; E4: 4 cámaras de 5 MP. Precisión (ISO 12836) de 10, 10, 7 y 4 µm; arcada completa en 32, 24, 18 y 9 s.',ex:'Textura: ninguna en E1, blanco y negro en E2, color en E3 y E4. El E4 tiene versión de ortodoncia con LED azul multilínea. Un anuncio indica que son 20% más rápidos que los E anteriores, al mismo precio.',open:'Entrega malla para el software de diseño; la apertura no se detalló en las fuentes.',com:'Opción sin suscripción o con LabCare (anuncio de 2017).',chk:'Los datos vienen de un distribuidor; verifica contra 3Shape qué modelos siguen a la venta.'},
+ {ty:'desk',br:'Medit',n:'T310 / T510 / T710',when:'Presentados en 2020',tech:'T310: 2 × 5 MP, 9 µm, 18 s. T510: 2 × 5 MP, 7 µm, 12 s. T710: 4 × 5 MP, 4 µm, 8 s.',ex:'El T710 incluye función multi-die y maneja implantes, impresiones y dentaduras de réplica.',open:'Sistemas abiertos (Medit); integrados con exocad.',com:'No se encontraron precios en fuentes confiables.',chk:'La página actual de Medit no trae las especificaciones por modelo; las cifras son del anuncio de 2020.'},
+ {ty:'desk',br:'Dentsply Sirona',n:'inEos X5',when:'Verificado con inLab CAD 16 (2017–2020)',tech:'Proyección de franjas de luz con un brazo robótico de 5 ejes; arcada completa en menos de 1 minuto.',ex:'Hasta cuatro muñones automáticos, escaneo triple de cubeta, impresiones, implantes con scanbodies y dentaduras.',open:'Exporta STL y tiene flujo validado con exocad e inLab.',com:'Pesa 40 kg; la página no indica precio.',chk:'Las desviaciones reportadas son de pruebas del fabricante (2.1 ± 2.8 µm en puentes; 1.3 ± 0.4 µm en inlays). Los documentos de compatibilidad son de 2017–2020.'},
+ {ty:'desk',br:'Shining 3D',n:'AutoScan DS-EX / DS-EX Pro / DS-MIX',when:'Datos de 2021 (artículo de terceros)',tech:'DS-EX: ≤15 µm, 30 s por mandíbula. DS-EX Pro: ≤10 µm, 15 s. DS-MIX: 2 × 5 MP, ≤7 µm, 13 s y salida STL/PLY.',ex:'El DS-MIX hace transferencia automática a articuladores Artex, Kavo, SAM y Bio-Art. Shining 3D vende además la línea DS-EX Pro(H).',open:'Solo el DS-MIX declara salida STL en la fuente.',com:'Sin precios en la fuente.',chk:'La información tiene años; confirma modelos vigentes con el distribuidor.'}
+];
+(function(){
+  const tcs=$('cat-type'), bcs=$('cat-brand'), grid=$('cat-grid'); let ty='intra', br='all';
+  [['intra','Intraorales'],['desk','De escritorio']].forEach(([k,l])=>{const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=l; b.onclick=()=>{ty=k; br='all'; render();}; tcs.appendChild(b);});
+  function render(){
+    [...tcs.children].forEach(c=>c.classList.toggle('active',c.dataset.k===ty));
+    const brs=['all',...new Set(CAT.filter(s=>s.ty===ty).map(s=>s.br))];
+    bcs.innerHTML='';
+    brs.forEach(k=>{const b=document.createElement('button'); b.className='chip'+(k===br?' active':''); b.textContent=k==='all'?'Todas las marcas':k; b.onclick=()=>{br=k; render();}; bcs.appendChild(b);});
+    grid.innerHTML='';
+    CAT.filter(s=>s.ty===ty&&(br==='all'||s.br===br)).forEach(s=>{
+      const d=document.createElement('div'); d.className='sw-card';
+      d.innerHTML=`<div class="badges"><span class="badge b-task"></span><span class="badge b-otro"></span></div><h3></h3><div class="who" style="font-family:var(--mono);font-size:11px;color:var(--ink3);"></div><ul class="clean"></ul><p class="note-mini"></p>`;
+      d.querySelector('.b-task').textContent=ty==='intra'?'Intraoral':'Escritorio';
+      d.querySelector('.b-otro').textContent=s.br;
+      d.querySelector('h3').textContent=s.n; d.querySelector('.who').textContent=s.when;
+      const ul=d.querySelector('ul');
+      [['Captura',s.tech],['Destaca',s.ex],['Apertura',s.open],['Costo',s.com]].forEach(([l,v])=>{const li=document.createElement('li'); li.innerHTML='<strong></strong> '; li.querySelector('strong').textContent=l+':'; li.appendChild(document.createTextNode(v)); ul.appendChild(li);});
+      d.querySelector('.note-mini').textContent='Verifica: '+s.chk;
+      grid.appendChild(d);
+    });
+  }
+  render();
+})();
+
+/* ============ 06 COMPARATIVA ============ */
+const CMP={
+ intra:{n:'Intraorales',crit:['Costo de entrada','Apertura de formatos','Ergonomía y portabilidad','Rapidez y campo de visión','Soporte y ecosistema'],
+  pool:[{n:'TRIOS 6',s:[1,3,4,4,5]},{n:'iTero Lumina',s:[1,1,4,5,5]},{n:'Primescan 2',s:[2,2,4,4,4]},{n:'Medit i900',s:[3,5,4,4,4]},{n:'Medit i700 Wireless',s:[4,5,5,3,4]},{n:'Aoralscan Elite',s:[3,5,4,3,3]},{n:'Aoralscan ELF',s:[4,5,5,3,3]}],
+  prof:{'Clínica nueva':[5,3,4,3,4],'Clínica con laboratorio externo':[3,5,3,3,4],'Facultad / docencia':[5,5,3,3,3]}},
+ desk:{n:'De escritorio',crit:['Precisión declarada','Velocidad','Apertura de formatos','Versatilidad de casos','Ecosistema y soporte'],
+  pool:[{n:'3Shape E3',s:[4,4,3,4,5]},{n:'3Shape E4',s:[5,5,3,5,5]},{n:'Medit T310',s:[3,4,5,3,4]},{n:'Medit T710',s:[5,5,5,5,4]},{n:'inEos X5',s:[5,2,5,5,4]}],
+  prof:{'Laboratorio pequeño':[3,3,4,3,4],'Alto volumen':[3,5,3,4,4],'Facultad / docencia':[3,2,5,4,3]}}
+};
+(function(){
+  let kind='intra'; let weights=[3,3,3,3,3];
+  const kc=$('kind-chips'), pc=$('prof-chips'), wb=$('weights');
+  Object.keys(CMP).forEach(k=>{const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=CMP[k].n; b.onclick=()=>{kind=k; weights=[3,3,3,3,3]; build(); draw();}; kc.appendChild(b);});
+  function build(){
+    pc.innerHTML=''; wb.innerHTML='';
+    Object.keys(CMP[kind].prof).forEach(p=>{const b=document.createElement('button'); b.className='chip'; b.textContent=p; b.onclick=()=>{
+      CMP[kind].prof[p].forEach((v,i)=>{weights[i]=v; $('w'+i).value=v; $('wv'+i).textContent=v;});
+      [...pc.children].forEach(c=>c.classList.toggle('active',c===b)); draw();}; pc.appendChild(b);});
+    CMP[kind].crit.forEach((c,i)=>{const d=document.createElement('div'); d.className='ctrl';
+      d.innerHTML=`<label><span></span>: <b id="wv${i}">3</b></label><input type="range" id="w${i}" min="0" max="5" value="3">`;
+      d.querySelector('span').textContent=c; wb.appendChild(d);
+      d.querySelector('input').addEventListener('input',e=>{weights[i]=+e.target.value; $('wv'+i).textContent=weights[i]; [...pc.children].forEach(x=>x.classList.remove('active')); draw();});
+    });
+  }
+  function draw(){
+    [...kc.children].forEach(c=>c.classList.toggle('active',c.dataset.k===kind));
+    const M=CMP[kind], pool=M.pool;
+    const colr=v=>['','#FFE3F0','#FFF1C2','#FFFFFF','#D5F5E8','#9FE6C8'][v];
+    $('heat-table').innerHTML='<tr><th>Opción</th>'+M.crit.map(c=>`<th style="text-align:center">${c}</th>`).join('')+'</tr>'+
+      pool.map(p=>`<tr><td class="name">${p.n}</td>`+p.s.map(v=>`<td class="s" style="background:${colr(v)}">${v}</td>`).join('')+'</tr>').join('');
+    const sum=weights.reduce((a,b)=>a+b,0); const box=$('rank'); box.innerHTML='';
+    if(!sum){box.innerHTML='<p style="margin:0;">Asigna al menos un peso mayor que 0 para ver el resultado.</p>'; return;}
+    pool.map(p=>({n:p.n,v:p.s.reduce((a,v,i)=>a+v*weights[i],0)/sum})).sort((a,b)=>b.v-a.v).forEach((r,i)=>{
+      const row=document.createElement('div'); row.className='rank-row'+(i===0?' top':'');
+      row.innerHTML=`<div class="nm"></div><div class="bar"><i style="width:${(r.v/5*100).toFixed(1)}%"></i></div><div class="val">${r.v.toFixed(2)}</div>`;
+      row.querySelector('.nm').textContent=r.n; box.appendChild(row);
+    });
+  }
+  build(); draw();
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ=[
+ {q:'¿Qué tecnología puso Align en el iTero Lumina en lugar de la captura confocal de modelos anteriores?',opts:['Fotogrametría intraoral','Luz estructurada con láser azul','Multi-Direct Capture','Captura hiperespectral'],correct:2,exp:'Align describe la Multi-Direct Capture como la sustituta de la imagen confocal: captura desde varios ángulos a la vez para cubrir más dentadura en un solo movimiento.'},
+ {q:'Para usar el Primescan 2 con toda su funcionalidad en la nube, ¿qué es necesario según Dentsply Sirona?',opts:['Una licencia perpetua del escáner solamente','Un cable USB-C dedicado','Conectarlo a una laptop de la marca','Una suscripción pagada a DS Core'],correct:3,exp:'El Primescan 2 es nativo de la nube: procesa y almacena los escaneos en DS Core, que requiere una suscripción pagada.'},
+ {q:'En el simulador de uniones aumentas el campo de captura y dejas fijos el traslape y el recorrido. ¿Qué ocurre?',opts:['Se necesitan menos capturas y hay menos uniones','Se necesitan más capturas y hay más uniones','No cambia nada','Desaparece el traslape'],correct:0,exp:'Con un campo mayor, cada captura cubre más recorrido. Hay menos uniones, y por eso menos puntos donde puede acumularse el error.'},
+ {q:'El Medit T710 y el 3Shape E4 declaran 4 µm de precisión. ¿Por qué no basta ese número para elegir entre ellos?',opts:['Porque 4 µm es una precisión mala','Porque cada fabricante mide con su propio protocolo y la cifra es declarada por él','Porque solo uno de los dos exporta STL','Porque los escáneres de escritorio no tienen precisión medible'],correct:1,exp:'Las cifras de precisión las declara cada fabricante con su propio protocolo. Sirven para ubicar una gama, y conviene complementarlas con velocidad, versatilidad, apertura y soporte.'},
+ {q:'¿Qué tipo de dato entrega un CBCT, a diferencia de un escáner intraoral o de escritorio?',opts:['Una malla STL con color','Un archivo de texto con medidas','Un volumen de voxeles, normalmente en DICOM','Una nube de puntos comprimida'],correct:2,exp:'Los escáneres de superficie entregan una malla (STL, PLY u OBJ); el CBCT entrega un volumen de voxeles, en formato DICOM, que se trabaja en el software de planeación.'}
+];
+(function(){
+  const container=$('quiz-container'), scoreBox=$('quiz-score'); let score=0,answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div'); block.className='q-block';
+    const h3=document.createElement('h3'); h3.textContent=`${qi+1}. ${item.q}`; block.appendChild(h3);
+    const explain=document.createElement('div'); explain.className='explain'; explain.textContent=item.exp;
+    item.opts.forEach((t,oi)=>{
+      const btn=document.createElement('button'); btn.className='opt'; btn.textContent=t;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){btn.classList.add('correct'); score++;} else {btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct');}
+        explain.classList.add('show'); answered++; if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain); container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML=`<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--ink2); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    $('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
