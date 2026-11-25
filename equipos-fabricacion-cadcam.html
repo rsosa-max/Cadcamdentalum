@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equipos de fabricación CAD/CAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9EE;
+    --card:#FFFFFF;
+    --ink:#1B1530;
+    --ink2:#4A4266;
+    --ink3:#8C84A8;
+    --soft:#F3EEFF;
+    --line:#E4DCF5;
+    --pink:#FF4F9A;
+    --pink-d:#D6226F;
+    --pink-l:#FFE3F0;
+    --violet:#6C4DF6;
+    --violet-l:#E9E4FF;
+    --mint:#12B886;
+    --mint-l:#D5F5E8;
+    --sun:#FFC53D;
+    --sun-l:#FFF1C2;
+    --sky:#339AF0;
+    --sky-l:#DCEEFF;
+    --red:#E03131;
+    --orange:#F59F00;
+    --disp:'Bricolage Grotesque','Trebuchet MS',sans-serif;
+    --body:'Geist','Inter',system-ui,sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh; background-image:radial-gradient(rgba(27,21,48,.09) 1.2px, transparent 1.4px); background-size:22px 22px;}
+  .app{max-width:1100px; margin:0 auto; padding:30px 20px 80px;}
+
+  header.top{padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); background:var(--sun); border:2px solid var(--ink); border-radius:30px; padding:5px 12px; box-shadow:3px 3px 0 var(--ink);}
+  h1{font-family:var(--disp); font-weight:800; font-size:clamp(32px,5.4vw,56px); letter-spacing:-.02em; margin-top:18px; line-height:1.02;}
+  h1 .mark{background:linear-gradient(transparent 58%, var(--pink) 58%, var(--pink) 92%, transparent 92%); padding:0 4px;}
+  .sub{color:var(--ink2); font-size:16px; margin-top:14px; max-width:700px; line-height:1.55;}
+
+  nav.tabs{display:flex; gap:8px; overflow-x:auto; padding:4px 4px 10px; margin:0 -4px 22px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:var(--mono); font-size:12px; font-weight:500; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:9px 14px; border-radius:30px; cursor:pointer; white-space:nowrap; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; box-shadow:2px 2px 0 var(--ink);}
+  nav.tabs button .n{color:var(--ink3); margin-right:7px;}
+  nav.tabs button:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active{background:var(--pink); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active .n{color:var(--ink);}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:var(--mono); font-size:11px; font-weight:700; color:var(--violet); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:var(--disp); font-size:clamp(24px,3.4vw,36px); font-weight:800; margin-bottom:14px; letter-spacing:-.015em; line-height:1.1;}
+  h3{font-family:var(--disp); font-size:17px; font-weight:700; margin-bottom:8px; color:var(--ink);}
+  p{color:var(--ink2); line-height:1.65; font-size:15px; margin-bottom:12px;}
+  p strong{color:var(--ink); font-weight:600;}
+  .lead{color:var(--ink); font-size:17px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid2e{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid2e{grid-template-columns:1fr;}}
+
+  .card{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; box-shadow:4px 4px 0 var(--ink);}
+  .card.soft{background:var(--soft);}
+  .card.sun{background:var(--sun-l);}
+  .viewport{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:16px; position:relative; box-shadow:4px 4px 0 var(--ink);}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink3); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:140px; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .stat .num{font-family:var(--disp); font-weight:800; font-size:24px; color:var(--pink-d); line-height:1.1;}
+  .stat .lab{font-family:var(--mono); font-size:10px; color:var(--ink3); text-transform:uppercase; letter-spacing:.06em; margin-top:4px; font-weight:500;}
+  .stat.ok{background:var(--mint-l);}
+  .stat.ok .num{color:#0A7A59;}
+
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:var(--mono); font-size:12px; font-weight:500; border:2px solid var(--ink); background:var(--card); color:var(--ink); padding:7px 13px; border-radius:30px; cursor:pointer; transition:transform .12s, box-shadow .12s, background .12s; box-shadow:2px 2px 0 var(--ink);}
+  .chip:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  .chip.active{background:var(--sun); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:20px; color:var(--ink2); font-size:14.5px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'●'; font-size:9px; position:absolute; left:2px; top:5px; color:var(--pink);}
+  ul.pros li::before{content:'+'; font-size:15px; top:-1px; color:var(--mint); font-weight:800;}
+  ul.cons li::before{content:'–'; font-size:15px; top:-1px; color:var(--red); font-weight:800;}
+
+  .callout{border:2px solid var(--ink); border-radius:16px; padding:14px 18px; background:var(--sun-l); margin-top:18px; box-shadow:4px 4px 0 var(--ink);}
+  .callout p{color:var(--ink); font-size:14px; margin:0;}
+  .callout .lab{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  .sticker{display:inline-block; background:var(--sun); border:2px solid var(--ink); border-radius:20px; padding:2px 10px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink); transform:rotate(-3deg); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:6px;}
+  table.formats th{font-family:var(--mono); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink2); text-align:left; padding:9px 10px; background:var(--soft); border-bottom:2px solid var(--ink);}
+  table.formats td{padding:10px; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top;}
+  table.formats td:first-child{color:var(--pink-d); font-family:var(--mono); font-weight:700;}
+  .table-wrap{overflow-x:auto;}
+
+  .app-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink);}
+  .app-card h3{font-size:15.5px;}
+  .app-card p{font-size:13.5px; margin-bottom:0;}
+
+  /* controls */
+  .ctrl-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
+  .ctrl label{display:block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink2); letter-spacing:.03em;}
+  .ctrl label b{color:var(--pink-d); font-weight:700;}
+  .ctrl input[type=range]{width:100%; margin-top:8px; accent-color:var(--pink);}
+  .ctrl input[type=number]{width:100%; margin-top:6px; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:8px 10px; border-radius:10px; font-family:var(--mono); font-size:13px;}
+  .ctrl input[type=number]:focus{outline:none; box-shadow:3px 3px 0 var(--pink);}
+  .check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink2); margin-top:12px; cursor:pointer;}
+  .check input{accent-color:var(--pink); width:16px; height:16px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-family:var(--mono); font-size:11px; color:var(--ink2);}
+  .legend i{display:inline-block; width:12px; height:12px; border-radius:4px; border:1.5px solid var(--ink); margin-right:6px; vertical-align:-2px;}
+
+  /* badges */
+  .badge{display:inline-block; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:20px; border:2px solid var(--ink); text-transform:uppercase; white-space:nowrap; color:var(--ink);}
+  .b-perp{background:var(--sun-l);}
+  .b-sub{background:var(--pink-l);}
+  .b-uso{background:var(--mint-l);}
+  .b-fm{background:var(--violet-l);}
+  .b-open{background:#E3F8D4;}
+  .b-free{background:var(--sky-l);}
+  .b-otro{background:#EDEAF3;}
+
+  .sw-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:8px; box-shadow:3px 3px 0 var(--ink);}
+  .sw-card h3{margin-bottom:0; font-size:16px;}
+  .sw-card p{font-size:13.5px; margin:0;}
+
+  /* unit map */
+  .umap{display:grid; gap:14px;}
+  .u1{border:2px dashed var(--ink3); border-radius:18px; padding:16px 18px; background:rgba(255,255,255,.6);}
+  .u1 .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px;}
+  .pills{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{font-family:var(--mono); font-size:11.5px; border:1.5px solid var(--ink3); color:var(--ink2); background:var(--card); border-radius:30px; padding:4px 11px;}
+  .u2{display:grid; grid-template-columns:1.5fr .9fr; gap:14px; align-items:stretch;}
+  @media(max-width:760px){.u2{grid-template-columns:1fr;}}
+  .block{border:2px solid var(--ink); border-radius:18px; padding:18px; box-shadow:4px 4px 0 var(--ink);}
+  .block.a{background:var(--pink-l);}
+  .block.b{background:var(--sky-l);}
+  .block .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); margin-bottom:12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .step{display:grid; grid-template-columns:34px 1fr auto; gap:12px; align-items:center; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:11px 12px; margin-bottom:10px;}
+  .step:last-child{margin-bottom:0;}
+  .step .no{width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; font-family:var(--disp); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .step .tx{font-size:14px; font-weight:600; color:var(--ink); line-height:1.3;}
+  .step .tx small{display:block; font-weight:400; color:var(--ink2); font-size:12.5px; margin-top:2px;}
+  .step.now{background:var(--sun); box-shadow:3px 3px 0 var(--ink);}
+  .step.now .no{background:var(--pink); color:var(--ink); border:2px solid var(--ink);}
+  .step.later{background:rgba(255,255,255,.65); border-style:dashed;}
+  .flow4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:860px){.flow4{grid-template-columns:1fr 1fr;}}
+  @media(max-width:520px){.flow4{grid-template-columns:1fr;}}
+  .fstage{position:relative; background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px 14px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .fstage .fn{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink3); letter-spacing:.08em;}
+  .fstage h3{font-size:17px; margin:2px 0 8px;}
+  .fstage .ftag{display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700; border:2px solid var(--ink); border-radius:20px; padding:3px 9px; background:#EDEAF3; color:var(--ink);}
+  .fstage .ftag.sw{background:var(--pink-l);}
+  .fstage .ftag.hw{background:var(--sky-l);}
+  .fstage .ftag.up{background:var(--card); border-style:dashed;}
+  .fstage.here{background:var(--sun-l); box-shadow:5px 5px 0 var(--ink);}
+  .fstage.here .sticker{position:absolute; top:-12px; right:10px;}
+
+  .src{font-size:12.5px; color:var(--ink2); line-height:1.8;}
+  .src a{color:var(--pink-d); text-decoration:none; border-bottom:2px solid var(--pink);}
+  .src a:hover{background:var(--pink-l);}
+
+  /* heat + rank */
+  .heat td.s{text-align:center; font-family:var(--disp); font-size:17px; font-weight:800; color:var(--ink);}
+  .heat td.name{white-space:nowrap; color:var(--ink); font-family:var(--disp); font-weight:700; font-size:14px;}
+  .rank-row{display:grid; grid-template-columns:200px 1fr 54px; gap:12px; align-items:center; margin-bottom:12px;}
+  .rank-row .nm{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .rank-row .bar{height:18px; background:var(--soft); border-radius:10px; overflow:hidden; border:2px solid var(--ink);}
+  .rank-row .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--violet),var(--pink)); transition:width .3s ease;}
+  .rank-row .val{font-family:var(--disp); font-size:18px; font-weight:800; color:var(--pink-d); text-align:right;}
+  .rank-row.top .nm{color:var(--pink-d);}
+  .rank-row.top .nm::after{content:' ★'; color:var(--orange);}
+  @media(max-width:560px){.rank-row{grid-template-columns:110px 1fr 44px;}}
+
+  .q-block{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; margin-bottom:16px; box-shadow:4px 4px 0 var(--ink);}
+  .q-block h3{font-size:16px; margin-bottom:14px; color:var(--ink); line-height:1.4;}
+  .opt{display:block; width:100%; text-align:left; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:11px 14px; border-radius:12px; margin-bottom:9px; cursor:pointer; font-family:var(--body); font-size:14px; transition:transform .12s, background .12s;}
+  .opt:hover{transform:translateX(3px); background:var(--soft);}
+  .opt.correct{background:var(--mint-l); font-weight:600;}
+  .opt.wrong{background:var(--pink-l);}
+  .opt[disabled]{cursor:default;}
+  .opt[disabled]:hover{transform:none;}
+  .explain{font-size:13px; color:var(--ink2); margin-top:10px; display:none; line-height:1.55; padding-top:10px; border-top:2px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:26px; background:var(--sun-l); border:2px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); font-family:var(--mono);}
+  .score-box .big{font-family:var(--disp); font-size:44px; font-weight:800; color:var(--ink);}
+  .reset-btn{font-family:var(--mono); font-size:12px; font-weight:700; background:var(--pink); color:var(--ink); border:2px solid var(--ink); padding:9px 18px; border-radius:30px; cursor:pointer; margin-top:12px; box-shadow:3px 3px 0 var(--ink);}
+
+  footer{margin-top:54px; padding-top:18px; border-top:2px solid var(--ink); font-family:var(--mono); font-size:11px; color:var(--ink2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  /* clase 07 */
+  .step.done{background:var(--mint-l);}
+  .prep-flow{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:760px){.prep-flow{grid-template-columns:1fr;}}
+  .pf{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink); position:relative;}
+  .pf .who{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3);}
+  .pf h3{margin:4px 0 6px; font-size:16px;}
+  .pf p{font-size:13.5px; margin:0;}
+  .pf.hl{background:var(--sun-l);}
+  .pf.hl .sticker{position:absolute; top:-12px; right:10px;}
+  .big-out{font-family:var(--mono); font-size:12px; color:var(--ink2); margin-top:10px; line-height:1.6;}
+  .big-out b{color:var(--ink);}
+  .tabsmall{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;}
+  .sw-card .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .sw-card ul{margin-top:4px;}
+  .note-mini{font-size:12px; color:var(--ink3); line-height:1.5; margin-top:6px;}
+  .b-task{background:var(--violet-l);}
+  /* clase 08 */
+  .track{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:6px 0 10px;}
+  @media(max-width:760px){.track{grid-template-columns:repeat(2,1fr);}}
+  .tk{border:2px solid var(--ink); border-radius:14px; padding:12px 8px; text-align:center; background:var(--card); font-family:var(--disp); font-weight:700; font-size:14.5px; line-height:1.2; position:relative;}
+  .tk small{display:block; font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); margin-bottom:4px;}
+  .tk.acc{background:var(--pink-l);}
+  .tk.on{background:var(--sun); box-shadow:3px 3px 0 var(--ink); transform:translateY(-2px);}
+  .band{border:2px dashed var(--violet); border-radius:14px; padding:9px 12px; text-align:center; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--violet); background:var(--violet-l);}
+  .band.on{background:var(--sun); border-style:solid; border-color:var(--ink); color:var(--ink); box-shadow:3px 3px 0 var(--ink);}
+  .io{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px;}
+  @media(max-width:760px){.io{grid-template-columns:1fr;}}
+  .io div{background:var(--soft); border:2px solid var(--ink); border-radius:12px; padding:10px 12px; font-size:13px;}
+  .io b{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); margin-bottom:3px;}
+  .need{display:grid; gap:10px; margin:10px 0 18px;}
+  .need label{display:flex; gap:10px; align-items:flex-start; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; cursor:pointer; font-size:14.5px;}
+  .need label.on{background:var(--sun-l); box-shadow:3px 3px 0 var(--ink);}
+  .need input{margin-top:3px; accent-color:var(--pink); width:18px; height:18px; flex:none;}
+  .rec{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:14px 16px; box-shadow:3px 3px 0 var(--ink); margin-bottom:12px;}
+  .rec h3{margin:0 0 4px; font-size:17px;}
+  .rec ul{margin:6px 0 0; padding-left:18px; font-size:13.5px;}
+  .rec .dep{font-family:var(--mono); font-size:11.5px; color:var(--ink2); margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);}
+</style>
+</head><body>
+<style>
+.bars{display:grid;gap:8px;margin-top:12px}
+.bar-row{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;cursor:pointer;font-size:13.5px}
+.bar-row .nm{font-weight:600;color:var(--ink)}
+.bar-row .tr{height:16px;background:var(--soft);border-radius:99px;overflow:hidden;border:1.5px solid var(--ink)}
+.bar-row .tr i{display:block;height:100%;background:var(--violet)}
+.bar-row.sel .tr i{background:var(--pink)}
+.bar-row .v{font-family:var(--mono);font-size:12px;text-align:right}
+.route{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.route .st{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-weight:600;font-size:13.5px;box-shadow:3px 3px 0 var(--ink)}
+.route .st small{display:block;font-weight:400;color:var(--ink2);font-size:11.5px;font-family:var(--mono)}
+.route .ar{font-weight:700;color:var(--ink3)}
+.zz{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}
+.zz .st{background:var(--sun-l);border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-weight:600;font-size:13px}
+.zz .st small{display:block;font-weight:400;color:var(--ink2);font-size:11.5px;font-family:var(--mono)}
+.sbs{display:grid;gap:8px;margin-top:10px}
+.sbs .r{display:grid;grid-template-columns:90px 1fr 60px;gap:8px;align-items:center;font-family:var(--mono);font-size:12px}
+.sbs .r i{display:block;height:18px;border:2px solid var(--ink);border-radius:6px}
+@media(max-width:600px){.bar-row{grid-template-columns:110px 1fr 56px;font-size:12.5px}.sbs .r{grid-template-columns:70px 1fr 52px}}
+</style>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">Unidad 2 · Hardware · Fabricación</div>
+    <h1>Equipos de <span class="mark">fabricación</span><br>imprimir, fresar y terminar</h1>
+    <p class="sub">Última clase del bloque de hardware. La captura ya entró al flujo y el software diseñó y preparó la pieza; ahora el archivo se vuelve objeto. Esta clase junta los tres tipos de equipo de fabricación (impresoras 3D, fresadoras y equipos de acabado) con modelos y marcas comerciales, catálogo consultado en noviembre de 2026.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. RUTA -->
+    <section class="panel" data-name="Ruta de fabricación" id="sec-ruta">
+      <div class="kicker">01 · Del archivo a la pieza</div>
+      <h2>Cada pieza sigue su propia ruta</h2>
+      <p class="lead">No todo se imprime ni todo se fresa, y casi nada sale terminado de la máquina. Elige una pieza y mira por qué equipos pasa. Esta ruta es la que organiza el resto de la clase.</p>
+      <div class="btn-row" id="rt-chips" style="margin-bottom:14px;"></div>
+      <div class="card">
+        <div class="kicker" id="rt-kind"></div>
+        <h3 id="rt-title" style="font-size:22px; margin-top:2px;"></h3>
+        <div class="route" id="rt-route"></div>
+        <p id="rt-text" style="margin-top:14px;"></p>
+      </div>
+
+      <h3 style="margin-top:26px;">Tres familias de equipo</h3>
+      <div class="grid3">
+        <div class="app-card"><h3>Impresoras 3D (aditivo)</h3><p>Construyen la pieza capa por capa con resina fotopolimerizable. Necesitan un equipo de lavado y uno de poscurado. Se ven en la pestaña 02.</p></div>
+        <div class="app-card"><h3>Fresadoras (sustractivo)</h3><p>Desbastan un disco o bloque con fresas. Pueden trabajar en húmedo o en seco según el material. Se ven en la pestaña 03.</p></div>
+        <div class="app-card"><h3>Equipos de acabado</h3><p>Hornos que sinterizan zirconia o cristalizan vitrocerámicas, más lavado y curado en el caso de las resinas. Se ven en la pestaña 04.</p></div>
+      </div>
+      <p class="src" style="margin-top:12px;">Las rutas son esquemas didácticos; cada fabricante de material valida su propio proceso.</p>
+    </section>
+
+    <!-- 2. IMPRESORAS -->
+    <section class="panel" data-name="Impresoras 3D" id="sec-print">
+      <div class="kicker">02 · Fabricación aditiva</div>
+      <h2>Impresoras 3D dentales</h2>
+      <p class="lead">Casi todas las impresoras dentales son de resina: una luz endurece el líquido capa por capa. Lo que cambia es <strong>cómo llega la luz</strong>, qué resinas acepta la máquina y cuánto trabajo de postproceso exige. Primero, el efecto de la capa sobre la superficie.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Efecto escalón (corte lateral de una rampa)</span>
+          <svg id="ls-svg" viewBox="0 0 320 135" style="margin-top:10px;"></svg>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ctrl-grid" style="grid-template-columns:1fr;">
+              <div class="ctrl"><label>Altura de capa: <b id="ls-h-v">50</b> µm</label><input type="range" id="ls-h" min="25" max="100" step="5" value="50"></div>
+              <div class="ctrl"><label>Inclinación de la superficie: <b id="ls-a-v">15</b>°</label><input type="range" id="ls-a" min="5" max="60" step="1" value="15"></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="num" id="ls-e">–</div><div class="lab">µm de escalón máximo</div></div>
+            <div class="stat"><div class="num" id="ls-w">–</div><div class="lab">mm de ancho de cada escalón</div></div>
+          </div>
+          <div class="big-out" id="ls-note"></div>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">Modelo geométrico: el escalón vertical es igual a la altura de capa, y su ancho es esa altura entre la tangente de la inclinación. Las superficies casi horizontales muestran escalones largos y visibles. El dibujo exagera la escala.</p>
+
+      <h3 style="margin-top:26px;">Cómo llega la luz a la resina</h3>
+      <div class="grid3">
+        <div class="app-card"><h3>MSLA / LCD</h3><p>Una pantalla LCD actúa como máscara frente a una fuente de luz. Es la base de equipos como la Formlabs Form 4B (MSLA) y la Kulzer cara Print Cube y Phrozen Sonic (LCD).</p></div>
+        <div class="app-card"><h3>DLP</h3><p>Un proyector digital endurece toda la capa a la vez. Lo usan, entre otras, Asiga Ultra, Straumann PRO20 y HeyGears UltraCraft ChairSide Pro.</p></div>
+        <div class="app-card"><h3>DPS (SprintRay)</h3><p>La SprintRay Midas usa cápsulas de resina en lugar de tanque y plataforma de construcción. SprintRay la llama Digital Press Stereolithography.</p></div>
+        <div class="app-card"><h3>CDLP</h3><p>La Carbon L1 usa CDLP, con volumen de construcción de 400 × 250 × 460 mm según 3Dnatives. Es de grandes lotes, por ejemplo modelos para alineadores.</p></div>
+        <div class="app-card"><h3>PolyJet</h3><p>La Stratasys DentaJet XL deposita gotas de material y imprime en varios materiales a la vez. Un listado de 3Dnatives le atribuye hasta 102 modelos de corona y puente en unas 4.5 horas.</p></div>
+        <div class="app-card"><h3>Híbrida SLA + DLP</h3><p>La Axtra3D Lumia X1 Dental combina un láser para el contorno y un proyector para la velocidad (249 × 140 × 499 mm, capas de 25 a 200 µm).</p></div>
+      </div>
+
+      <h3 style="margin-top:26px;">Lo que ocurre después de imprimir</h3>
+      <p style="margin-top:0;">La pieza sale con resina líquida encima y sin terminar de polimerizar. Recorre los pasos.</p>
+      <div class="btn-row" id="pp-chips" style="margin-bottom:12px;"></div>
+      <div class="card">
+        <h3 id="pp-title" style="font-size:20px; margin:0 0 4px;"></h3>
+        <p id="pp-text" style="margin:0;"></p>
+      </div>
+      <div class="callout">
+        <div class="lab">Equipo de postproceso</div>
+        <p>Cada fabricante ofrece su cadena: Formlabs (Form Wash y Form Cure), SprintRay (ProWash S, ProCure 2 y NanoCure) o Rapid Shape (WASH y CURE). Dentsply Sirona describe la Primeprint con una unidad de postproceso automatizada.</p>
+      </div>
+    </section>
+
+    <!-- 3. FRESADORAS -->
+    <section class="panel" data-name="Fresadoras" id="sec-mill">
+      <div class="kicker">03 · Fabricación sustractiva</div>
+      <h2>Fresadoras dentales</h2>
+      <p class="lead">Una fresadora quita material con una herramienta redonda, y eso impone un límite: <strong>no puede fresar un rincón más cerrado que su propia fresa</strong>. Mueve el diámetro de la fresa y mira qué le pasa a una fisura.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Oclusal de una corona (corte de 6 mm)</span>
+          <svg id="tl-svg" viewBox="0 0 320 190" style="margin-top:10px;"></svg>
+          <div class="legend"><span><i style="background:#1B1530"></i>diseño</span><span><i style="background:#FF4F9A"></i>material que queda</span></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ctrl-grid" style="grid-template-columns:1fr;">
+              <div class="ctrl"><label>Diámetro de la fresa: <b id="tl-d-v">1.0</b> mm</label><input type="range" id="tl-d" min="0.4" max="2.4" step="0.1" value="1.0"></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="num" id="tl-e">–</div><div class="lab">µm de exceso máx. en la fisura</div></div>
+            <div class="stat"><div class="num" id="tl-r">–</div><div class="lab">mm de radio interno mínimo</div></div>
+          </div>
+          <div class="big-out" id="tl-note"></div>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">Modelo didáctico con un perfil inventado y una fresa de punta esférica. No representa una fresa ni una máquina concreta.</p>
+
+      <h3 style="margin-top:26px;">Lo que distingue a una fresadora</h3>
+      <div class="grid2e">
+        <div class="app-card"><h3>Húmedo y seco</h3><p>El fresado en húmedo usa refrigerante y es la vía de las vitrocerámicas, los metales y los híbridos. El seco aspira el polvo y es el de la zirconia presinterizada y el PMMA. Muchas máquinas actuales hacen ambos: la PrograMill 7 cambia sola entre modos y la CEREC Primemill pasa de un trabajo en seco a uno en húmedo.</p></div>
+        <div class="app-card"><h3>Ejes</h3><p>Una máquina de 5 ejes inclina el disco o la herramienta para alcanzar zonas que de otra forma quedarían ocultas. La Zirkonzahn M2 y la M5 declaran fresado simultáneo en 5+1 ejes, y la inLab MC X5 y la Ceramill Motion 3 son de 5 ejes.</p></div>
+        <div class="app-card"><h3>Cambiador y magazine</h3><p>El cambiador de herramientas y de bloques permite trabajar sin supervisión. La M5 tiene un magazine de 16 herramientas; la inLab MC X5 cambia hasta seis herramientas por proceso y sostiene hasta seis bloques.</p></div>
+        <div class="app-card"><h3>Del laboratorio a la clínica</h3><p>Algunas máquinas son de laboratorio (discos, varias indicaciones) y otras son compactas, para trabajar en el consultorio con bloques, como la CEREC Primemill o la PrograMill 7 Pure.</p></div>
+      </div>
+    </section>
+
+    <!-- 4. ACABADO -->
+    <section class="panel" data-name="Equipos de acabado" id="sec-fin">
+      <div class="kicker">04 · Después de la máquina</div>
+      <h2>Hornos y equipos de acabado</h2>
+      <p class="lead">La zirconia sale de la fresadora presinterizada: blanda y más grande que la restauración final. El horno la <strong>sinteriza</strong> y la encoge hasta su tamaño real. Una vitrocerámica como el disilicato de litio se <strong>cristaliza</strong> en el horno para ganar resistencia y color. Primero, cuánto más grande hay que fresar.</p>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="kicker">Calculadora de contracción</div>
+          <div class="ctrl-grid" style="grid-template-columns:1fr; margin-top:8px;">
+            <div class="ctrl"><label>Dimensión final deseada: <b id="sh-d-v">10</b> mm</label><input type="range" id="sh-d" min="4" max="16" step="0.5" value="10"></div>
+            <div class="ctrl"><label>Contracción lineal: <b id="sh-s-v">20</b>%</label><input type="range" id="sh-s" min="15" max="28" step="0.5" value="20"></div>
+          </div>
+          <div class="sbs">
+            <div class="r"><span>fresada</span><i id="sh-b1" style="background:var(--pink)"></i><b id="sh-v1">–</b></div>
+            <div class="r"><span>final</span><i id="sh-b2" style="background:var(--mint)"></i><b id="sh-v2">–</b></div>
+          </div>
+          <div class="big-out" id="sh-note" style="margin-top:10px;"></div>
+        </div>
+        <div class="card">
+          <div class="kicker">Duración de ciclos de sinterizado</div>
+          <p style="margin:6px 0 0; font-size:13.5px;">Toca una barra para ver la condición en que el fabricante declara ese tiempo.</p>
+          <div class="bars" id="cy-bars"></div>
+          <div class="big-out" id="cy-note" style="margin-top:12px;"></div>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">En la práctica, el software de diseño aplica el factor de contracción que da el fabricante del disco, que cambia por lote. La calculadora solo muestra el orden de magnitud. Los ciclos vienen de las páginas de Zirkonzahn, Ivoclar y Amann Girrbach.</p>
+
+      <div class="callout">
+        <div class="lab">Rápido no siempre es válido</div>
+        <p>Un ciclo ultrarrápido solo vale para el material, el tamaño y la cantidad de piezas con que el fabricante lo validó. Zirkonzahn, por ejemplo, limita el programa Ultraspeed a elementos de hasta 2 g, e Ivoclar declara su sinterizado de 15 minutos con tres coronas de un material concreto.</p>
+      </div>
+
+      <h3 style="margin-top:26px;">Qué hace cada equipo de acabado</h3>
+      <div class="grid3">
+        <div class="app-card"><h3>Horno de sinterizado</h3><p>Lleva la zirconia a unos 1,500–1,700 °C. Zirkonzahn declara hasta 1,700 °C en toda su línea Zirkonofen e Ivoclar 1,560 °C en el Programat CS6.</p></div>
+        <div class="app-card"><h3>Horno de cristalización y glaseado</h3><p>El Programat CS6 y el CEREC SpeedFire combinan sinterizado, cristalización y glaseado en un solo equipo, pensado para la clínica.</p></div>
+        <div class="app-card"><h3>Vacío</h3><p>El Zirkonofen 700 Ultra-Vakuum sinteriza sin oxígeno, con resultados más translúcidos en zirconia y con metal sinterizado mediante un adaptador, según Zirkonzahn.</p></div>
+      </div>
+    </section>
+
+    <!-- 5. CATALOGO -->
+    <section class="panel" data-name="Catálogo por marcas" id="sec-cat">
+      <div class="kicker">05 · Marcas y modelos</div>
+      <h2>Catálogo de equipos de fabricación (noviembre de 2026)</h2>
+      <p class="lead">Fichas de los modelos principales con lo que dicen los fabricantes y, cuando se indica, lo que reportan terceros. Cada ficha marca qué falta o qué debes verificar. No se hallaron precios confiables en las fuentes: pídelos al distribuidor de tu país.</p>
+
+      <div class="card" style="background:var(--sun-l);">
+        <div class="kicker">Zirkonzahn · un ecosistema completo</div>
+        <p style="margin:4px 0 0;">La marca cubre casi todo el flujo con equipo propio: desde el escáner S600 ARTI (clase 09), pasando por las fresadoras M1, M2 y M5, hasta los hornos Zirkonofen y la impresora P4000.</p>
+        <div class="zz">
+          <div class="st">Escáner<small>S600 ARTI</small></div><span>→</span>
+          <div class="st">Fresado<small>M1 · M2 · M5</small></div><span>→</span>
+          <div class="st">Sinterizado<small>Zirkonofen 600/V4 · 700 · Turbo</small></div><span>→</span>
+          <div class="st">Impresión<small>P4000 + L300</small></div>
+        </div>
+        <div class="btn-row" style="margin-top:8px;"><button class="chip" id="zz-go">Ver Zirkonzahn en el catálogo</button></div>
+      </div>
+
+      <div class="btn-row" id="cat-type" style="margin:18px 0 10px;"></div>
+      <div class="btn-row" id="cat-brand" style="margin-bottom:16px;"></div>
+      <div class="cat-grid" id="cat-grid"></div>
+
+      <p class="src" style="margin-top:16px;"><b>Fuentes (consultadas en noviembre de 2026):</b><br>
+        <a href="https://zirkonzahn.com/us/cad-cam-systems/m2-milling-unit-series/comparison" target="_blank" rel="noopener">Zirkonzahn · serie M2</a> ·
+        <a href="https://zirkonzahn.com/us/cad-cam-systems/milling-unit-m1" target="_blank" rel="noopener">Zirkonzahn · M1</a> ·
+        <a href="https://medicalexpo.com/prod/zirkonzahn/product-74646-877307.html" target="_blank" rel="noopener">Zirkonzahn · M5 (MedicalExpo)</a> ·
+        <a href="https://zirkonzahn.com/ca/products/machines-and-equipment/sintering-furnaces" target="_blank" rel="noopener">Zirkonzahn · hornos de sinterizado</a> ·
+        <a href="https://dentistry.co.uk/2022/11/04/the-p4000-system-for-3d-printing-complete-add-on-package-for-zirkonzahn-digital-workflow/" target="_blank" rel="noopener">Dentistry.co.uk · Zirkonzahn P4000</a> ·
+        <a href="https://www.3dnatives.com/en/the-dental-resin-3d-printers-currently-on-the-market-170220225/" target="_blank" rel="noopener">3Dnatives · impresoras de resina dentales</a> ·
+        <a href="https://dental.formlabs.com/compare/formlabs-form-4b-vs-sprintray-midas/" target="_blank" rel="noopener">Formlabs · Form 4B vs. Midas (página del fabricante)</a> ·
+        <a href="https://sprintray.com/dental-3d-printers/" target="_blank" rel="noopener">SprintRay · impresoras</a> ·
+        <a href="https://www.rolanddga.com/applications/dental-cad-cam" target="_blank" rel="noopener">Roland DGA · dental</a> ·
+        <a href="https://www.dental-tribune.com/news/ivoclar-launches-programill-7-and-programill-7-pure/" target="_blank" rel="noopener">Dental Tribune · PrograMill 7</a> ·
+        <a href="https://dentsplysirona.com/en-us/categories/cerec/cerec-primemill.html" target="_blank" rel="noopener">Dentsply Sirona · CEREC Primemill</a> ·
+        <a href="https://www.dentsplysirona.com/pl-pl/explore/lab/cad-cam-equipment-dental-lab/production/inlab-mc-x5.html" target="_blank" rel="noopener">Dentsply Sirona · inLab MC X5</a> ·
+        <a href="https://www.dentsplysirona.com/en-us/discover/discover-by-category/cad-cam/sintering.html" target="_blank" rel="noopener">Dentsply Sirona · sinterizado</a> ·
+        <a href="https://henryschein.com/us-en/images/Zahn/Ceramill_Motion_3_EN.pdf" target="_blank" rel="noopener">Amann Girrbach · Ceramill Motion 3</a> ·
+        <a href="https://www.amanngirrbach.com/en-us/equipment/sintering/ceramill-therm-3/" target="_blank" rel="noopener">Amann Girrbach · Ceramill Therm 3</a> ·
+        <a href="https://www.ivoclar.com/en_us/products/equipment/programat-cs6" target="_blank" rel="noopener">Ivoclar · Programat CS6</a></p>
+    </section>
+
+    <!-- 6. COMPARATIVA -->
+    <section class="panel" data-name="Comparativa" id="sec-comp">
+      <div class="kicker">06 · Cierre de la clase</div>
+      <h2>Comparativa dentro de cada tipo de equipo</h2>
+      <p class="lead">Una impresora, una fresadora y un horno no compiten entre sí, así que se comparan por separado. Elige el tipo, un perfil o ajusta tus pesos. Los puntajes van de 1 a 5 (5 es lo más favorable para quien compra).</p>
+
+      <div class="card">
+        <div class="kicker">1 · Tipo de equipo</div>
+        <div class="btn-row" id="kind-chips" style="margin-top:6px; margin-bottom:18px;"></div>
+        <div class="kicker">2 · Perfil (o ajusta los pesos)</div>
+        <div class="btn-row" id="prof-chips" style="margin-top:6px; margin-bottom:18px;"></div>
+        <div class="ctrl-grid" id="weights"></div>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden; margin-top:16px;">
+        <div class="table-wrap"><table class="formats heat" id="heat-table" style="margin-top:0;"></table></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="kicker">Resultado (promedio ponderado sobre 5)</div>
+        <div id="rank" style="margin-top:14px;"></div>
+      </div>
+      <p class="src" style="margin-top:12px;">Puntajes ilustrativos con criterio docente, basados en las fuentes de la pestaña anterior (varias del propio fabricante); no son un benchmark. No incluyen precio porque no se hallaron cifras confiables.</p>
+      <div class="callout">
+        <div class="lab">El equipo ideal depende de tu flujo</div>
+        <p>Un sistema cerrado puede dar un flujo muy fluido y atarte a una marca; uno abierto te deja elegir resinas, discos y software, pero te pide validar tú el proceso. Un ecosistema completo, como el de Zirkonzahn o el de Dentsply Sirona, simplifica el soporte, y una mezcla de marcas ofrece libertad con más responsabilidad.</p>
+      </div>
+    </section>
+
+    <!-- 7. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">07 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Unidad 2 · Equipos de fabricación · CAD/CAM dental</span>
+    <span>Impresoras 3D · fresadoras · equipos de acabado · catálogo 2026</span>
+  </footer>
+
+</div>
+<script>
+const C={ink:'#1B1530',ink2:'#4A4266',ink3:'#8C84A8',line:'#E4DCF5',soft:'#F3EEFF',pink:'#FF4F9A',pinkL:'#FFE3F0',violet:'#6C4DF6',mint:'#12B886',orange:'#F59F00',sun:'#FFC53D',sunL:'#FFF1C2',red:'#E03131',sky:'#339AF0',white:'#FFFFFF'};
+const FONT_MONO='Geist Mono, monospace';
+const $=id=>document.getElementById(id);
+const SVGNS='http://www.w3.org/2000/svg';
+const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+const txt=(svg,x,y,t,o={})=>{const e=g('text',Object.assign({x,y,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink3},o)); e.textContent=t; svg.appendChild(e); return e;};
+
+/* TABS */
+const sections=[...document.querySelectorAll('section.panel')];
+const tabsNav=$('tabs');
+sections.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML=`<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click',()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active'); tabsNav.children[0].classList.add('active');
+const goTab=i=>tabsNav.children[i].click();
+
+/* ============ 01 RUTA ============ */
+const RT=[
+ {c:'Modelo de trabajo',k:'Aditivo',t:'Modelo de estudio o de trabajo',r:[['Impresora 3D','resina de modelo'],['Lavado','retira el exceso'],['Poscurado','termina de polimerizar']],x:'Un modelo se imprime, no se frese: es una forma completa que no necesita dureza especial. Después se lava y se poscura. Sirve de apoyo para verificar contactos o para termoformar.'},
+ {c:'Guía quirúrgica',k:'Aditivo',t:'Guía quirúrgica o férula',r:[['Impresora 3D','resina biocompatible certificada'],['Lavado','solvente de la resina'],['Poscurado','según el fabricante']],x:'La guía proviene de la planeación (clase 07). Al ir hacia el paciente, se usa una resina indicada para ese fin y se respeta el lavado y el poscurado que pide el fabricante.'},
+ {c:'Corona de zirconia',k:'Sustractivo',t:'Corona de zirconia',r:[['Fresadora','en seco, disco presinterizado'],['Sinterizado','horno, contracción'],['Caracterización','tinción y glaseado']],x:'La fresadora talla la corona sobredimensionada en un disco presinterizado. El horno la sinteriza y la lleva a su tamaño final, y después se caracteriza y se glasea.'},
+ {c:'Corona de disilicato',k:'Sustractivo',t:'Corona de disilicato de litio',r:[['Fresadora','en húmedo, bloque'],['Cristalización','horno'],['Glaseado','mismo horno']],x:'El bloque se frese en un estado intermedio y se cristaliza en el horno, que le da su resistencia y su color finales. Hornos como el Programat CS6 o el CEREC SpeedFire combinan cristalizado y glaseado.'},
+ {c:'Provisional',k:'Sustractivo o aditivo',t:'Provisional de PMMA o resina',r:[['Fresadora','en seco, PMMA'],['Pulido','y caracterización']],x:'El PMMA se frese en seco y se pule. Otra vía es imprimir el provisional con una resina indicada, y en ese caso se agregan el lavado y el poscurado.'},
+ {c:'Metal sinterizado',k:'Sustractivo',t:'Estructura de metal sinterizado',r:[['Fresadora','metal presinterizado'],['Sinterizado','horno, con vacío'],['Acabado','pulido']],x:'Algunas fresadoras trabajan metal sinterizado. Zirkonzahn indica que su Zirkonofen 700 Ultra-Vakuum sinteriza metal con un adaptador y sin oxígeno.'}
+];
+(function(){
+  const chips=$('rt-chips');
+  function show(k){
+    [...chips.children].forEach((c,i)=>c.classList.toggle('active',i===k));
+    const d=RT[k];
+    $('rt-kind').textContent='Vía '+d.k.toLowerCase(); $('rt-title').textContent=d.t; $('rt-text').textContent=d.x;
+    const r=$('rt-route'); r.innerHTML='';
+    d.r.forEach((s,i)=>{
+      if(i){const a=document.createElement('span'); a.className='ar'; a.textContent='→'; r.appendChild(a);}
+      const e=document.createElement('div'); e.className='st'; e.innerHTML='<span></span><small></small>';
+      e.querySelector('span').textContent=s[0]; e.querySelector('small').textContent=s[1]; r.appendChild(e);
+    });
+  }
+  RT.forEach((d,i)=>{const b=document.createElement('button'); b.className='chip'; b.textContent=d.c; b.onclick=()=>show(i); chips.appendChild(b);});
+  show(0);
+})();
+
+/* ============ 02 ESCALON DE CAPA ============ */
+(function(){
+  const svg=$('ls-svg'); const x0=20,y0=112,s=130,XW=2.2;
+  const defs=g('defs',{}); const cp=g('clipPath',{id:'ls-clip'}); cp.appendChild(g('rect',{x:x0,y:6,width:XW*s,height:y0-6})); defs.appendChild(cp);
+  function draw(){
+    const h=+$('ls-h').value/1000, a=+$('ls-a').value, t=Math.tan(a*Math.PI/180);
+    $('ls-h-v').textContent=$('ls-h').value; $('ls-a-v').textContent=a;
+    svg.innerHTML=''; svg.appendChild(defs);
+    const X=x=>x0+x*s, Y=y=>y0-y*s;
+    const grp=g('g',{'clip-path':'url(#ls-clip)'});
+    let d='M'+X(0)+','+Y(0);
+    for(let k=0;;k++){
+      const xs=k*h/t; if(xs>XW)break;
+      const xe=Math.min(XW,(k+1)*h/t);
+      d+=' L'+X(xs).toFixed(1)+','+Y(k*h).toFixed(1)+' L'+X(xe).toFixed(1)+','+Y(k*h).toFixed(1);
+    }
+    d+=' L'+X(XW)+','+Y(0)+' Z';
+    grp.appendChild(g('path',{d,fill:'rgba(255,79,154,.22)',stroke:C.pink,'stroke-width':1.5,'stroke-linejoin':'miter'}));
+    grp.appendChild(g('line',{x1:X(0),y1:Y(0),x2:X(XW),y2:Y(XW*t),stroke:C.ink,'stroke-width':2,'stroke-dasharray':'5 4'}));
+    svg.appendChild(grp);
+    svg.appendChild(g('line',{x1:x0,y1:y0,x2:x0+XW*s,y2:y0,stroke:C.ink3}));
+    txt(svg,x0+XW*s/2,y0+14,'superficie ideal (línea) y pieza impresa (escalones)',{'font-size':'9'});
+    const w=h/t;
+    $('ls-e').textContent=Math.round(h*1000); $('ls-w').textContent=w.toFixed(2);
+    $('ls-note').innerHTML = a<20 ? '<b>Superficie poco inclinada.</b> Cada escalón es largo y se ve y se siente. Una capa más fina o girar la pieza para que sus caras importantes queden más verticales reduce el efecto.' :
+      a<40 ? '<b>Inclinación intermedia.</b> Los escalones son visibles pero cortos; la capa fina todavía mejora el acabado.' :
+      '<b>Superficie muy inclinada.</b> Los escalones son cortos y casi no se notan, aunque la capa sea gruesa.';
+  }
+  ['ls-h','ls-a'].forEach(id=>$(id).addEventListener('input',draw)); draw();
+})();
+
+/* ============ 02 POSTPROCESO ============ */
+const PP=[
+ {c:'1 · Retirar',t:'Retirar de la plataforma',x:'La pieza se separa de la plataforma de construcción. Todavía está cubierta de resina líquida y no ha terminado de polimerizar, así que se maneja con cuidado. Formlabs describe una plataforma flexible para retirar sin herramientas.'},
+ {c:'2 · Lavar',t:'Lavado',x:'Se elimina la resina sobrante con el solvente que indique el fabricante de la resina. Hay equipos automáticos, como Form Wash o ProWash S, y también se hace a mano.'},
+ {c:'3 · Secar',t:'Secado',x:'El solvente debe evaporarse por completo antes de curar. Algunos equipos, como el ProWash S, lavan y secan en el mismo ciclo.'},
+ {c:'4 · Poscurar',t:'Poscurado',x:'Luz (y, según la resina, calor) termina la polimerización. Equipos como Form Cure, ProCure 2 o NanoCure traen programas por material. Una pieza poscurada de más o de menos puede cambiar su resistencia y su ajuste.'},
+ {c:'5 · Terminar',t:'Quitar soportes y terminar',x:'Se cortan los soportes, se pule la zona de contacto y se verifica la pieza contra el diseño, como vimos en la clase 08. Después se entrega o se coloca.'}
+];
+(function(){
+  const chips=$('pp-chips');
+  function show(k){[...chips.children].forEach((c,i)=>c.classList.toggle('active',i===k)); $('pp-title').textContent=PP[k].t; $('pp-text').textContent=PP[k].x;}
+  PP.forEach((d,i)=>{const b=document.createElement('button'); b.className='chip'; b.textContent=d.c; b.onclick=()=>show(i); chips.appendChild(b);});
+  show(0);
+})();
+
+/* ============ 03 RADIO DE FRESA ============ */
+(function(){
+  const svg=$('tl-svg'); const dx=0.01, W=6, N=Math.round(W/dx), sc=50, x0=10, y0=178;
+  const H=[]; for(let i=0;i<=N;i++){const x=i*dx; H.push(1.5+0.9*Math.cos(2*Math.PI*x/3)-0.5*(Math.exp(-Math.pow((x-1.5)/0.1,2))+Math.exp(-Math.pow((x-4.5)/0.1,2))));}
+  function draw(){
+    const D=+$('tl-d').value, R=D/2; $('tl-d-v').textContent=D.toFixed(1);
+    const win=Math.ceil(R/dx);
+    const c=new Array(N+1).fill(-9);
+    for(let i=0;i<=N;i++){let m=-9; for(let j=Math.max(0,i-win);j<=Math.min(N,i+win);j++){const u=(i-j)*dx; if(Math.abs(u)<=R){const v=H[j]+Math.sqrt(R*R-u*u); if(v>m)m=v;}} c[i]=m;}
+    const M=new Array(N+1).fill(0); let ex=0;
+    for(let i=0;i<=N;i++){let m=9; for(let j=Math.max(0,i-win);j<=Math.min(N,i+win);j++){const u=(i-j)*dx; if(Math.abs(u)<=R){const v=c[j]-Math.sqrt(R*R-u*u); if(v<m)m=v;}} M[i]=Math.max(m,H[i]); if(M[i]-H[i]>ex)ex=M[i]-H[i];}
+    svg.innerHTML='';
+    const X=x=>x0+x*sc, Y=y=>y0-y*sc;
+    const poly=A=>'M'+X(0)+','+Y(0)+A.map((v,i)=>' L'+X(i*dx).toFixed(1)+','+Y(v).toFixed(1)).join('')+' L'+X(W)+','+Y(0)+' Z';
+    svg.appendChild(g('path',{d:poly(M),fill:C.pink,opacity:.55}));
+    svg.appendChild(g('path',{d:poly(H),fill:C.soft,stroke:C.ink,'stroke-width':2.2,'stroke-linejoin':'round'}));
+    const ci=Math.round(1.5/dx);
+    svg.appendChild(g('circle',{cx:X(1.5),cy:Y(c[ci]),r:R*sc,fill:'rgba(108,77,246,.12)',stroke:C.violet,'stroke-width':1.8}));
+    txt(svg,X(1.5),Y(c[ci])+3,'fresa',{fill:C.violet,'font-size':'9'});
+    txt(svg,160,y0+10,'6 mm de ancho',{'font-size':'9'});
+    const e=Math.round(ex*1000);
+    $('tl-e').textContent=e; $('tl-r').textContent=R.toFixed(2);
+    $('tl-note').innerHTML = e<20 ? '<b>La fresa alcanza casi todo el detalle.</b> Con este diámetro la fisura queda casi como se diseñó.' :
+      e<150 ? '<b>La fisura se redondea.</b> Queda material en el fondo: la superficie oclusal pierde algo de profundidad.' :
+      '<b>La fisura queda muy llena.</b> Para conservar ese detalle hace falta una fresa más delgada o un ajuste manual después.';
+  }
+  $('tl-d').addEventListener('input',draw); draw();
+})();
+
+/* ============ 04 CONTRACCION ============ */
+(function(){
+  function draw(){
+    const d=+$('sh-d').value, s=+$('sh-s').value/100;
+    $('sh-d-v').textContent=d.toFixed(1); $('sh-s-v').textContent=$('sh-s').value;
+    const m=d/(1-s);
+    $('sh-v1').textContent=m.toFixed(2)+' mm'; $('sh-v2').textContent=d.toFixed(1)+' mm';
+    $('sh-b1').style.width=(m/24*100)+'%'; $('sh-b2').style.width=(d/24*100)+'%';
+    $('sh-note').innerHTML=`Para ${d.toFixed(1)} mm finales se frese a <b>${m.toFixed(2)} mm</b>, un ${((m/d-1)*100).toFixed(0)}% más grande en cada dimensión y unas ${(1/Math.pow(1-s,3)).toFixed(1)} veces el volumen.`;
+  }
+  ['sh-d','sh-s'].forEach(id=>$(id).addEventListener('input',draw)); draw();
+})();
+
+/* ============ 04 CICLOS ============ */
+const CY=[
+ {n:'Zirkonofen Turbo · Lento',m:720,c:'Zirkonzahn: 12 h, ajustado al peso del elemento.'},
+ {n:'Zirkonofen Turbo · Estándar',m:480,c:'Zirkonzahn: 8 h, ajustado al peso del elemento.'},
+ {n:'Ceramill Therm 3 · el más rápido',m:360,c:'Amann Girrbach: el ciclo más rápido es de 6 h; admite hasta 120 unidades y puentes de hasta 14 unidades.'},
+ {n:'Zirkonofen Turbo · Speed',m:210,c:'Zirkonzahn: 3.5 h; la propia marca advierte contra paredes de más de 4 mm.'},
+ {n:'Zirkonofen 600/V4 · Speed',m:180,c:'Zirkonzahn: menos de 3 h para estructuras pequeñas; se muestra como tope.'},
+ {n:'Zirkonofen Turbo · Ultraspeed',m:75,c:'Zirkonzahn: 75 min, para elementos de hasta 2 g.'},
+ {n:'Programat CS6 · superspeed',m:15,c:'Ivoclar: 15 min sin presecado, con tres coronas de IPS e.max ZirCAD Prime.'}
+];
+(function(){
+  const box=$('cy-bars'); let sel=0;
+  const fmt=m=>m>=60?(Math.floor(m/60)+' h'+(m%60?(' '+m%60+' min'):'')):m+' min';
+  function draw(){
+    box.innerHTML='';
+    CY.forEach((d,i)=>{
+      const r=document.createElement('div'); r.className='bar-row'+(i===sel?' sel':'');
+      r.innerHTML='<span class="nm"></span><span class="tr"><i></i></span><span class="v"></span>';
+      r.querySelector('.nm').textContent=d.n; r.querySelector('i').style.width=Math.max(2,d.m/720*100)+'%'; r.querySelector('.v').textContent=fmt(d.m);
+      r.onclick=()=>{sel=i; draw();}; box.appendChild(r);
+    });
+    $('cy-note').innerHTML='<b></b> '; $('cy-note').querySelector('b').textContent=CY[sel].n+':'; $('cy-note').appendChild(document.createTextNode(CY[sel].c));
+  }
+  draw();
+})();
+
+/* ============ 05 CATALOGO ============ */
+const CAT=[
+ /* IMPRESORAS */
+ {ty:'print',br:'Zirkonzahn',n:'P4000 (sistema de impresión)',when:'Presentado en noviembre de 2022 (artículo de prensa)',tech:'LCD con pantalla monocromática 4K; área de 20 × 12.5 × 20 cm; hasta 21 modelos Geller o 15 de arcada completa; resina de 405 nm.',ex:'Sistema con impresora, Zirkonzahn.Slicer, lámpara de poscurado L300 y la resina Printer Resin Waterbased Beige para modelos. Transferencia por USB, LAN o Wi‑Fi.',open:'Diseñada para resina de 405 nm; la fuente no aclara si acepta resinas de otras marcas.',com:'Sin precio en la fuente.',chk:'La fuente no da velocidad de impresión. La resina citada es para modelos: consulta qué resinas valida Zirkonzahn para otros usos.'},
+ {ty:'print',br:'Formlabs',n:'Form 4B',when:'Modelo dental de la serie Form 4',tech:'MSLA con Low Force Display; 200 × 125 × 210 mm; 50 µm en XY; hasta 100 mm/h; 405 nm.',ex:'PreForm Dental con orientación y soportes automáticos, cámara integrada y plataforma flexible. Form Wash y Form Cure automatizan el postproceso.',open:'Modo abierto para resinas de 405 nm de otras marcas (según Formlabs).',com:'Sin precio en las fuentes.',chk:'Varios datos vienen de la página de Formlabs que la compara con sus competidores: es parte interesada.'},
+ {ty:'print',br:'SprintRay',n:'Midas',when:'Línea de impresión de SprintRay',tech:'DPS (Digital Press Stereolithography): cápsula de resina en lugar de tanque; 385 nm; 45 µm de resolución (según Formlabs).',ex:'Según Formlabs: 3 coronas, 6 inlays o 9 carillas en 10 minutos a 100 µm; lavado manual y poscurado automático con NanoCure.',open:'Formlabs la describe como cerrada, con cuatro materiales de SprintRay; SprintRay promueve un sistema abierto de resinas certificadas.',com:'Sin precio en las fuentes.',chk:'Los datos técnicos vienen de la página comparativa de Formlabs y la página de SprintRay no los da; confírmalos con SprintRay.'},
+ {ty:'print',br:'SprintRay',n:'Pro 2',when:'Línea de impresión de SprintRay',tech:'Tecnología de panel óptico que reparte la luz por toda la plataforma.',ex:'Para restauraciones y uso clínico. La página cita una plataforma completa de arcadas en unos 25 minutos y 5 minutos para el siguiente trabajo; con ProWash S y ProCure 2 para el postproceso.',open:'No detallada en la fuente.',com:'Sin precio en la fuente.',chk:'La página mezcla “SprintRay Pro” y “Pro 2”: no queda claro de cuál es el dato de velocidad.'},
+ {ty:'print',br:'Asiga',n:'Ultra',when:'Listado de 3Dnatives',tech:'DLP con imagen 4K.',ex:'Arquitectura de materiales abierta, con cientos de resinas.',open:'Abierta (según 3Dnatives).',com:'Sin precio en la fuente.',chk:'La fuente no da volumen de construcción ni velocidad.'},
+ {ty:'print',br:'Straumann',n:'PRO20',when:'Listado de 3Dnatives',tech:'DLP; hasta 50 mm/h; cámara calentada a 35 °C.',ex:'Identificación automática de material e integración con el ecosistema Straumann.',open:'Orientada a su propio ecosistema.',com:'Sin precio en la fuente.',chk:'El nivel de apertura es una inferencia: confirma con Straumann.'},
+ {ty:'print',br:'Dentsply Sirona',n:'Primeprint',when:'Listado de 3Dnatives',tech:'Tecnología no indicada en la fuente.',ex:'Flujo automatizado de impresión a postproceso con una unidad de postproceso (PPU), cartucho Primeprint Box y trazabilidad por RFID.',open:'Orientada al ecosistema Dentsply Sirona.',com:'Sin precio en la fuente.',chk:'La fuente no da volumen, resolución ni velocidad.'},
+ {ty:'print',br:'Rapid Shape',n:'ONE',when:'Listado de 3Dnatives',tech:'Tecnología no indicada; pensada para el consultorio.',ex:'Corona o puente en 8 minutos y hasta 32 modelos al día; más de 50 resinas; con WASH y CURE para el postproceso.',open:'Más de 50 resinas (según 3Dnatives).',com:'Sin precio en la fuente.',chk:'Los tiempos son los que cita el listado; verifica con el fabricante.'},
+ {ty:'print',br:'HeyGears',n:'UltraCraft ChairSide Pro',when:'Listado de 3Dnatives',tech:'DLP; 144 × 81 × 110 mm; precisión de ±25 µm.',ex:'Calibración automática; el fabricante dice que mejora la productividad más de 40%.',open:'No detallada.',com:'Sin precio en la fuente.',chk:'El 40% es una afirmación del fabricante.'},
+ {ty:'print',br:'Kulzer',n:'cara Print Cube',when:'Listado de 3Dnatives',tech:'LCD 6K con píxel de 34 µm; 192 × 120 × 190 mm; hasta 5 modelos por trabajo.',ex:'Validada con los materiales dima Print de Kulzer.',open:'Validada para materiales de la marca.',com:'Sin precio en la fuente.',chk:'No se indica velocidad.'},
+ {ty:'print',br:'Stratasys',n:'DentaJet XL',when:'Listado de 3Dnatives',tech:'PolyJet: deposita gotas y cura con luz; hasta 102 modelos de corona y puente en unas 4.5 h.',ex:'Impresión multimaterial para laboratorios de gran volumen.',open:'Orientada a materiales de la marca.',com:'Sin precio en la fuente.',chk:'La capacidad es la que cita el listado.'},
+ {ty:'print',br:'Carbon',n:'L1',when:'Listado de 3Dnatives',tech:'CDLP; 400 × 250 × 460 mm.',ex:'Pensada para lotes grandes o de varias piezas; se usa en producción de alineadores.',open:'No detallada.',com:'Sin precio en la fuente.',chk:'La fuente no da resolución ni velocidad.'},
+ /* FRESADORAS */
+ {ty:'mill',br:'Zirkonzahn',n:'M1 (Soft, Wet, Wet Heavy Metal, Abutment)',when:'Línea compacta de Zirkonzahn',tech:'Cuatro versiones; la elegida determina qué indicaciones y materiales procesa. Compacta (47.7 × 69.3 × 61.3 cm) y con motores rápidos.',ex:'Se combina con el escáner S600 ARTI y con el software Zirkonzahn.',open:'La página no detalla apertura de formatos.',com:'Sin precio en la fuente.',chk:'La página no indica número de ejes ni materiales por versión.'},
+ {ty:'mill',br:'Zirkonzahn',n:'M2 (Wet Heavy Metal, Teleskoper, Dual…)',when:'Serie de cinco modelos',tech:'Fresado simultáneo en 5+1 ejes; húmedo y seco, materiales duros y blandos; dos cámaras de fresado.',ex:'Detección óptica de herramienta, pantalla táctil, autolimpieza y reposicionado de bloques con 5 µm. Las versiones Dual y Teleskoper amplían órbitas y almacén de herramientas.',open:'La página no detalla apertura de formatos.',com:'Sin precio en la fuente.',chk:'Las diferencias entre modelos se infirieron de una tabla con íconos sin texto.'},
+ {ty:'mill',br:'Zirkonzahn',n:'M5',when:'Fresadora de gama alta de Zirkonzahn',tech:'Fresado simultáneo en 5+1 ejes; dos opciones de husillo (Hard Automatic o Soft M5); magazine de 16 herramientas con cambio automático.',ex:'Materiales: zirconia, resina, cera, madera, metal sinterizado, cromo‑cobalto, titanio, Raw‑Abutments, vitrocerámicas y composite, según el equipamiento. Ionizador opcional para la resina.',open:'La página no detalla apertura de formatos.',com:'Sin precio en la fuente.',chk:'La lista de materiales depende de la configuración que se compre.'},
+ {ty:'mill',br:'Roland DGSHAPE',n:'DWX-43W',when:'Fresadora en húmedo',tech:'Para disilicatos de litio, vitrocerámicas, zirconia presinterizada, cerámicas híbridas, composites y abutments de titanio (con el kit AK-1).',ex:'Husillo nuevo para materiales más duros, con 20% más de vida útil de la herramienta (según Roland).',open:'Plataforma abierta: acepta el escáner, el CAD/CAM y el material que se elija.',com:'Sin precio en la fuente.',chk:'La página no indica número de ejes.'},
+ {ty:'mill',br:'Roland DGSHAPE',n:'DWX-53D y DWX-53DC',when:'Fresadoras en seco',tech:'Zirconia, PMMA, cera, composites, PEEK, yeso, resina reforzada con fibra de vidrio y cromo‑cobalto presinterizado. El 53DC suma cambiador automático de discos.',ex:'Hasta 20% más rápidas en PMMA y zirconia, adaptador Open‑Edge, cámara web integrada y extractor incluido.',open:'Abierta (adaptador Open‑Edge).',com:'Sin precio en la fuente.',chk:'La página da 5 ejes solo para el DWX‑53DC (por la dirección de la página).'},
+ {ty:'mill',br:'Ivoclar',n:'PrograMill PM7 y PM7 Pure',when:'Presentadas por Ivoclar (nota de Dental Tribune)',tech:'Cinco ejes; husillo de 1.5 kW; pantalla de 12 in. La PM7 cambia sola entre fresado húmedo y seco.',ex:'Cambio automático de material y herramienta para trabajar sin supervisión. La Pure es compacta, para laboratorios internos y consultorios.',open:'No detallada en la fuente.',com:'Sin precio en la fuente.',chk:'La nota no dice si la Pure cambia entre húmedo y seco y no da capacidad de discos ni precisión.'},
+ {ty:'mill',br:'Dentsply Sirona',n:'CEREC Primemill',when:'Fresadora del sistema CEREC',tech:'Trabaja en húmedo y en seco, incluso uno tras otro; el seco evita el presecado de la zirconia. Aspira los restos.',ex:'Coronas, carillas, inlays, onlays, puentes, coronas sobre pilar y guías quirúrgicas, sincronizada con el software CEREC.',open:'Centrada en el ecosistema CEREC.',com:'Sin precio en la fuente.',chk:'La página no indica ejes, husillo ni bloques, y mezcla datos de varias máquinas CEREC.'},
+ {ty:'mill',br:'Dentsply Sirona',n:'inLab MC X5',when:'Unidad de producción del laboratorio',tech:'Cinco ejes; húmedo y seco; discos de hasta 98.5 mm de diámetro y 30 mm de grosor; portabloques para hasta seis bloques; cambiador de hasta seis herramientas.',ex:'Zirconia, polímeros, composites, cera, metal sinterizado, vidrio y cerámicas híbridas; titanio en pilares de una pieza. Control táctil desde la máquina o una tableta.',open:'Abierta: acepta STL de otros sistemas CAD.',com:'Sin precio en la fuente.',chk:'Los discos de 98.5 mm exigen una versión de software reciente (inLab CAM 16.1 SP o superior).'},
+ {ty:'mill',br:'Amann Girrbach',n:'Ceramill Motion 3',when:'Fresadora híbrida de Amann Girrbach',tech:'Cinco ejes, húmedo y seco; husillo de alta frecuencia con fresas HD ultradelgadas; pantalla de 10 in.',ex:'Soportes con RFID, cámara interior, autocalibración, acceso remoto AG.Live y un modo de tallado para vitrocerámicas e híbridos que, según la marca, ahorra cerca de 60% del tiempo (unos 15 min por corona).',open:'La página no detalla apertura de formatos.',com:'Sin precio en la fuente.',chk:'La página no indica materiales concretos ni capacidad de discos.'},
+ /* HORNOS */
+ {ty:'furn',br:'Zirkonzahn',n:'Zirkonofen 600/V4',when:'Horno de sinterizado de Zirkonzahn',tech:'Hasta 1,700 °C; hasta unos 60 elementos de zirconia; calentamiento de hasta 60 °C/min; cámara de 0.6 l.',ex:'Programa Speed: estructuras pequeñas en menos de 3 h. Pantalla táctil de 7 in y puerta automática para enfriar más rápido. Admite zirconia de otros fabricantes.',open:'Admite materiales de otros fabricantes (según Zirkonzahn).',com:'Sin precio en la fuente.',chk:'Las versiones V2 y V3, de 5 y 12 programas, son anteriores.'},
+ {ty:'furn',br:'Zirkonzahn',n:'Zirkonofen 700 (y 700 Ultra‑Vakuum)',when:'Horno de mayor capacidad',tech:'Hasta 1,700 °C; unos 120 elementos de zirconia; cámara de 0.8 l. La versión Ultra‑Vakuum añade vacío y sinterizado libre de oxígeno.',ex:'Con vacío, resultados más translúcidos en zirconia y sinterizado de metal (hasta 25 elementos con adaptador).',open:'No detallada.',com:'Sin precio en la fuente.',chk:'La página no da tiempos de ciclo para este horno.'},
+ {ty:'furn',br:'Zirkonzahn',n:'Zirkonofen Turbo',when:'Horno de ciclos rápidos',tech:'Cuatro programas según el peso del elemento: lento 12 h, estándar 8 h, Speed 3.5 h y Ultraspeed 75 min.',ex:'Control automático de la plataforma durante el enfriamiento. Ultraspeed es para elementos de hasta 2 g, y Speed advierte contra paredes de más de 4 mm.',open:'No detallada.',com:'Sin precio en la fuente.',chk:'La información recuperada estaba incompleta: temperatura y capacidad no aparecieron.'},
+ {ty:'furn',br:'Ivoclar',n:'Programat CS6',when:'Horno combinado para el consultorio',tech:'Sinterizado, cristalización y glaseado en un equipo; hasta 1,560 °C; requiere bomba de vacío externa.',ex:'Superspeed de 15 min para tres coronas de IPS e.max ZirCAD Prime sin presecado; cristalización de IPS e.max CAD en 11 min 10 s (máximo dos restauraciones).',open:'Sistema abierto: programas personalizados para materiales de otras marcas.',com:'Sin precio en la fuente.',chk:'La página no da la capacidad de la cámara.'},
+ {ty:'furn',br:'Dentsply Sirona',n:'CEREC SpeedFire e inLab Profire',when:'Hornos de Dentsply Sirona',tech:'SpeedFire (consultorio): sinterizado, glaseado y cristalización de zirconia y vitrocerámicas. Profire: horno de sinterizado para laboratorio.',ex:'El SpeedFire recibe el trabajo del software CEREC, inLab CAM o DS Core, con los parámetros de cocción ya incluidos, sin programar a mano.',open:'Centrado en materiales validados por Dentsply Sirona.',com:'Sin precio en la fuente.',chk:'La página no da tiempos, capacidad ni temperatura.'},
+ {ty:'furn',br:'Amann Girrbach',n:'Ceramill Therm 3',when:'Horno de laboratorio de alta capacidad',tech:'Hasta 120 unidades en tres bandejas apilables, puentes de hasta 14 unidades; ciclo más rápido de 6 h; 250 espacios de programa.',ex:'Sinterizado sobre perlas para un calor uniforme, presecado y sinterizado en la misma unidad, pantalla táctil y registro de cocciones.',open:'Solo zirconia (según la página).',com:'Sin precio en la fuente.',chk:'La página no indica temperatura máxima. Pesa 30 kg (500 × 461 × 480 mm).'}
+];
+(function(){
+  const tcs=$('cat-type'), bcs=$('cat-brand'), grid=$('cat-grid'); let ty='print', br='all';
+  const TL={print:'Impresoras 3D',mill:'Fresadoras',furn:'Hornos'}, BL={print:'Impresora',mill:'Fresadora',furn:'Horno'};
+  Object.keys(TL).forEach(k=>{const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=TL[k]; b.onclick=()=>{ty=k; br='all'; render();}; tcs.appendChild(b);});
+  function render(){
+    [...tcs.children].forEach(c=>c.classList.toggle('active',c.dataset.k===ty));
+    const brs=['all',...new Set(CAT.filter(s=>s.ty===ty).map(s=>s.br))];
+    bcs.innerHTML='';
+    brs.forEach(k=>{const b=document.createElement('button'); b.className='chip'+(k===br?' active':''); b.textContent=k==='all'?'Todas las marcas':k; b.onclick=()=>{br=k; render();}; bcs.appendChild(b);});
+    grid.innerHTML='';
+    CAT.filter(s=>s.ty===ty&&(br==='all'||s.br===br)).forEach(s=>{
+      const d=document.createElement('div'); d.className='sw-card';
+      d.innerHTML=`<div class="badges"><span class="badge b-task"></span><span class="badge b-otro"></span></div><h3></h3><div class="who" style="font-family:var(--mono);font-size:11px;color:var(--ink3);"></div><ul class="clean"></ul><p class="note-mini"></p>`;
+      d.querySelector('.b-task').textContent=BL[ty]; d.querySelector('.b-otro').textContent=s.br;
+      d.querySelector('h3').textContent=s.n; d.querySelector('.who').textContent=s.when;
+      const ul=d.querySelector('ul');
+      [['Datos clave',s.tech],['Destaca',s.ex],['Sistema',s.open],['Precio',s.com]].forEach(([l,v])=>{const li=document.createElement('li'); li.innerHTML='<strong></strong> '; li.querySelector('strong').textContent=l+':'; li.appendChild(document.createTextNode(v)); ul.appendChild(li);});
+      d.querySelector('.note-mini').textContent='Verifica: '+s.chk;
+      grid.appendChild(d);
+    });
+  }
+  render();
+  $('zz-go').onclick=()=>{
+    const z=CAT.find(s=>s.br==='Zirkonzahn'); ty='mill'; br='Zirkonzahn'; render();
+    grid.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+})();
+
+/* ============ 06 COMPARATIVA ============ */
+const CMP={
+ print:{n:'Impresoras 3D',crit:['Apertura de resinas','Velocidad','Postproceso automatizado','Capacidad por lote','Ecosistema y soporte'],
+  pool:[{n:'Formlabs Form 4B',s:[5,4,5,3,5]},{n:'SprintRay Midas',s:[2,5,2,2,4]},{n:'Asiga Ultra',s:[5,3,3,3,4]},{n:'Straumann PRO20',s:[2,4,4,3,4]},{n:'Dentsply Sirona Primeprint',s:[2,3,5,3,4]},{n:'Zirkonzahn P4000',s:[3,3,3,4,4]}],
+  prof:{'Clínica con impresión en el consultorio':[2,5,4,2,4],'Laboratorio de volumen':[4,3,3,5,3],'Facultad / docencia':[5,3,3,4,2]}},
+ mill:{n:'Fresadoras',crit:['Versatilidad de materiales','Automatización','Apertura de software','Compacidad','Ecosistema y soporte'],
+  pool:[{n:'Zirkonzahn M2',s:[5,4,3,2,4]},{n:'Roland DWX-53DC',s:[4,4,5,3,3]},{n:'Ivoclar PrograMill PM7',s:[4,5,3,3,5]},{n:'CEREC Primemill',s:[2,3,2,5,5]},{n:'inLab MC X5',s:[5,4,5,2,4]},{n:'Ceramill Motion 3',s:[4,5,3,2,4]}],
+  prof:{'Clínica de consultorio':[2,3,3,5,4],'Laboratorio':[5,5,4,1,3],'Facultad / docencia':[4,3,5,3,3]}},
+ furn:{n:'Hornos',crit:['Velocidad de ciclo','Capacidad','Versatilidad (sinterizar, cristalizar, glasear)','Apertura de materiales','Ecosistema y soporte'],
+  pool:[{n:'Zirkonofen 600/V4',s:[4,3,2,4,4]},{n:'Zirkonofen 700 Ultra-Vakuum',s:[2,5,3,4,4]},{n:'Zirkonofen Turbo',s:[5,3,2,3,4]},{n:'Programat CS6',s:[5,2,5,4,5]},{n:'CEREC SpeedFire',s:[4,2,5,2,5]},{n:'Ceramill Therm 3',s:[2,5,1,2,4]}],
+  prof:{'Clínica con restauración el mismo día':[5,1,5,3,4],'Laboratorio':[3,5,2,4,3],'Facultad / docencia':[2,3,3,5,3]}}
+};
+(function(){
+  let kind='print'; let weights=[3,3,3,3,3];
+  const kc=$('kind-chips'), pc=$('prof-chips'), wb=$('weights');
+  Object.keys(CMP).forEach(k=>{const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=CMP[k].n; b.onclick=()=>{kind=k; weights=[3,3,3,3,3]; build(); draw();}; kc.appendChild(b);});
+  function build(){
+    pc.innerHTML=''; wb.innerHTML='';
+    Object.keys(CMP[kind].prof).forEach(p=>{const b=document.createElement('button'); b.className='chip'; b.textContent=p; b.onclick=()=>{
+      CMP[kind].prof[p].forEach((v,i)=>{weights[i]=v; $('w'+i).value=v; $('wv'+i).textContent=v;});
+      [...pc.children].forEach(c=>c.classList.toggle('active',c===b)); draw();}; pc.appendChild(b);});
+    CMP[kind].crit.forEach((c,i)=>{const d=document.createElement('div'); d.className='ctrl';
+      d.innerHTML=`<label><span></span>: <b id="wv${i}">3</b></label><input type="range" id="w${i}" min="0" max="5" value="3">`;
+      d.querySelector('span').textContent=c; wb.appendChild(d);
+      d.querySelector('input').addEventListener('input',e=>{weights[i]=+e.target.value; $('wv'+i).textContent=weights[i]; [...pc.children].forEach(x=>x.classList.remove('active')); draw();});
+    });
+  }
+  function draw(){
+    [...kc.children].forEach(c=>c.classList.toggle('active',c.dataset.k===kind));
+    const M=CMP[kind], pool=M.pool;
+    const colr=v=>['','#FFE3F0','#FFF1C2','#FFFFFF','#D5F5E8','#9FE6C8'][v];
+    $('heat-table').innerHTML='<tr><th>Opción</th>'+M.crit.map(c=>`<th style="text-align:center">${c}</th>`).join('')+'</tr>'+
+      pool.map(p=>`<tr><td class="name">${p.n}</td>`+p.s.map(v=>`<td class="s" style="background:${colr(v)}">${v}</td>`).join('')+'</tr>').join('');
+    const sum=weights.reduce((a,b)=>a+b,0); const box=$('rank'); box.innerHTML='';
+    if(!sum){box.innerHTML='<p style="margin:0;">Asigna al menos un peso mayor que 0 para ver el resultado.</p>'; return;}
+    pool.map(p=>({n:p.n,v:p.s.reduce((a,v,i)=>a+v*weights[i],0)/sum})).sort((a,b)=>b.v-a.v).forEach((r,i)=>{
+      const row=document.createElement('div'); row.className='rank-row'+(i===0?' top':'');
+      row.innerHTML=`<div class="nm"></div><div class="bar"><i style="width:${(r.v/5*100).toFixed(1)}%"></i></div><div class="val">${r.v.toFixed(2)}</div>`;
+      row.querySelector('.nm').textContent=r.n; box.appendChild(row);
+    });
+  }
+  build(); draw();
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ=[
+ {q:'Una pieza impresa tiene una cara casi horizontal y quieres que los escalones se noten menos. ¿Qué ayuda?',opts:['Usar una capa más gruesa','Usar una capa más fina','Hacer la cara todavía más horizontal','Omitir el poscurado'],correct:1,exp:'El escalón vertical es igual a la altura de capa, y en una superficie poco inclinada cada escalón es largo. Una capa más fina, o girar la pieza para que esa cara quede más inclinada, reduce el efecto.'},
+ {q:'Una fresa de 2 mm de diámetro tiene que tallar una fisura más estrecha que la propia fresa. ¿Qué ocurre?',opts:['La fresa llega al fondo sin problema','La fisura queda parcialmente llena y redondeada','La máquina cambia sola a una fresa de 5 ejes','La zirconia se encoge menos'],correct:1,exp:'Una fresa redonda no puede tallar un rincón más cerrado que su radio. Queda material sobrante en la fisura, y para conservar ese detalle hace falta una fresa más delgada o ajustar a mano.'},
+ {q:'Con una contracción lineal del 20%, ¿a qué tamaño hay que fresar una zirconia que debe medir 10 mm al final?',opts:['8 mm','10 mm','12 mm','12.5 mm'],correct:3,exp:'La pieza fresada se encoge un 20% al sinterizar: 10 ÷ (1 − 0.20) = 12.5 mm. Multiplicar por 1.2 daría 12 mm, un error muy común. En la práctica, el software aplica el factor del lote del disco.'},
+ {q:'¿Qué equipo cristaliza y glasea una vitrocerámica como el disilicato de litio?',opts:['Una impresora 3D','Una fresadora de 5 ejes','Una lámpara de poscurado','Un horno de cristalización y glaseado'],correct:3,exp:'El disilicato se frese en un estado intermedio y después se cristaliza en un horno, que le da su resistencia y su color finales. Algunos hornos combinan sinterizado, cristalización y glaseado en un solo equipo.'},
+ {q:'¿Por qué una pieza impresa en resina debe lavarse y poscurarse antes de usarse?',opts:['Para que se contraiga como la zirconia','Para retirar la resina líquida sobrante y terminar la polimerización','Para que la impresora no necesite soportes','Para convertirla en cerámica'],correct:1,exp:'Al salir de la impresora, la pieza tiene resina sin polimerizar encima y aún no alcanza sus propiedades finales. El lavado retira el exceso y el poscurado con luz (y a veces calor) completa la polimerización.'}
+];
+(function(){
+  const container=$('quiz-container'), scoreBox=$('quiz-score'); let score=0,answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div'); block.className='q-block';
+    const h3=document.createElement('h3'); h3.textContent=`${qi+1}. ${item.q}`; block.appendChild(h3);
+    const explain=document.createElement('div'); explain.className='explain'; explain.textContent=item.exp;
+    item.opts.forEach((t,oi)=>{
+      const btn=document.createElement('button'); btn.className='opt'; btn.textContent=t;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){btn.classList.add('correct'); score++;} else {btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct');}
+        explain.classList.add('show'); answered++; if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain); container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML=`<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--ink2); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    $('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
