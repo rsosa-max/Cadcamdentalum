@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 2 · Software Accesorio CAD/CAM: Sonrisa, Oclusión y Verificación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9EE;
+    --card:#FFFFFF;
+    --ink:#1B1530;
+    --ink2:#4A4266;
+    --ink3:#8C84A8;
+    --soft:#F3EEFF;
+    --line:#E4DCF5;
+    --pink:#FF4F9A;
+    --pink-d:#D6226F;
+    --pink-l:#FFE3F0;
+    --violet:#6C4DF6;
+    --violet-l:#E9E4FF;
+    --mint:#12B886;
+    --mint-l:#D5F5E8;
+    --sun:#FFC53D;
+    --sun-l:#FFF1C2;
+    --sky:#339AF0;
+    --sky-l:#DCEEFF;
+    --red:#E03131;
+    --orange:#F59F00;
+    --disp:'Bricolage Grotesque','Trebuchet MS',sans-serif;
+    --body:'Geist','Inter',system-ui,sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  body{min-height:100vh; background-image:radial-gradient(rgba(27,21,48,.09) 1.2px, transparent 1.4px); background-size:22px 22px;}
+  .app{max-width:1100px; margin:0 auto; padding:30px 20px 80px;}
+
+  header.top{padding-bottom:22px; margin-bottom:22px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); background:var(--sun); border:2px solid var(--ink); border-radius:30px; padding:5px 12px; box-shadow:3px 3px 0 var(--ink);}
+  h1{font-family:var(--disp); font-weight:800; font-size:clamp(32px,5.4vw,56px); letter-spacing:-.02em; margin-top:18px; line-height:1.02;}
+  h1 .mark{background:linear-gradient(transparent 58%, var(--pink) 58%, var(--pink) 92%, transparent 92%); padding:0 4px;}
+  .sub{color:var(--ink2); font-size:16px; margin-top:14px; max-width:700px; line-height:1.55;}
+
+  nav.tabs{display:flex; gap:8px; overflow-x:auto; padding:4px 4px 10px; margin:0 -4px 22px; scrollbar-width:thin;}
+  nav.tabs button{flex:none; font-family:var(--mono); font-size:12px; font-weight:500; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:9px 14px; border-radius:30px; cursor:pointer; white-space:nowrap; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; box-shadow:2px 2px 0 var(--ink);}
+  nav.tabs button .n{color:var(--ink3); margin-right:7px;}
+  nav.tabs button:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active{background:var(--pink); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+  nav.tabs button.active .n{color:var(--ink);}
+
+  section.panel{display:none; animation:fadeIn .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .kicker{font-family:var(--mono); font-size:11px; font-weight:700; color:var(--violet); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;}
+  h2{font-family:var(--disp); font-size:clamp(24px,3.4vw,36px); font-weight:800; margin-bottom:14px; letter-spacing:-.015em; line-height:1.1;}
+  h3{font-family:var(--disp); font-size:17px; font-weight:700; margin-bottom:8px; color:var(--ink);}
+  p{color:var(--ink2); line-height:1.65; font-size:15px; margin-bottom:12px;}
+  p strong{color:var(--ink); font-weight:600;}
+  .lead{color:var(--ink); font-size:17px; line-height:1.6; margin-bottom:18px;}
+
+  .grid2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid2e{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;} .grid2e{grid-template-columns:1fr;}}
+
+  .card{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; box-shadow:4px 4px 0 var(--ink);}
+  .card.soft{background:var(--soft);}
+  .card.sun{background:var(--sun-l);}
+  .viewport{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:16px; position:relative; box-shadow:4px 4px 0 var(--ink);}
+  .viewport svg{width:100%; height:auto; display:block;}
+  .viewport .tag{position:absolute; top:14px; left:16px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink3); letter-spacing:.08em; text-transform:uppercase; z-index:2;}
+
+  .stat-row{display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;}
+  .stat{flex:1; min-width:140px; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .stat .num{font-family:var(--disp); font-weight:800; font-size:24px; color:var(--pink-d); line-height:1.1;}
+  .stat .lab{font-family:var(--mono); font-size:10px; color:var(--ink3); text-transform:uppercase; letter-spacing:.06em; margin-top:4px; font-weight:500;}
+  .stat.ok{background:var(--mint-l);}
+  .stat.ok .num{color:#0A7A59;}
+
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .chip{font-family:var(--mono); font-size:12px; font-weight:500; border:2px solid var(--ink); background:var(--card); color:var(--ink); padding:7px 13px; border-radius:30px; cursor:pointer; transition:transform .12s, box-shadow .12s, background .12s; box-shadow:2px 2px 0 var(--ink);}
+  .chip:hover{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink);}
+  .chip.active{background:var(--sun); font-weight:700; box-shadow:3px 3px 0 var(--ink);}
+
+  ul.clean{list-style:none;}
+  ul.clean li{position:relative; padding-left:20px; color:var(--ink2); font-size:14.5px; margin-bottom:8px; line-height:1.5;}
+  ul.clean li::before{content:'●'; font-size:9px; position:absolute; left:2px; top:5px; color:var(--pink);}
+  ul.pros li::before{content:'+'; font-size:15px; top:-1px; color:var(--mint); font-weight:800;}
+  ul.cons li::before{content:'–'; font-size:15px; top:-1px; color:var(--red); font-weight:800;}
+
+  .callout{border:2px solid var(--ink); border-radius:16px; padding:14px 18px; background:var(--sun-l); margin-top:18px; box-shadow:4px 4px 0 var(--ink);}
+  .callout p{color:var(--ink); font-size:14px; margin:0;}
+  .callout .lab{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+
+  .sticker{display:inline-block; background:var(--sun); border:2px solid var(--ink); border-radius:20px; padding:2px 10px; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink); transform:rotate(-3deg); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;}
+
+  table.formats{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:6px;}
+  table.formats th{font-family:var(--mono); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink2); text-align:left; padding:9px 10px; background:var(--soft); border-bottom:2px solid var(--ink);}
+  table.formats td{padding:10px; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top;}
+  table.formats td:first-child{color:var(--pink-d); font-family:var(--mono); font-weight:700;}
+  .table-wrap{overflow-x:auto;}
+
+  .app-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink);}
+  .app-card h3{font-size:15.5px;}
+  .app-card p{font-size:13.5px; margin-bottom:0;}
+
+  /* controls */
+  .ctrl-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
+  .ctrl label{display:block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink2); letter-spacing:.03em;}
+  .ctrl label b{color:var(--pink-d); font-weight:700;}
+  .ctrl input[type=range]{width:100%; margin-top:8px; accent-color:var(--pink);}
+  .ctrl input[type=number]{width:100%; margin-top:6px; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:8px 10px; border-radius:10px; font-family:var(--mono); font-size:13px;}
+  .ctrl input[type=number]:focus{outline:none; box-shadow:3px 3px 0 var(--pink);}
+  .check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink2); margin-top:12px; cursor:pointer;}
+  .check input{accent-color:var(--pink); width:16px; height:16px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-family:var(--mono); font-size:11px; color:var(--ink2);}
+  .legend i{display:inline-block; width:12px; height:12px; border-radius:4px; border:1.5px solid var(--ink); margin-right:6px; vertical-align:-2px;}
+
+  /* badges */
+  .badge{display:inline-block; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:20px; border:2px solid var(--ink); text-transform:uppercase; white-space:nowrap; color:var(--ink);}
+  .b-perp{background:var(--sun-l);}
+  .b-sub{background:var(--pink-l);}
+  .b-uso{background:var(--mint-l);}
+  .b-fm{background:var(--violet-l);}
+  .b-open{background:#E3F8D4;}
+  .b-free{background:var(--sky-l);}
+  .b-otro{background:#EDEAF3;}
+
+  .sw-card{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:8px; box-shadow:3px 3px 0 var(--ink);}
+  .sw-card h3{margin-bottom:0; font-size:16px;}
+  .sw-card p{font-size:13.5px; margin:0;}
+
+  /* unit map */
+  .umap{display:grid; gap:14px;}
+  .u1{border:2px dashed var(--ink3); border-radius:18px; padding:16px 18px; background:rgba(255,255,255,.6);}
+  .u1 .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px;}
+  .pills{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{font-family:var(--mono); font-size:11.5px; border:1.5px solid var(--ink3); color:var(--ink2); background:var(--card); border-radius:30px; padding:4px 11px;}
+  .u2{display:grid; grid-template-columns:1.5fr .9fr; gap:14px; align-items:stretch;}
+  @media(max-width:760px){.u2{grid-template-columns:1fr;}}
+  .block{border:2px solid var(--ink); border-radius:18px; padding:18px; box-shadow:4px 4px 0 var(--ink);}
+  .block.a{background:var(--pink-l);}
+  .block.b{background:var(--sky-l);}
+  .block .ulabel{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); margin-bottom:12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .step{display:grid; grid-template-columns:34px 1fr auto; gap:12px; align-items:center; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:11px 12px; margin-bottom:10px;}
+  .step:last-child{margin-bottom:0;}
+  .step .no{width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; font-family:var(--disp); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .step .tx{font-size:14px; font-weight:600; color:var(--ink); line-height:1.3;}
+  .step .tx small{display:block; font-weight:400; color:var(--ink2); font-size:12.5px; margin-top:2px;}
+  .step.now{background:var(--sun); box-shadow:3px 3px 0 var(--ink);}
+  .step.now .no{background:var(--pink); color:var(--ink); border:2px solid var(--ink);}
+  .step.later{background:rgba(255,255,255,.65); border-style:dashed;}
+  .flow4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:860px){.flow4{grid-template-columns:1fr 1fr;}}
+  @media(max-width:520px){.flow4{grid-template-columns:1fr;}}
+  .fstage{position:relative; background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px 14px 14px; box-shadow:3px 3px 0 var(--ink);}
+  .fstage .fn{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink3); letter-spacing:.08em;}
+  .fstage h3{font-size:17px; margin:2px 0 8px;}
+  .fstage .ftag{display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700; border:2px solid var(--ink); border-radius:20px; padding:3px 9px; background:#EDEAF3; color:var(--ink);}
+  .fstage .ftag.sw{background:var(--pink-l);}
+  .fstage .ftag.hw{background:var(--sky-l);}
+  .fstage .ftag.up{background:var(--card); border-style:dashed;}
+  .fstage.here{background:var(--sun-l); box-shadow:5px 5px 0 var(--ink);}
+  .fstage.here .sticker{position:absolute; top:-12px; right:10px;}
+
+  .src{font-size:12.5px; color:var(--ink2); line-height:1.8;}
+  .src a{color:var(--pink-d); text-decoration:none; border-bottom:2px solid var(--pink);}
+  .src a:hover{background:var(--pink-l);}
+
+  /* heat + rank */
+  .heat td.s{text-align:center; font-family:var(--disp); font-size:17px; font-weight:800; color:var(--ink);}
+  .heat td.name{white-space:nowrap; color:var(--ink); font-family:var(--disp); font-weight:700; font-size:14px;}
+  .rank-row{display:grid; grid-template-columns:200px 1fr 54px; gap:12px; align-items:center; margin-bottom:12px;}
+  .rank-row .nm{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .rank-row .bar{height:18px; background:var(--soft); border-radius:10px; overflow:hidden; border:2px solid var(--ink);}
+  .rank-row .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--violet),var(--pink)); transition:width .3s ease;}
+  .rank-row .val{font-family:var(--disp); font-size:18px; font-weight:800; color:var(--pink-d); text-align:right;}
+  .rank-row.top .nm{color:var(--pink-d);}
+  .rank-row.top .nm::after{content:' ★'; color:var(--orange);}
+  @media(max-width:560px){.rank-row{grid-template-columns:110px 1fr 44px;}}
+
+  .q-block{background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:20px; margin-bottom:16px; box-shadow:4px 4px 0 var(--ink);}
+  .q-block h3{font-size:16px; margin-bottom:14px; color:var(--ink); line-height:1.4;}
+  .opt{display:block; width:100%; text-align:left; background:var(--card); border:2px solid var(--ink); color:var(--ink); padding:11px 14px; border-radius:12px; margin-bottom:9px; cursor:pointer; font-family:var(--body); font-size:14px; transition:transform .12s, background .12s;}
+  .opt:hover{transform:translateX(3px); background:var(--soft);}
+  .opt.correct{background:var(--mint-l); font-weight:600;}
+  .opt.wrong{background:var(--pink-l);}
+  .opt[disabled]{cursor:default;}
+  .opt[disabled]:hover{transform:none;}
+  .explain{font-size:13px; color:var(--ink2); margin-top:10px; display:none; line-height:1.55; padding-top:10px; border-top:2px dashed var(--line);}
+  .explain.show{display:block;}
+  .score-box{text-align:center; padding:26px; background:var(--sun-l); border:2px solid var(--ink); border-radius:18px; box-shadow:4px 4px 0 var(--ink); font-family:var(--mono);}
+  .score-box .big{font-family:var(--disp); font-size:44px; font-weight:800; color:var(--ink);}
+  .reset-btn{font-family:var(--mono); font-size:12px; font-weight:700; background:var(--pink); color:var(--ink); border:2px solid var(--ink); padding:9px 18px; border-radius:30px; cursor:pointer; margin-top:12px; box-shadow:3px 3px 0 var(--ink);}
+
+  footer{margin-top:54px; padding-top:18px; border-top:2px solid var(--ink); font-family:var(--mono); font-size:11px; color:var(--ink2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  /* clase 07 */
+  .step.done{background:var(--mint-l);}
+  .prep-flow{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px;}
+  @media(max-width:760px){.prep-flow{grid-template-columns:1fr;}}
+  .pf{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:16px; box-shadow:3px 3px 0 var(--ink); position:relative;}
+  .pf .who{font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3);}
+  .pf h3{margin:4px 0 6px; font-size:16px;}
+  .pf p{font-size:13.5px; margin:0;}
+  .pf.hl{background:var(--sun-l);}
+  .pf.hl .sticker{position:absolute; top:-12px; right:10px;}
+  .big-out{font-family:var(--mono); font-size:12px; color:var(--ink2); margin-top:10px; line-height:1.6;}
+  .big-out b{color:var(--ink);}
+  .tabsmall{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;}
+  .sw-card .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .sw-card ul{margin-top:4px;}
+  .note-mini{font-size:12px; color:var(--ink3); line-height:1.5; margin-top:6px;}
+  .b-task{background:var(--violet-l);}
+  /* clase 08 */
+  .track{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:6px 0 10px;}
+  @media(max-width:760px){.track{grid-template-columns:repeat(2,1fr);}}
+  .tk{border:2px solid var(--ink); border-radius:14px; padding:12px 8px; text-align:center; background:var(--card); font-family:var(--disp); font-weight:700; font-size:14.5px; line-height:1.2; position:relative;}
+  .tk small{display:block; font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); margin-bottom:4px;}
+  .tk.acc{background:var(--pink-l);}
+  .tk.on{background:var(--sun); box-shadow:3px 3px 0 var(--ink); transform:translateY(-2px);}
+  .band{border:2px dashed var(--violet); border-radius:14px; padding:9px 12px; text-align:center; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--violet); background:var(--violet-l);}
+  .band.on{background:var(--sun); border-style:solid; border-color:var(--ink); color:var(--ink); box-shadow:3px 3px 0 var(--ink);}
+  .io{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px;}
+  @media(max-width:760px){.io{grid-template-columns:1fr;}}
+  .io div{background:var(--soft); border:2px solid var(--ink); border-radius:12px; padding:10px 12px; font-size:13px;}
+  .io b{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); margin-bottom:3px;}
+  .need{display:grid; gap:10px; margin:10px 0 18px;}
+  .need label{display:flex; gap:10px; align-items:flex-start; background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:12px 14px; cursor:pointer; font-size:14.5px;}
+  .need label.on{background:var(--sun-l); box-shadow:3px 3px 0 var(--ink);}
+  .need input{margin-top:3px; accent-color:var(--pink); width:18px; height:18px; flex:none;}
+  .rec{background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:14px 16px; box-shadow:3px 3px 0 var(--ink); margin-bottom:12px;}
+  .rec h3{margin:0 0 4px; font-size:17px;}
+  .rec ul{margin:6px 0 0; padding-left:18px; font-size:13.5px;}
+  .rec .dep{font-family:var(--mono); font-size:11.5px; color:var(--ink2); margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);}
+</style>
+</head><body>
+<div class="app">
+
+  <header class="top">
+    <div class="eyebrow">Unidad 2 · Software · Accesorios</div>
+    <h1>Software <span class="mark">accesorio</span><br>sonrisa, oclusión y verificación</h1>
+    <p class="sub">Tercera clase de la Unidad 2. Diseñar y preparar no son los únicos programas del flujo: hay software que ayuda a decidir la estética antes del diseño, a reproducir el movimiento mandibular, a compartir casos y a comprobar la pieza ya fabricada. Hoy los recorremos en el orden en que aparecen.</p>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="main">
+
+    <!-- 1. UNIDAD 2 -->
+    <section class="panel" data-name="Unidad 2" id="sec-unidad">
+      <div class="kicker">01 · Panorama de la unidad</div>
+      <h2>Dónde caen los accesorios</h2>
+      <p class="lead">En la Unidad 2 bajamos de las bases teóricas a las herramientas: <strong>primero el software, al final el hardware</strong>, siempre ubicados en el flujo digital. Ya vimos el software de diseño y el de preparación; hoy cerramos el bloque de software con los accesorios.</p>
+
+      <div class="umap">
+        <div class="u1">
+          <div class="ulabel">Unidad 1 · Bases teóricas (ya vistas)</div>
+          <div class="pills">
+            <span class="pill">Mallas</span><span class="pill">Voxeles</span><span class="pill">Escaneo</span><span class="pill">Manufactura aditiva</span><span class="pill">Manufactura sustractiva</span>
+          </div>
+        </div>
+        <div class="u2">
+          <div class="block a">
+            <div class="ulabel"><span>Unidad 2 · Bloque A · Software (primero)</span></div>
+            <div class="step done">
+              <div class="no" style="background:var(--mint)">1</div>
+              <div class="tx">Software de diseño<small>Programas CAD, licencias y comparativa · clase 06</small></div>
+            </div>
+            <div class="step done">
+              <div class="no" style="background:var(--mint)">2</div>
+              <div class="tx">Software de planeación y nesting<small>Preparar lo diseñado para fabricarlo · clase 07</small></div>
+            </div>
+            <div class="step now">
+              <div class="no">3</div>
+              <div class="tx">Otros accesorios de software<small>Sonrisa, oclusión, colaboración y verificación</small></div>
+              <span class="sticker">Hoy</span>
+            </div>
+          </div>
+          <div class="block b">
+            <div class="ulabel"><span>Unidad 2 · Bloque B · Hardware (al final)</span></div>
+            <div class="step later" style="height:calc(100% - 30px); align-items:center;">
+              <div class="no" style="background:var(--ink3)">4</div>
+              <div class="tx">Equipos del flujo digital<small>Se revisan una vez entendido el software que los alimenta</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="lab">Qué cambia hoy</div>
+        <p>Hasta ahora cada clase se centró en un paso del flujo. Los accesorios <strong>no son un paso nuevo</strong>: se conectan a pasos que ya conoces, antes, durante o después, y mejoran lo que entra o lo que sale de ellos.</p>
+      </div>
+    </section>
+
+    <!-- 2. MAPA -->
+    <section class="panel" data-name="Mapa de accesorios" id="sec-mapa">
+      <div class="kicker">02 · Ubicarlos en el flujo</div>
+      <h2>Cuatro familias, cuatro momentos</h2>
+      <p class="lead">Toca una familia y verás en qué parte del flujo se conecta, qué recibe y qué entrega. El flujo base es el de siempre; los accesorios están en rosa.</p>
+
+      <div class="track" id="track"></div>
+      <div class="band" id="band">Colaboración: en cada traspaso entre clínica, laboratorio y centro de fabricación</div>
+
+      <div class="btn-row" id="fam-chips" style="margin:18px 0 14px;"></div>
+      <div class="card">
+        <div class="kicker" id="fam-when"></div>
+        <h3 id="fam-title" style="font-size:22px; margin-top:2px;"></h3>
+        <p id="fam-text"></p>
+        <div class="io">
+          <div><b>Recibe</b><span id="fam-in"></span></div>
+          <div><b>Entrega</b><span id="fam-out"></span></div>
+          <div><b>Ejemplos de esta clase</b><span id="fam-ex"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SONRISA -->
+    <section class="panel" data-name="Diseño de sonrisa" id="sec-sonrisa">
+      <div class="kicker">03 · Antes del diseño</div>
+      <h2>Diseño de sonrisa: decidir antes de diseñar</h2>
+      <p class="lead">En casos estéticos conviene ver el resultado antes de diseñar la restauración. El software de diseño de sonrisa parte de fotos del paciente, superpone guías y propone una disposición de dientes que luego guía el diseño. Aquí compararemos dos opciones: <strong>Smile Creator</strong>, de exocad, y la <strong>DSD App</strong>, de Digital Smile Design.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Sonrisa esquemática (ancho del central fijo: 8.5 mm)</span>
+          <svg id="sm-svg" viewBox="0 0 320 210" style="margin-top:12px;"></svg>
+          <div class="legend"><span><i style="background:var(--violet)"></i>Línea media facial</span><span><i style="background:var(--pink)"></i>Guías de diseño</span></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="kicker">Capas de guía</div>
+            <div class="btn-row" id="sm-layers" style="margin:8px 0 14px;"></div>
+            <div class="ctrl-grid" style="grid-template-columns:1fr;">
+              <div class="ctrl"><label>Desviación de la línea media dental: <b id="sm-off-v">0</b> mm</label><input type="range" id="sm-off" min="-4" max="4" step="0.5" value="0"></div>
+              <div class="ctrl"><label>Altura del incisivo central: <b id="sm-h-v">10.5</b> mm</label><input type="range" id="sm-h" min="8" max="13" step="0.5" value="10.5"></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="num" id="sm-ratio">–</div><div class="lab">ancho / alto del central</div></div>
+            <div class="stat"><div class="num" id="sm-dev">–</div><div class="lab">desviación de línea media</div></div>
+          </div>
+          <div class="big-out" id="sm-note"></div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px;">Dos herramientas, dos niveles</h3>
+      <div class="grid2e">
+        <div class="card sun">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-fm">Módulo o independiente</span><span class="badge b-otro">exocad</span></div>
+          <h3>Smile Creator</h3>
+          <ul class="clean">
+            <li>Diseño de sonrisa en <strong>2D y 3D</strong>: se editan los contornos dentales en 2D y se ve el resultado como arreglo 3D en tiempo real.</li>
+            <li>Las fotos del paciente se cargan desde archivo o por webcam, se convierten en objetos 3D y <strong>se alinean con el escaneo</strong>.</li>
+            <li>Añade guías automáticas, biblioteca de dientes y selección de color.</li>
+            <li>El resultado alimenta el diseño en DentalCAD, la planeación en ExoPlan y los encerados diagnósticos en Model Creator.</li>
+            <li>Se vende como módulo de DentalCAD o por separado; sin cobro por clic ni límite de casos, según exocad. Precio no publicado.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-free">Descrita como gratuita</span><span class="badge b-otro">Digital Smile Design</span></div>
+          <h3>DSD App</h3>
+          <ul class="clean">
+            <li>Simulador de sonrisa <strong>solo en 2D</strong>, a partir de una foto frontal en máxima sonrisa.</li>
+            <li>Marco de sonrisa con línea media, guía del canino y curvas gingival y de papila; simulador de antes y después, notas y exportación a PDF.</li>
+            <li>El fabricante aclara que <strong>no es software de planeación de casos</strong> y que no genera mock-up 3D ni imprimible; eso lo hace su servicio aparte, DSD Planning Center.</li>
+            <li>Disponible en iPad (iPadOS 12.4 o posterior, no iPad mini) y en Mac con chip M1 o posterior. Sin versión Android.</li>
+            <li>Sus imágenes 2D pueden usarse en Smile Creator. La página no detalla el modelo de licencia.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">La simulación es didáctica: no sustituye el análisis facial ni las proporciones de un caso real.</p>
+    </section>
+
+    <!-- 4. OCLUSION -->
+    <section class="panel" data-name="Oclusión dinámica" id="sec-oclusion">
+      <div class="kicker">04 · Durante el diseño</div>
+      <h2>Oclusión dinámica: del articulador físico al virtual</h2>
+      <p class="lead">Una corona puede ajustar bien en máxima intercuspidación y aun así interferir al mover la mandíbula. El software de oclusión dinámica reproduce el movimiento durante el diseño. exocad lo divide en dos módulos que se complementan: el <strong>articulador virtual</strong> y la <strong>importación de movimiento mandibular</strong>.</p>
+
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Protrusiva, vista lateral esquemática</span>
+          <svg id="oc-svg" viewBox="0 0 320 250" style="margin-top:12px;"></svg>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ctrl-grid" style="grid-template-columns:1fr;">
+              <div class="ctrl"><label>Inclinación de la guía condílea: <b id="oc-a-v">35</b>°</label><input type="range" id="oc-a" min="15" max="60" value="35"></div>
+              <div class="ctrl"><label>Ángulo de Bennett: <b id="oc-b-v">15</b>°</label><input type="range" id="oc-b" min="0" max="30" value="15"></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="num" id="oc-idx">–</div><div class="lab">desoclusión posterior (índice relativo)</div></div>
+            <div class="stat"><div class="num" id="oc-cusp">–</div><div class="lab">altura de cúspide admisible</div></div>
+          </div>
+          <div class="big-out" id="oc-note"></div>
+        </div>
+      </div>
+      <p class="src" style="margin-top:12px;">El índice es ilustrativo: parte de la inclinación de la guía condílea y supone una guía incisiva constante. En clínica la desoclusión depende también de la guía anterior y de la anatomía del paciente. El ángulo de Bennett condiciona la trayectoria del cóndilo de balance en lateralidad; aquí se muestra en la vista superior.</p>
+
+      <h3 style="margin-top:26px;">Dos módulos de exocad, dos niveles de realismo</h3>
+      <div class="grid2e">
+        <div class="card">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-fm">Módulo de DentalCAD</span></div>
+          <h3>Virtual Articulator</h3>
+          <ul class="clean">
+            <li>Simula el movimiento mandibular y considera la oclusión dinámica al diseñar.</li>
+            <li>Se ajustan el ángulo condíleo, el de Bennett y el desplazamiento lateral inmediato, <strong>como en un articulador físico</strong>.</li>
+            <li>Permite elegir tipos de articulador que ajustan la oclusión automáticamente.</li>
+            <li>Puede transferir la posición de los modelos de yeso desde un articulador físico, siempre que el escáner lo permita.</li>
+          </ul>
+        </div>
+        <div class="card sun">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-fm">Módulo adicional</span></div>
+          <h3>Jaw Motion Import</h3>
+          <ul class="clean">
+            <li>Trae a DentalCAD el <strong>movimiento real del paciente</strong>, registrado con un dispositivo externo.</li>
+            <li>Sistemas compatibles: Zebris JMA, SICAT (Sdi Matrix), OXO, Modjaw, ITAKA y Gamma CADIAX.</li>
+            <li>Funciona junto con el Virtual Articulator, y con Model Creator permite fabricar modelos semidinámicos.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="lab">Valores promedio vs. paciente real</div>
+        <p>El Virtual Articulator trabaja con <strong>ajustes</strong> (valores promedio o medidos). Jaw Motion Import trabaja con <strong>registros del paciente</strong>. Para ambos, exocad indica que el precio y la licencia se piden a un distribuidor; la página no los detalla.</p>
+      </div>
+    </section>
+
+    <!-- 5. COLABORACION Y VERIFICACION -->
+    <section class="panel" data-name="Colaboración y verificación" id="sec-colab">
+      <div class="kicker">05 · Entre pasos y después de fabricar</div>
+      <h2>Compartir casos y comprobar la pieza</h2>
+      <p class="lead">Dos tareas cierran el ciclo: <strong>mover</strong> el caso entre clínica y laboratorio sin correos con archivos enormes, y <strong>verificar</strong> que lo fabricado coincide con lo diseñado.</p>
+
+      <h3>Colaboración en la nube</h3>
+      <div class="grid2e">
+        <div class="card">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-otro">3Shape</span><span class="badge b-otro">Portal con cuenta</span></div>
+          <h3>Communicate y Unite Cloud</h3>
+          <ul class="clean">
+            <li>Portal para compartir escaneos e información del caso entre clínica y laboratorio, <strong>sin correos ni cargas de archivos grandes</strong>.</li>
+            <li>Communicate: para clínicas con TRIOS en Unite 23.1 o anterior y laboratorios con Dental System. Unite Cloud: para TRIOS con Unite 24.1 o posterior.</li>
+            <li>Se entra con una cuenta 3Shape; la empresa indica cumplimiento de HIPAA y GDPR.</li>
+            <li>Precio no indicado en la página.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-otro">Medit</span><span class="badge b-sub">Almacenamiento por plan</span></div>
+          <h3>Medit Link</h3>
+          <ul class="clean">
+            <li>Plataforma para gestionar casos y escaneos en clínicas y laboratorios, con seguimiento de órdenes a laboratorio.</li>
+            <li>Su plan de almacenamiento en la nube lista <strong>2 GB gratis</strong> y 10 TB por 9.99 USD al mes (con un mes de prueba).</li>
+            <li>Se integra con las aplicaciones de Medit y de terceros, como Model Builder, Splints y Design.</li>
+            <li>La página no indica si Link en sí es gratuito, por suscripción o por usuario.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px;">Verificación de la pieza fabricada</h3>
+      <div class="grid2">
+        <div class="viewport">
+          <span class="tag">Margen de una corona: diseño vs. fabricada (datos simulados)</span>
+          <svg id="vf-svg" viewBox="0 0 300 236" style="margin-top:8px;"></svg>
+          <div class="legend"><span><i style="background:var(--mint)"></i>Dentro de tolerancia</span><span><i style="background:var(--red)"></i>Fuera de tolerancia</span></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ctrl-grid" style="grid-template-columns:1fr;">
+              <div class="ctrl"><label>Desviación máxima de la pieza: <b id="vf-d-v">60</b> µm</label><input type="range" id="vf-d" min="10" max="200" step="5" value="60"></div>
+              <div class="ctrl"><label>Tolerancia que fijas: <b id="vf-t-v">50</b> µm</label><input type="range" id="vf-t" min="10" max="150" step="5" value="50"></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat ok"><div class="num" id="vf-pct">–</div><div class="lab">puntos dentro de tolerancia</div></div>
+            <div class="stat"><div class="num" id="vf-pts">–</div><div class="lab">puntos de 36 fuera</div></div>
+          </div>
+          <div class="big-out" id="vf-note"></div>
+        </div>
+      </div>
+      <div class="grid2e" style="margin-top:18px;">
+        <div class="card">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-otro">Medit</span><span class="badge b-fm">App dentro de Link</span></div>
+          <h3>Crown Fit</h3>
+          <ul class="clean">
+            <li>Prueba de ajuste digital de coronas y puentes fresados: alinea la pieza con el escaneo de los dientes preparados.</li>
+            <li>También <strong>compara la pieza fabricada con su diseño CAD</strong>, lo que ayuda a revisar la exactitud de la fresadora o impresora.</li>
+            <li>Se instala desde la pestaña de Apps de Medit Link (cuenta de clínica o laboratorio). Medit aclara que no fue desarrollada para uso médico o clínico.</li>
+          </ul>
+        </div>
+        <div class="card soft">
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"><span class="badge b-free">Gratuito (según nota de 2011)</span><span class="badge b-open">General</span></div>
+          <h3>GOM Inspect</h3>
+          <ul class="clean">
+            <li>Programa de inspección de GOM, no dental: procesa mallas, importa CAD, alinea, compara y genera reportes.</li>
+            <li>Es una herramienta del tipo que se emplea en estudios de desviación entre mallas.</li>
+            <li>La fuente consultada es de 2011: verifica versión y condiciones vigentes antes de adoptarlo.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. CATALOGO -->
+    <section class="panel" data-name="Catálogo y licencias" id="sec-cat">
+      <div class="kicker">06 · Quién ofrece qué</div>
+      <h2>Catálogo de software accesorio</h2>
+      <p class="lead">Agrupados por familia, porque comparar un simulador de sonrisa con un verificador de coronas no tiene sentido. Fíjate en el modelo de licencia y en <strong>de qué ecosistema depende</strong> cada uno.</p>
+      <div class="btn-row" id="cat-chips" style="margin-bottom:16px;"></div>
+      <div class="cat-grid" id="cat-grid"></div>
+      <p class="src" style="margin-top:16px;"><b>Fuentes (consultadas en noviembre de 2026):</b><br>
+        <a href="https://exocad.com/our-products/smile-creator" target="_blank" rel="noopener">exocad · Smile Creator</a> ·
+        <a href="https://exocad.com/our-products/exocad-dentalcad/virtual-articulator" target="_blank" rel="noopener">exocad · Virtual Articulator</a> ·
+        <a href="https://exocad.com/our-products/exocad-dentalcad/jaw-motion-import" target="_blank" rel="noopener">exocad · Jaw Motion Import</a> ·
+        <a href="https://digitalsmiledesign.com/dsd-app" target="_blank" rel="noopener">Digital Smile Design · DSD App</a> ·
+        <a href="https://www.3shape.com/products/communicate" target="_blank" rel="noopener">3Shape · Communicate</a> ·
+        <a href="https://medit.com/medit-link" target="_blank" rel="noopener">Medit · Medit Link</a> ·
+        <a href="https://support.medit.com/hc/en-us/articles/360052595151--Crown-Fit-Overview-and-General-Information" target="_blank" rel="noopener">Medit · Crown Fit</a> ·
+        <a href="https://www.digitalengineering247.com/article/capture-3d-announces-gom-inspect/additive-manufacturing" target="_blank" rel="noopener">Digital Engineering 24/7 · GOM Inspect (2011)</a></p>
+    </section>
+
+    <!-- 7. QUE NECESITO -->
+    <section class="panel" data-name="¿Qué necesito?" id="sec-need">
+      <div class="kicker">07 · Cierre de la clase</div>
+      <h2>¿Qué accesorios necesita tu flujo?</h2>
+      <p class="lead">No existe un “mejor accesorio”: depende de lo que haces. Marca tu situación y obtén las familias que te convienen, con la dependencia que traen.</p>
+      <div class="need" id="need"></div>
+      <div id="rec"></div>
+      <div class="callout">
+        <div class="lab">Mira siempre la dependencia</div>
+        <p>Casi todos estos accesorios <strong>viven dentro de un ecosistema</strong>: los módulos de exocad requieren DentalCAD, Communicate y Unite Cloud van con 3Shape, y Crown Fit con Medit Link. Antes de comprar, confirma que se conecta con el escáner y el CAD que ya tienes.</p>
+      </div>
+    </section>
+
+    <!-- 8. QUIZ -->
+    <section class="panel" data-name="Autoevaluación" id="sec-quiz">
+      <div class="kicker">08 · Verificación</div>
+      <h2>Autoevaluación rápida</h2>
+      <p class="lead">Cinco preguntas para confirmar los conceptos clave de esta clase.</p>
+      <div id="quiz-container"></div>
+      <div id="quiz-score" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Unidad 2 · Software accesorio · CAD/CAM dental</span>
+    <span>Sonrisa · oclusión · colaboración · verificación</span>
+  </footer>
+
+</div>
+<script>
+const C={ink:'#1B1530',ink2:'#4A4266',ink3:'#8C84A8',line:'#E4DCF5',soft:'#F3EEFF',pink:'#FF4F9A',pinkL:'#FFE3F0',violet:'#6C4DF6',mint:'#12B886',orange:'#F59F00',sun:'#FFC53D',sunL:'#FFF1C2',red:'#E03131',white:'#FFFFFF'};
+const FONT_MONO='Geist Mono, monospace';
+const $=id=>document.getElementById(id);
+const SVGNS='http://www.w3.org/2000/svg';
+const g=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag); for(const k in attrs)e.setAttribute(k,attrs[k]); return e;};
+const txt=(svg,x,y,t,o={})=>{const e=g('text',Object.assign({x,y,'text-anchor':'middle','font-family':FONT_MONO,'font-size':'10','font-weight':'700',fill:C.ink3},o)); e.textContent=t; svg.appendChild(e); return e;};
+
+/* TABS */
+const sections=[...document.querySelectorAll('section.panel')];
+const tabsNav=$('tabs');
+sections.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML=`<span class="n">0${i+1}</span>${s.dataset.name}`;
+  b.addEventListener('click',()=>{
+    sections.forEach(x=>x.classList.remove('active'));
+    [...tabsNav.children].forEach(x=>x.classList.remove('active'));
+    s.classList.add('active'); b.classList.add('active');
+  });
+  tabsNav.appendChild(b);
+});
+sections[0].classList.add('active'); tabsNav.children[0].classList.add('active');
+
+/* ============ 02 MAPA ============ */
+const STAGES=[['Paso 1','Captura',0],['Antes del diseño','Sonrisa',1],['Paso 2','Diseño',0],['Paso 3','Preparación',0],['Paso 4','Fabricación',0],['Después','Verificación',1]];
+const FAM=[
+ {c:'Sonrisa',st:[1],when:'Antes del diseño',t:'Diseño de sonrisa',x:'Se decide la estética con el paciente antes de diseñar. Es una etapa de decisión, no de fabricación: su valor está en que el diseño parte de un objetivo acordado.',i:'Fotos del paciente y escaneo de los dientes',o:'Una disposición dental (2D o 3D) que guía el diseño restaurador',e:'Smile Creator (exocad) · DSD App'},
+ {c:'Oclusión',st:[2],when:'Durante el diseño',t:'Oclusión dinámica',x:'Mientras se diseña la restauración, se reproduce el movimiento mandibular para que no genere interferencias fuera de la máxima intercuspidación.',i:'Modelos posicionados, ajustes del articulador o registros de movimiento mandibular',o:'Superficies oclusales diseñadas con el movimiento en cuenta',e:'Virtual Articulator · Jaw Motion Import (exocad)'},
+ {c:'Colaboración',st:[-1],when:'En cada traspaso',t:'Colaboración en la nube',x:'No es un paso del flujo sino un servicio que lo conecta: mueve escaneos, diseños y comentarios entre clínica, laboratorio y centro de fabricación.',i:'Escaneos, diseños y notas del caso',o:'Un caso compartido y seguimiento de órdenes',e:'3Shape Communicate / Unite Cloud · Medit Link'},
+ {c:'Verificación',st:[5],when:'Después de fabricar',t:'Verificación de la pieza',x:'Cierra el ciclo: se escanea la pieza fabricada y se compara con el diseño y con el diente preparado, para detectar desviaciones de la máquina o del proceso.',i:'Escaneo de la pieza fabricada, diseño CAD y escaneo de la preparación',o:'Un informe de ajuste y desviación',e:'Medit Crown Fit · GOM Inspect'}
+];
+(function(){
+  const track=$('track'), chips=$('fam-chips'), band=$('band');
+  STAGES.forEach(([a,b,acc])=>{const d=document.createElement('div'); d.className='tk'+(acc?' acc':''); d.innerHTML=`<small></small><span></span>`; d.querySelector('small').textContent=acc?'Accesorio':a; d.querySelector('span').textContent=b; track.appendChild(d);});
+  function show(k){
+    [...chips.children].forEach((c,i)=>c.classList.toggle('active',i===k));
+    const f=FAM[k];
+    [...track.children].forEach((d,i)=>d.classList.toggle('on',f.st.includes(i)));
+    band.classList.toggle('on',f.st.includes(-1));
+    $('fam-when').textContent=f.when; $('fam-title').textContent=f.t; $('fam-text').textContent=f.x;
+    $('fam-in').textContent=f.i; $('fam-out').textContent=f.o; $('fam-ex').textContent=f.e;
+  }
+  FAM.forEach((f,i)=>{const b=document.createElement('button'); b.className='chip'; b.textContent=`${i+1} · ${f.c}`; b.onclick=()=>show(i); chips.appendChild(b);});
+  show(0);
+})();
+
+/* ============ 03 SONRISA ============ */
+(function(){
+  const svg=$('sm-svg'); const LAY={mid:true,can:true,gin:true,pap:true};
+  const names={mid:'Línea media',can:'Guía de caninos',gin:'Curva gingival',pap:'Papilas'};
+  const lc=$('sm-layers');
+  Object.keys(LAY).forEach(k=>{const b=document.createElement('button'); b.className='chip active'; b.textContent=names[k]; b.onclick=()=>{LAY[k]=!LAY[k]; b.classList.toggle('active',LAY[k]); draw();}; lc.appendChild(b);});
+  const S=4; // px por mm
+  function draw(){
+    const off=+$('sm-off').value, h=+$('sm-h').value;
+    $('sm-off-v').textContent=off; $('sm-h-v').textContent=h;
+    svg.innerHTML='';
+    const cx=160, top=70;
+    // labios
+    svg.appendChild(g('path',{d:'M20,60 Q90,20 160,40 Q230,20 300,60 Q230,190 160,196 Q90,190 20,60 Z',fill:C.pinkL,stroke:C.ink,'stroke-width':2.5}));
+    svg.appendChild(g('path',{d:'M44,66 Q100,48 160,58 Q220,48 276,66 Q220,170 160,176 Q100,170 44,66 Z',fill:C.white,stroke:C.ink,'stroke-width':2}));
+    // dientes: ancho mm, alto mm (central = h)
+    const spec=[{n:'lat',w:6.5,r:.86},{n:'cen',w:8.5,r:1},{n:'cen',w:8.5,r:1},{n:'lat',w:6.5,r:.86},{n:'can',w:7.5,r:.97}];
+    // lado derecho y izquierdo: central, lateral, canino
+    const side=[{w:8.5,r:1},{w:6.5,r:.86},{w:7.5,r:.97}];
+    const shift=off*S; let xr=cx+shift, xl=cx+shift; const teeth=[];
+    side.forEach((t,i)=>{
+      const th=h*S*t.r, tw=t.w*S;
+      teeth.push({x:xr,y:top,w:tw,h:th,dir:1,i}); xr+=tw;
+      teeth.push({x:xl-tw,y:top,w:tw,h:th,dir:-1,i}); xl-=tw;
+    });
+    // encía (zeniths)
+    if(LAY.gin){
+      const pts=[]; teeth.sort((a,b)=>a.x-b.x).forEach(t=>pts.push([t.x+t.w/2, top-(t.i===0?8:t.i===1?2:9)]));
+      let d='M'+pts.map(p=>p.join(',')).join(' L');
+      svg.appendChild(g('path',{d,fill:'none',stroke:C.pink,'stroke-width':2.5,'stroke-dasharray':'5 4'}));
+    }
+    teeth.forEach(t=>svg.appendChild(g('rect',{x:t.x+.8,y:t.y,width:t.w-1.6,height:t.h,rx:t.w*.32,fill:'#FFFFFF',stroke:C.ink,'stroke-width':2})));
+    if(LAY.pap) teeth.forEach(t=>{ if(t.i<2){const px=t.dir>0?t.x+t.w:t.x; svg.appendChild(g('path',{d:`M${px-3},${top-3} L${px+3},${top-3} L${px},${top+8} Z`,fill:C.pink,opacity:.85}));}});
+    if(LAY.can){ teeth.filter(t=>t.i===2).forEach(t=>svg.appendChild(g('line',{x1:t.x+t.w/2,y1:top-22,x2:t.x+t.w/2,y2:top+t.h+10,stroke:C.pink,'stroke-width':1.8,'stroke-dasharray':'3 3'}))); }
+    // línea media facial
+    if(LAY.mid){ svg.appendChild(g('line',{x1:cx,y1:30,x2:cx,y2:190,stroke:C.violet,'stroke-width':2.5})); }
+    txt(svg,160,206,LAY.mid?'línea media facial':'', {fill:C.violet});
+    const ratio=8.5/h*100;
+    $('sm-ratio').textContent=ratio.toFixed(0)+'%';
+    $('sm-dev').textContent=Math.abs(off).toFixed(1)+' mm';
+    $('sm-note').innerHTML= Math.abs(off)>=2 ? '<b>La desviación de la línea media se nota a simple vista.</b> Es el tipo de hallazgo que el software muestra antes de diseñar.' :
+      (Math.abs(off)===0?'Línea media dental coincidente con la facial.':'Desviación pequeña; revisa el conjunto con las demás guías.')+' El central de '+h+' mm de alto tiene una relación ancho/alto de '+ratio.toFixed(0)+'%.';
+  }
+  ['sm-off','sm-h'].forEach(id=>$(id).addEventListener('input',draw)); draw();
+})();
+
+/* ============ 04 OCLUSION ============ */
+(function(){
+  const svg=$('oc-svg');
+  function draw(){
+    const A=+$('oc-a').value, B=+$('oc-b').value;
+    $('oc-a-v').textContent=A; $('oc-b-v').textContent=B;
+    svg.innerHTML='';
+    // fosa glenoidea (izquierda)
+    svg.appendChild(g('path',{d:'M20,40 Q50,20 90,40 L90,24 L20,24 Z',fill:C.sunL,stroke:C.ink,'stroke-width':2}));
+    svg.appendChild(g('circle',{cx:56,cy:48,r:11,fill:C.violet,stroke:C.ink,'stroke-width':2}));
+    // trayectoria condílea
+    const r=A*Math.PI/180, L=90;
+    const x2=56+L*Math.cos(r), y2=48+L*Math.sin(r);
+    svg.appendChild(g('line',{x1:56,y1:48,x2:x2,y2:y2,stroke:C.pink,'stroke-width':3,'stroke-linecap':'round'}));
+    svg.appendChild(g('line',{x1:56,y1:48,x2:56+L,y2:48,stroke:C.ink3,'stroke-width':1.5,'stroke-dasharray':'4 4'}));
+    svg.appendChild(g('path',{d:`M${56+34},48 A34,34 0 0 1 ${56+34*Math.cos(r)},${48+34*Math.sin(r)}`,fill:'none',stroke:C.ink,'stroke-width':1.5}));
+    txt(svg,56+62,48+ (A>40?30:22),A+'°',{fill:C.ink,'font-size':'11'});
+    txt(svg,56,24-2,'cóndilo',{});
+    // arco inferior (mandíbula) con molar: sube al desocluir
+    const idx=Math.tan(r)/Math.tan(60*Math.PI/180); // 0..1 aprox
+    const gap=idx*34;
+    // maxilar
+    svg.appendChild(g('rect',{x:120,y:120,width:180,height:16,rx:6,fill:C.sunL,stroke:C.ink,'stroke-width':2}));
+    svg.appendChild(g('path',{d:'M170,136 L170,158 L212,158 L212,136',fill:C.white,stroke:C.ink,'stroke-width':2}));
+    svg.appendChild(g('path',{d:'M270,136 L270,178 Q283,184 296,178 L296,136',fill:C.white,stroke:C.ink,'stroke-width':2}));
+    // mandibula, baja segun la guia condilea
+    const lt=162+gap;
+    svg.appendChild(g('rect',{x:120,y:lt+22,width:180,height:16,rx:6,fill:C.sunL,stroke:C.ink,'stroke-width':2}));
+    svg.appendChild(g('path',{d:`M176,${lt+22} L176,${lt+8} L190,${lt} L206,${lt+8} L206,${lt+22}`,fill:C.white,stroke:C.ink,'stroke-width':2}));
+    svg.appendChild(g('line',{x1:190,y1:158,x2:190,y2:lt,stroke:C.mint,'stroke-width':3}));
+    txt(svg,190,lt+56,'separación posterior',{fill:C.mint});
+    // Bennett (vista superior)
+    const br=B*Math.PI/180, bx=272, by=96;
+    svg.appendChild(g('rect',{x:226,y:8,width:88,height:100,rx:10,fill:C.soft,stroke:C.line,'stroke-width':1.5}));
+    svg.appendChild(g('line',{x1:bx,y1:by,x2:bx,y2:34,stroke:C.ink3,'stroke-width':1.5,'stroke-dasharray':'4 4'}));
+    svg.appendChild(g('line',{x1:bx,y1:by,x2:bx+60*Math.sin(br),y2:by-60*Math.cos(br),stroke:C.orange,'stroke-width':3,'stroke-linecap':'round'}));
+    svg.appendChild(g('circle',{cx:bx,cy:by,r:5,fill:C.orange,stroke:C.ink,'stroke-width':1.5}));
+    txt(svg,270,22,'Bennett',{'font-size':'9'});
+    txt(svg,bx-22,by-8,B+'°',{fill:C.ink,'font-size':'11'});
+    const pct=Math.round(idx*100);
+    $('oc-idx').textContent=pct+'%';
+    $('oc-cusp').textContent= pct<40?'baja':pct<65?'media':'alta';
+    $('oc-note').innerHTML= pct<40 ? '<b>Guía condílea plana:</b> el cóndilo baja poco en protrusiva y la separación posterior es pequeña. Las cúspides deben ser bajas o las fosas poco profundas para no interferir.' :
+      pct>=65 ? '<b>Guía condílea pronunciada:</b> la mandíbula se separa rápido de los dientes posteriores. Permite cúspides más altas y fosas más profundas sin interferir.' :
+      '<b>Guía intermedia:</b> la separación posterior crece de forma moderada con el movimiento. Es el caso en el que más ayuda comprobarla en el software.';
+  }
+  ['oc-a','oc-b'].forEach(id=>$(id).addEventListener('input',draw)); draw();
+})();
+
+/* ============ 05 VERIFICACION ============ */
+(function(){
+  const svg=$('vf-svg'); const N=36, cx=150, cy=118, R=88;
+  function draw(){
+    const D=+$('vf-d').value, T=+$('vf-t').value;
+    $('vf-d-v').textContent=D; $('vf-t-v').textContent=T;
+    svg.innerHTML='';
+    svg.appendChild(g('circle',{cx,cy,r:R-26,fill:C.soft,stroke:C.line,'stroke-width':2}));
+    svg.appendChild(g('circle',{cx,cy,r:R+16,fill:'none',stroke:C.line,'stroke-width':1.5,'stroke-dasharray':'3 4'}));
+    let ok=0;
+    for(let i=0;i<N;i++){
+      const th=i/N*2*Math.PI;
+      const dev=D*Math.sin(2*th+0.7)*(0.55+0.45*Math.cos(th*3));
+      const inTol=Math.abs(dev)<=T; if(inTol) ok++;
+      const rr=R+dev/200*14;
+      svg.appendChild(g('circle',{cx:cx+rr*Math.cos(th),cy:cy+rr*Math.sin(th),r:7,fill:inTol?C.mint:C.red,stroke:C.ink,'stroke-width':1.5}));
+    }
+    svg.appendChild(g('circle',{cx,cy,r:R,fill:'none',stroke:C.ink3,'stroke-width':1,'stroke-dasharray':'2 3'}));
+    txt(svg,cx,cy-2,'margen',{fill:C.ink2,'font-size':'12'}); txt(svg,cx,cy+12,'de la corona',{fill:C.ink3});
+    const pct=Math.round(ok/N*100);
+    $('vf-pct').textContent=pct+'%'; $('vf-pts').textContent=N-ok;
+    $('vf-note').innerHTML= pct===100?'<b>Toda la pieza cae dentro de tu tolerancia.</b> ¿Es la tolerancia adecuada? Defínela antes de medir, no después.':
+      pct>=75?'<b>La mayoría cae dentro,</b> pero hay zonas fuera. Revisa dónde están: ¿en el margen o en una superficie que no importa?':
+      '<b>Muchas zonas quedan fuera.</b> Sube la tolerancia solo si hay razón clínica; si no, revisa la máquina, el material o el proceso.';
+  }
+  ['vf-d','vf-t'].forEach(id=>$(id).addEventListener('input',draw)); draw();
+})();
+
+/* ============ 06 CATALOGO ============ */
+const FAMN={sonrisa:'Sonrisa',ocl:'Oclusión',colab:'Colaboración',ver:'Verificación'};
+const CAT=[
+ {t:'sonrisa',n:'Smile Creator',who:'exocad',lic:[['b-fm','Módulo o independiente']],d:'Diseño de sonrisa 2D/3D con fotos alineadas al escaneo.',f:['Alimenta a DentalCAD, ExoPlan y Model Creator.','Sin cobro por clic ni límite de casos (según exocad).','Precio no publicado; se compra con un distribuidor.'],dep:'Ecosistema exocad'},
+ {t:'sonrisa',n:'DSD App',who:'Digital Smile Design',lic:[['b-free','Descrita como gratuita']],d:'Simulador de sonrisa 2D sobre foto frontal, para iPad y Mac con chip M1+.',f:['No produce mock-up 3D ni imprimible (eso es el Planning Center).','Sus imágenes 2D se pueden usar en Smile Creator.','Licencia no detallada en la página.'],dep:'Apple (iPad / Mac M1 o posterior)'},
+ {t:'ocl',n:'Virtual Articulator',who:'exocad',lic:[['b-fm','Módulo de DentalCAD']],d:'Simulación de movimiento mandibular con ajustes de articulador.',f:['Ángulo condíleo, de Bennett y desplazamiento lateral inmediato.','Transfiere posición de modelos si el escáner lo permite.','Licencia no especificada en la página.'],dep:'Requiere DentalCAD'},
+ {t:'ocl',n:'Jaw Motion Import',who:'exocad',lic:[['b-fm','Módulo adicional']],d:'Importa registros de movimiento mandibular de dispositivos externos.',f:['Zebris JMA, SICAT (Sdi Matrix), OXO, Modjaw, ITAKA, Gamma CADIAX.','Se usa junto al Virtual Articulator.','Con Model Creator, modelos semidinámicos.'],dep:'Requiere DentalCAD y un dispositivo de registro'},
+ {t:'colab',n:'Communicate / Unite Cloud',who:'3Shape',lic:[['b-otro','Con cuenta 3Shape']],d:'Portal en la nube para compartir escaneos y casos entre clínica y laboratorio.',f:['Communicate: TRIOS con Unite 23.1 o anterior y labs con Dental System.','Unite Cloud: TRIOS con Unite 24.1 o posterior.','Precio no indicado.'],dep:'Ecosistema 3Shape'},
+ {t:'colab',n:'Medit Link',who:'Medit',lic:[['b-sub','Nube por plan']],d:'Gestión de casos y escaneos con seguimiento de órdenes a laboratorio.',f:['Almacenamiento: 2 GB gratis; 10 TB por 9.99 USD/mes.','Se integra con apps de Medit y de terceros.','Licencia de Link no indicada.'],dep:'Ecosistema Medit'},
+ {t:'ver',n:'Crown Fit',who:'Medit',lic:[['b-fm','App dentro de Medit Link']],d:'Prueba de ajuste digital y comparación entre pieza fabricada y diseño CAD.',f:['Aplica a coronas y puentes fresados.','Windows 10/11 o macOS Monterey 12 en adelante.','No fue desarrollada para uso médico o clínico, según Medit.'],dep:'Requiere cuenta de Medit Link'},
+ {t:'ver',n:'GOM Inspect',who:'GOM',lic:[['b-free','Gratuito (nota de 2011)'],['b-open','General, no dental']],d:'Inspección de mallas y nubes de puntos: alinear, comparar y reportar.',f:['Importa CAD y compara con la malla escaneada.','La fuente consultada es de 2011; verifica condiciones actuales.','Curva de aprendizaje mayor que una app dental.'],dep:'Independiente de marca'}
+];
+(function(){
+  const chips=$('cat-chips'), grid=$('cat-grid'); let cur='all';
+  function render(){
+    [...chips.children].forEach(c=>c.classList.toggle('active',c.dataset.k===cur));
+    grid.innerHTML='';
+    CAT.filter(s=>cur==='all'||s.t===cur).forEach(s=>{
+      const d=document.createElement('div'); d.className='sw-card';
+      d.innerHTML=`<div class="badges"><span class="badge b-task"></span></div><h3></h3><div class="who" style="font-family:var(--mono);font-size:11px;color:var(--ink3);"></div><p></p><ul class="clean"></ul><p class="note-mini"></p>`;
+      d.querySelector('.b-task').textContent=FAMN[s.t];
+      s.lic.forEach(([cl,tx])=>{const b=document.createElement('span'); b.className='badge '+cl; b.textContent=tx; d.querySelector('.badges').appendChild(b);});
+      d.querySelector('h3').textContent=s.n; d.querySelector('.who').textContent=s.who; d.querySelector('p').textContent=s.d;
+      s.f.forEach(x=>{const li=document.createElement('li'); li.textContent=x; d.querySelector('ul').appendChild(li);});
+      d.querySelector('.note-mini').textContent='Depende de: '+s.dep;
+      grid.appendChild(d);
+    });
+  }
+  [['all','Todos'],['sonrisa',FAMN.sonrisa],['ocl',FAMN.ocl],['colab',FAMN.colab],['ver',FAMN.ver]].forEach(([k,l])=>{const b=document.createElement('button'); b.className='chip'; b.dataset.k=k; b.textContent=l; b.onclick=()=>{cur=k; render();}; chips.appendChild(b);});
+  render();
+})();
+
+/* ============ 07 ¿QUE NECESITO? ============ */
+const NEEDS=[
+ {id:'est',t:'Hago casos estéticos anteriores y quiero mostrar el resultado al paciente antes de empezar.',fam:'sonrisa'},
+ {id:'oc',t:'Realizo rehabilitaciones o restauraciones donde la oclusión dinámica importa.',fam:'ocl'},
+ {id:'mov',t:'Tengo (o planeo tener) un dispositivo de registro del movimiento mandibular.',fam:'mov'},
+ {id:'lab',t:'Envío casos a un laboratorio o los recibo de una clínica.',fam:'colab'},
+ {id:'fab',t:'Fabrico en casa (fresadora o impresora) y quiero comprobar la exactitud.',fam:'ver'}
+];
+const RECS={
+ sonrisa:{h:'Diseño de sonrisa',p:['Smile Creator si trabajas con exocad y quieres pasar del plan 2D/3D al diseño sin rehacer nada.','DSD App si necesitas una simulación 2D rápida con el paciente (sin mock-up 3D) en iPad o Mac.'],dep:'Smile Creator depende de exocad; DSD App, de equipos Apple.'},
+ ocl:{h:'Oclusión dinámica',p:['Virtual Articulator para diseñar con ajustes de articulador (ángulo condíleo, Bennett).','Verifica que tu escáner permita transferir la posición de los modelos de yeso.'],dep:'Módulo de DentalCAD (exocad).'},
+ mov:{h:'Movimiento mandibular real',p:['Jaw Motion Import, si tu dispositivo está en la lista: Zebris JMA, SICAT (Sdi Matrix), OXO, Modjaw, ITAKA o Gamma CADIAX.','Funciona junto con Virtual Articulator.'],dep:'Módulo de DentalCAD; requiere un dispositivo de registro compatible.'},
+ colab:{h:'Colaboración',p:['3Shape Communicate o Unite Cloud si tu escáner es TRIOS o tu laboratorio usa Dental System.','Medit Link si trabajas con escáneres Medit; incluye 2 GB gratis de almacenamiento.'],dep:'La plataforma depende de la marca del escáner con que se captura.'},
+ ver:{h:'Verificación',p:['Crown Fit (Medit Link) para comparar la pieza fabricada con su diseño y con la preparación.','GOM Inspect como alternativa general si no usas Medit, con más curva de aprendizaje.','Define tu tolerancia antes de medir.'],dep:'Crown Fit exige Medit Link; GOM Inspect no depende de marca.'}
+};
+(function(){
+  const box=$('need'), rec=$('rec'); const sel=new Set();
+  NEEDS.forEach(n=>{
+    const l=document.createElement('label'); l.innerHTML='<input type="checkbox"><span></span>'; l.querySelector('span').textContent=n.t;
+    l.querySelector('input').addEventListener('change',e=>{ if(e.target.checked) sel.add(n.fam); else sel.delete(n.fam); l.classList.toggle('on',e.target.checked); draw(); });
+    box.appendChild(l);
+  });
+  function draw(){
+    rec.innerHTML='';
+    if(!sel.size){rec.innerHTML='<p class="lead" style="margin:0 0 12px;">Marca al menos una situación para ver recomendaciones.</p>'; return;}
+    ['sonrisa','ocl','mov','colab','ver'].filter(k=>sel.has(k)).forEach(k=>{
+      const r=RECS[k]; const d=document.createElement('div'); d.className='rec';
+      d.innerHTML='<h3></h3><ul></ul><div class="dep"></div>';
+      d.querySelector('h3').textContent=r.h; r.p.forEach(x=>{const li=document.createElement('li'); li.textContent=x; d.querySelector('ul').appendChild(li);});
+      d.querySelector('.dep').textContent='Dependencia: '+r.dep; rec.appendChild(d);
+    });
+    if(sel.size===0) return;
+  }
+  draw();
+})();
+
+/* ============ QUIZ ============ */
+const QUIZ=[
+ {q:'Según Digital Smile Design, ¿qué NO puede hacer la DSD App?',opts:['Simular una sonrisa a partir de una foto frontal','Comparar el antes y el después del diseño','Producir un mock-up 3D o imprimible (eso lo hace su servicio aparte)','Mostrar guías como línea media y curva gingival'],correct:2,exp:'La DSD App es un simulador 2D. El mock-up 3D o imprimible se hace con el servicio DSD Planning Center, y sus imágenes 2D pueden usarse en Smile Creator.'},
+ {q:'En la simulación de oclusión aumentas la inclinación de la guía condílea. ¿Qué ocurre en protrusiva?',opts:['Aumenta la separación posterior, lo que permite cúspides más altas sin interferir','Disminuye la separación posterior y conviene aplanar las cúspides','Desaparece la influencia de la guía anterior','El ángulo de Bennett pasa a ser cero'],correct:0,exp:'Con una guía condílea más pronunciada, la mandíbula se separa antes de los dientes posteriores. La guía anterior también influye: el modelo de la clase la mantiene constante para aislar el efecto.'},
+ {q:'¿Para qué sirve el módulo Jaw Motion Import de exocad?',opts:['Para fabricar guías quirúrgicas','Para compartir el caso con el laboratorio','Para acomodar piezas dentro del disco','Para traer a DentalCAD el movimiento real del paciente registrado con un dispositivo externo'],correct:3,exp:'Importa datos de sistemas como Zebris JMA, SICAT, OXO, Modjaw, ITAKA o Gamma CADIAX, y se usa junto con el Virtual Articulator.'},
+ {q:'¿Qué permite hacer Medit Crown Fit, además de la prueba de ajuste?',opts:['Diseñar la corona desde cero','Comparar la pieza fabricada con su diseño CAD, para revisar la exactitud de la máquina','Acomodar coronas en el disco de zirconia','Planear el implante sobre la tomografía'],correct:1,exp:'Crown Fit alinea la pieza fabricada con el escaneo de la preparación y la compara con el diseño CAD, lo que ayuda a evaluar la exactitud de la fresadora o la impresora.'},
+ {q:'¿En qué momento del flujo se usa el software de diseño de sonrisa?',opts:['Después de fabricar, para verificar la pieza','Durante la preparación, para acomodar piezas','Antes del diseño restaurador: su resultado guía lo que se va a diseñar','Solo cuando se imprime un modelo'],correct:2,exp:'Se decide la estética antes de diseñar. El resultado de Smile Creator, por ejemplo, alimenta a DentalCAD, ExoPlan y Model Creator.'}
+];
+(function(){
+  const container=$('quiz-container'), scoreBox=$('quiz-score'); let score=0,answered=0;
+  QUIZ.forEach((item,qi)=>{
+    const block=document.createElement('div'); block.className='q-block';
+    const h3=document.createElement('h3'); h3.textContent=`${qi+1}. ${item.q}`; block.appendChild(h3);
+    const explain=document.createElement('div'); explain.className='explain'; explain.textContent=item.exp;
+    item.opts.forEach((t,oi)=>{
+      const btn=document.createElement('button'); btn.className='opt'; btn.textContent=t;
+      btn.addEventListener('click',()=>{
+        if(btn.disabled) return;
+        [...block.querySelectorAll('.opt')].forEach(o=>o.disabled=true);
+        if(oi===item.correct){btn.classList.add('correct'); score++;} else {btn.classList.add('wrong'); block.querySelectorAll('.opt')[item.correct].classList.add('correct');}
+        explain.classList.add('show'); answered++; if(answered===QUIZ.length) showScore();
+      });
+      block.appendChild(btn);
+    });
+    block.appendChild(explain); container.appendChild(block);
+  });
+  function showScore(){
+    scoreBox.style.display='block';
+    scoreBox.innerHTML=`<div class="score-box"><div class="big">${score} / ${QUIZ.length}</div><div style="color:var(--ink2); margin-top:6px;">respuestas correctas</div><button class="reset-btn" id="quiz-reset">Reintentar</button></div>`;
+    $('quiz-reset').addEventListener('click',()=>location.reload());
+  }
+})();
+</script>
+</body>
+</html>
